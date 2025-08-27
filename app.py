@@ -7,58 +7,9 @@ import faiss
 import numpy as np
 from transformers import pipeline
 import os
-
-import subprocess
-import sys
-import ssl
-
-# ------------------- 1. Install NLTK if missing -------------------
-try:
-    import nltk
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "nltk"])
-    import nltk
-
-# ------------------- 2. Fix SSL issues on macOS -------------------
-try:
-    _create_unverified_https_context = ssl._create_unverified_context
-except AttributeError:
-    pass
-else:
-    ssl._create_default_https_context = _create_unverified_https_context
-
-# ------------------- 3. Download 'punkt' -------------------
-nltk.download('punkt', quiet=False)
-
-# ------------------- 4. Test sent_tokenize -------------------
+import nltk
+nltk.download('punkt')
 from nltk.tokenize import sent_tokenize
-
-
-project_dir = "/Users/ayaansinghal/Downloads/Bolt App"
-
-# Walk through all files in the project directory
-for root, dirs, files in os.walk(project_dir):
-    for file in files:
-        if file.endswith(".py"):  # only Python files
-            file_path = os.path.join(root, file)
-            try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-            except UnicodeDecodeError:
-                # fallback encoding
-                with open(file_path, "r", encoding="latin-1") as f:
-                    content = f.read()
-            if "punkt" in content:
-                content_new = content.replace("punkt", "punkt")
-                try:
-                    with open(file_path, "w", encoding="utf-8") as f:
-                        f.write(content_new)
-                except UnicodeEncodeError:
-                    with open(file_path, "w", encoding="latin-1") as f:
-                        f.write(content_new)
-                print(f"Fixed {file_path}")
-
-
 
 app = Flask(__name__)
 
