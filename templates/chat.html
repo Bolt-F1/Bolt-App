@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+
+<script>
+    // Auto-refresh messages every 2 seconds
+    function refreshMessages() {
+        fetch(window.location.href)
+            .then(response => response.text())
+            .then(html => {
+                // Parse HTML and update messages div
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(html, "text/html");
+                let newMessages = doc.querySelector(".messages").innerHTML;
+                document.querySelector(".messages").innerHTML = newMessages;
+            });
+    }
+
+    setInterval(refreshMessages, 2000); // 2000 ms = 2 seconds
+
+</script>
+
+<head>
+    <title>Simple Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <h1>Welcome, {{ username }}</h1>
+
+
+        <div class="messages">
+            {% for msg in messages %}
+                <div class="message {% if msg[0] == username %}user{% else %}other{% endif %}">
+                    <strong style="color: {{ user_colors[msg[0]] }}">{{ msg[0] }}</strong>: {{ msg[1] }}
+                    <span class="time">{{ msg[2] }}</span>
+                </div>
+            {% endfor %}
+        </div>
+        
+
+        <form method="POST" class="message-form">
+            <input type="text" name="message" placeholder="Type a message..." required>
+            <button type="submit" style="background-color: black; color: wheat; outline: wheat;">Send</button>
+        </form>
+    </div>
+
+    <nav class="bottom-menu">
+        <ul>
+            <li><a href="{{ url_for('chat') }}"><img src="images/image-removebg-preview-9.png" alt="Chat" /></a></li>
+            <li><a href="{{ url_for('todo') }}"><img src="about.png" alt="Tasks" /></a></li>
+            <li><a href="#"><img src="services.png" alt="Bolt AI" /></a></li>
+            <li><a href="#"><img src="contact.png" alt="Bolt Sim" /></a></li>
+        </ul>
+    </nav>
+
+    
+
+</body>
+</html>
+
+
+

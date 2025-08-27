@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+    <head>
+        <title> Bolt Chatbot: </title>
+        <h2> Welcome to the Chatbot.</h2>
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    </head>
+
+    <body>
+        <div class="chatbot_body">
+            <div class = chatbot_output>
+                <p> {{ answer }} </p>
+            </div>
+            <div class="chatbot_input_box">
+                <form method="POST" class="chatbot_input_form">
+                    <input type="text" name="chatbot_query" placeholder="Ask any question..." required>
+                    <button type="submit" style="background-color: black; color: wheat; outline: wheat;">Send</button>
+                </form>
+            </div>
+        </div>
+    </body>
