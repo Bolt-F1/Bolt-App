@@ -66,10 +66,10 @@
 
         <nav class="bottom-menu">
             <ul>
-                <li><a href="{{ url_for('chat') }}"><img src="images/image-removebg-preview-9.png" alt="Chat" /></a></li>
-                <li><a href="{{ url_for('todo') }}"><img src="about.png" alt="Tasks" /></a></li>
-                <li><a href="{{ url_for('chatbot') }}"><img src="services.png" alt="Bolt Chatbot" /></a></li>
-                <li><a href="#"><img src="contact.png" alt="Bolt Sim" /></a></li>
+                <li><a href="{{ url_for('chat') }}"><img src="{{ url_for('static', filename='images/Message_Icon.png') }}" alt="Chat" /></a></li>
+                <li><a href="{{ url_for('todo') }}"><img src="{{ url_for('static', filename='images/to_do_list_icon.png') }}" alt="Tasks" /></a></li>
+                <li><a href="{{ url_for('chatbot') }}"><img src="{{ url_for('static', filename='images/Bolt_AI_Icon.png') }}" alt="Bolt Chatbot" /></a></li>
+                <li><a href="#"><img src="conta" alt="Track time calculator" /></a></li>
             </ul>
         </nav>
     

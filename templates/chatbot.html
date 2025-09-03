@@ -10,7 +10,10 @@
     <body>
         <div class="chatbot_body">
             <div class = chatbot_output>
-                <p> {{ answer }} </p>
+                {% for i in chatbot_convo %}
+                <p class="chatbot_query"> {{ i[1] }}</p>
+                <p class="chatbot_answer"> {{ i[2] }} </p>
+                {% endfor %}
             </div>
             <div class="chatbot_input_box">
                 <form method="POST" class="chatbot_input_form">

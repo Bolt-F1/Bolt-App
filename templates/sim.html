@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+    <head>
+        <title> Bolt Sim </title>
+        <h2> Simulations </h2>
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    </head>
+
+    <body>
+        
+        <form class="track_time_calc_form">
+            <input type="hidden" name="form_id" value="track_time_calc">
+            <input type="number" name="drag_co" placeholder="drag coefficent (e.g. 0.0007)">
+            <input type="number" name="lift_co" placeholder="lift coefficent (e.g. 0.0007)">
+            <input type="number" name="mass" placeholder="mass (kg) (e.g. 0.065)">
+            <input type="number" name="cross_section" placeholder="Frontal cross section (m) (e.g. 0.3)">
+            <button type="submit"> Submit </button>
+        </form>
+        
+
+
+        <div class="ml_sim">
+            <h1>Drag Prediction App</h1>
+    
+            <form method="POST" action="/handle" enctype="multipart/form-data">
+                <input type="hidden" name="form_id" value="ml_sim">
+                <label>Upload STEP file(s):</label><br>
+                <input type="file" name="step_files" multiple><br><br>
+        
+                <label>Drag Co-efficent values (comma-separated, only used for training):</label><br>
+                <input type="text" name="drag_values" placeholder="10.5, 12.3, 9.8"><br>
+                <label>Lift Co-efficent values (comma-separated, only used for training):</label><br>
+                <input type="text" name="lift_values" placeholder="10.5, 12.3, 9.8"><br><br>
+        
+                <button type="submit" name="action" value="train">Train</button>
+                <button type="submit" name="action" value="predict">Predict</button>
+            </form>
+        </div>
+
+            <div class="track_time_calc_results"> 
+                <h4> Results </h4>
+                <p> Final Time = {{ time }}</p>
+                <img src="data:image/png;base64,{{img_base64}}" alt="Simulation Graph">
+            </div>
+        </div>
+
+
+        <nav class="bottom-menu">
+            <ul>
+                <li><a href="{{ url_for('chat') }}"><img src="{{ url_for('static', filename='images/Message_Icon.png') }}" alt="Chat" /></a></li>
+                <li><a href="{{ url_for('todo') }}"><img src="{{ url_for('static', filename='images/to_do_list_icon.png') }}" alt="Tasks" /></a></li>
+                <li><a href="{{ url_for('chatbot') }}"><img src="{{ url_for('static', filename='images/Bolt_AI_Icon.png') }}" alt="Bolt Chatbot" /></a></li>
+                <li><a href="#"><img src="conta" alt="Track time calculator" /></a></li>
+            </ul>
+        </nav>
+    </body>
+</html>

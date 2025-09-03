@@ -5,3 +5,10 @@ faiss-cpu
 numpy
 transformers
 nltk
+pandas
+matplotlib
+scikit-learn
+os
+pythonocc-core
+scipy
+datetime
