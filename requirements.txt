@@ -1,5 +1,5 @@
-Flask
-PyMuPDF
+flask
+pymupdf
 sentence-transformers
 faiss-cpu
 numpy
@@ -8,7 +8,5 @@ nltk
 pandas
 matplotlib
 scikit-learn
-os
+joblib
 pythonocc-core
-scipy
-datetime
