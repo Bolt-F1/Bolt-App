@@ -1,78 +1,82 @@
 <!DOCTYPE html>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<html>
-    <head>
-        <title> The Bolt To Do List: </title>
-        <h2> To-do list</h2>
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    </head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Bolt To-Do List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
 
-    <body>
-        <div class="list">
+    <header class="header">
+        <h1>The Bolt To-Do List</h1>
+    </header>
 
-            <div class="create_task">
+    <main class="main-container">
 
-                <h4 style="color: goldenrod;"> Add a Task </h4> 
-            
-                <form method="POST" class="create_task_form">
-                    <input type="hidden" name="form_id" value="create_task">
-                    <input type="text" name="todo-title" placeholder="Task Title" required>
-                    <input type="text" name="todo-body" placeholder="Details" required>
-                    <input type="text" name="todo-deadline" placeholder="Deadline (YYYY-MM-DD)" required>
-                    <button type="submit" style="background-color: black; color: wheat; outline: wheat;">Send</button>
-                </form>
+        <!-- Create Task Panel -->
+        <section class="create-task-panel">
+            <h2>Add a Task</h2>
+            <form method="POST" class="create-task-form">
+                <input type="hidden" name="form_id" value="create_task">
+                <input type="text" name="todo-title" placeholder="Task Title" required>
+                <input type="text" name="todo-body" placeholder="Details" required>
+                <input type="text" name="todo-deadline" placeholder="Deadline (YYYY-MM-DD)" required>
+                <button type="submit" class="btn-submit">Add Task</button>
+            </form>
+        </section>
 
-            </div>
-
-            <form method="GET" style="display:inline;">
+        <!-- Toggle Completed Tasks -->
+        <section class="toggle-completed">
+            <form method="GET">
                 <input type="hidden" name="username" value="{{ username }}">
                 {% if show_completed %}
                     <input type="hidden" name="show_completed" value="0">
-                    <button type="submit">Hide Completed</button>
+                    <button type="submit" class="btn-toggle">Hide Completed</button>
                 {% else %}
                     <input type="hidden" name="show_completed" value="1">
-                    <button type="submit">Show Completed</button>
+                    <button type="submit" class="btn-toggle">Show Completed</button>
                 {% endif %}
             </form>
-            
+        </section>
 
-            <div class = list_items>
-                {% for i in todolist_items %}
-                    <div class="list_item">
-                        <span class = todolist_item_title>{{ i[1] }}</span>
-                        <span class = todolist_item_body>{{ i[2] }}</span>
-                        <span class = todolist_item_creater>Set by: {{ i[3] }}</span>
-                        <span class = todolist_item_deadline>Deadline: {{ i[4] }}</span>
-                        {% if i[5] %}
-                        <br> <span class="todolist_item_completed">Completed</span>
-                        {% endif %}
-
-                        {% if not i[5] %}
-
-                        <form method="POST" class="complete_task">
-                            <input type="hidden" name="task_id" value="{{ i[0] }}">
-                            <input type="hidden" name="form_id" value="complete_task">
-                            <button type="submit">Completed?</button>
-                        </form>
-
-                        {% endif %}
-                        
-                    </div>
-                {% endfor %}
-
+        <!-- Task List -->
+        <section class="task-list">
+            {% for i in todolist_items %}
+            <div class="task-card {% if i[5] %}completed{% endif %}">
+                <div class="task-header">
+                    <span class="task-title">{{ i[1] }}</span>
+                    {% if i[5] %}
+                        <span class="task-status">Completed</span>
+                    {% endif %}
+                </div>
+                <p class="task-body">{{ i[2] }}</p>
+                <div class="task-meta">
+                    <span>Set by: {{ i[3] }}</span>
+                    <span>Deadline: {{ i[4] }}</span>
+                </div>
+                {% if not i[5] %}
+                <form method="POST" class="complete-task-form">
+                    <input type="hidden" name="task_id" value="{{ i[0] }}">
+                    <input type="hidden" name="form_id" value="complete_task">
+                    <button type="submit" class="btn-complete">Mark as Completed</button>
+                </form>
+                {% endif %}
             </div>
+            {% endfor %}
+        </section>
 
-        </div>
+    </main>
 
-        <nav class="bottom-menu">
-            <ul>
-                <li><a href="{{ url_for('chat') }}"><img src="{{ url_for('static', filename='images/Message_Icon.png') }}" alt="Chat" /></a></li>
-                <li><a href="{{ url_for('todo') }}"><img src="{{ url_for('static', filename='images/to_do_list_icon.png') }}" alt="Tasks" /></a></li>
-                <li><a href="{{ url_for('chatbot') }}"><img src="{{ url_for('static', filename='images/Bolt_AI_Icon.png') }}" alt="Bolt Chatbot" /></a></li>
-                <li><a href="#"><img src="conta" alt="Track time calculator" /></a></li>
-            </ul>
-        </nav>
-    
+    <nav class="bottom-menu">
+        <ul>
+            <li><a href="{{ url_for('chat') }}"><img src="{{ url_for('static', filename='images/Message_Icon.png') }}" alt="Chat"></a></li>
+            <li><a href="{{ url_for('todo') }}"><img src="{{ url_for('static', filename='images/to_do_list_icon.png') }}" alt="Tasks"></a></li>
+            <li><a href="{{ url_for('chatbot') }}"><img src="{{ url_for('static', filename='images/Bolt_AI_Icon.png') }}" alt="Chatbot"></a></li>
+            <li><a href="{{ url_for('sim') }}"><img src="{{ url_for('static', filename='images/Sim_icon.png') }}" alt="Sim"></a></li>
+            <li><a href="{{ url_for('vr') }}"><img src="{{ url_for('static', filename='images/VR_icon.png') }}" alt="VR City"></a></li>
+        </ul>
+    </nav>
 
-    </body>
+</body>
 </html>

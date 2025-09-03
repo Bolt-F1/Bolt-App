@@ -8,7 +8,7 @@ import numpy as np
 from transformers import pipeline
 import os
 import nltk
-
+nltk.download('punkt')
 from nltk.tokenize import sent_tokenize
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -16,14 +16,7 @@ from sklearn.ensemble import RandomForestRegressor
 import io
 import base64
 import joblib
-from OCC.Core.gp import gp_Dir, gp_Pln, gp_Pnt
-from OCC.Core.STEPControl import STEPControl_Reader
-from OCC.Core.BRepGProp import brepgprop_VolumeProperties, brepgprop_SurfaceProperties
-from OCC.Core.GProp import GProp_GProps
-from OCC.Core.BRepBndLib import brepbndlib_Add
-from OCC.Core.Bnd import Bnd_Box
-from OCC.Core.IFSelect import IFSelect_RetDone
-from OCC.Core.BRepProj import BRepProj_Projection
+import trimesh
 
 
 
@@ -138,14 +131,30 @@ clear_if_new_day()
 # ------------------------------------------------------------------------------------------------------
 
 
+# ------------------------------------------------------------------------------------------------------
+# NLP / CHATBOT SETUP (Memory-Efficient)
+# ------------------------------------------------------------------------------------------------------
 
-device = 0  # set -1 for CPU
-model = SentenceTransformer("all-MiniLM-L6-v2", device=device)
-summarizer = pipeline("summarization", model="facebook/bart-base", device=device)
-qa_model = pipeline("text2text-generation", model="bigscience/bloomz-560m", device=device)
+
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2", device=-1)
+
+
+summarizer = pipeline(
+    "summarization",
+    model="sshleifer/distilbart-cnn-12-6",
+    device=-1
+)
+
+
+qa_model = pipeline(
+    "text2text-generation",
+    model="google/flan-t5-small",
+    device=-1
+)
 
 
 def extract_text_from_pdf(file_path):
+    import fitz
     try:
         doc = fitz.open(file_path)
         text = "\n".join([page.get_text("text") for page in doc])
@@ -154,69 +163,55 @@ def extract_text_from_pdf(file_path):
         print(f"Error reading PDF: {e}")
         return ""
 
-
 def chunk_text(text, chunk_size=500, overlap=50):
+    from nltk.tokenize import sent_tokenize
     sentences = sent_tokenize(text)
     chunks = []
     current_chunk = []
-
     for sent in sentences:
         if len(current_chunk) + len(sent.split()) <= chunk_size:
             current_chunk.append(sent)
         else:
             chunks.append(" ".join(current_chunk))
-            # Overlap handling
             current_chunk = current_chunk[-overlap:] + [sent] if overlap > 0 else [sent]
-
     if current_chunk:
         chunks.append(" ".join(current_chunk))
-
     return chunks
 
-
 def create_faiss_index(chunks):
-    embeddings = model.encode(chunks, convert_to_numpy=True, show_progress_bar=True)
+    embeddings = embedding_model.encode(chunks, convert_to_numpy=True, show_progress_bar=True)
     dim = embeddings.shape[1]
     index = faiss.IndexFlatL2(dim)
     index.add(embeddings)
     return index, embeddings
 
 def search_query(query, chunks, index, top_k=3):
-    query_vec = model.encode([query], convert_to_numpy=True)
+    query_vec = embedding_model.encode([query], convert_to_numpy=True)
     D, I = index.search(query_vec, top_k)
     return [chunks[i] for i in I[0]]
 
-
 def generate_answer(query, retrieved_chunks):
-    
-    chunk_summaries = [
+    summaries = [
         summarizer(chunk, max_length=100, min_length=30, do_sample=False)[0]["summary_text"]
         for chunk in retrieved_chunks
     ]
-    
-    summary = "\n".join(chunk_summaries)
-
+    combined_summary = "\n".join(summaries)
     prompt = (
-        f"Summary:\n{summary}\n\n"
+        f"Summary:\n{combined_summary}\n\n"
         f"Question: {query}\n\n"
-        f"Answer in bullet points. Include numbers from the summary with short explanations. "
-        f"If no numbers, give a ~100-word bullet-point answer."
+        "Answer in bullet points. Include numbers from the summary with labels and short explanations. "
+        "If no numbers are present, give a concise ~100-word bullet-point answer."
     )
-
-    response = qa_model(
-        prompt, 
-        max_new_tokens=250, 
-        num_beams=1, 
-        top_p=0.95, 
-        do_sample=True
-    )
-    
+    response = qa_model(prompt, max_new_tokens=250, num_beams=1, top_p=0.95, do_sample=True)
     return response[0]["generated_text"]
 
-
+# ------------------------------------------------------------------------------------------------------
+# INITIALIZE CHATBOT
+# ------------------------------------------------------------------------------------------------------
 pdf_text = extract_text_from_pdf("f1_in_schools_technical_regulations_2024-2025_development_class.pdf")
 chunks = chunk_text(pdf_text)
 index, embeddings = create_faiss_index(chunks)
+
 
 
 # ------------------------------------------------------------------------------------------------------
@@ -276,93 +271,93 @@ def run_track_time_sim(drag_co, lift_co, mass, cross_section):
 # ------------------------------------------------------------------------------------------------------
 
 
-
-
+# --- Config ---
 UPLOAD_FOLDER = "uploads"
 MODEL_PATH = "models/drag_rf_model.pkl"
+DATASET_PATH = "data/features_dataset.csv"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs("models", exist_ok=True)
+os.makedirs("data", exist_ok=True)
 
-# --- STEP loader ---
-def load_step_file(file_path):
-    reader = STEPControl_Reader()
-    status = reader.ReadFile(file_path)
-    if status != 1:
-        raise ValueError(f"Error reading STEP file: {file_path}")
-    reader.TransferRoots()
-    shape = reader.OneShape()
-    return shape
+# --- OBJ Loader ---
+def load_obj_file(file_path):
+    mesh = trimesh.load(file_path, force='mesh')
+    if not isinstance(mesh, trimesh.Trimesh):
+        raise ValueError("File could not be loaded as a mesh")
+    return mesh
 
-def calc_cross_section(shape, direction=(0, 0, 1)):
-   
-    airflow_dir = gp_Dir(*direction)
-    plane = gp_Pln(gp_Pnt(0, 0, 0), airflow_dir)
-
-    
-    proj = BRepProj_Projection(shape, plane, airflow_dir)
-    proj_shape = proj.Shape()
-
- 
-    props = GProp_GProps()
-    brepgprop_SurfaceProperties(proj_shape, props)
-    area = props.Mass()  
-
-    return area
-
-# --- Feature extraction ---
-def extract_features(shape):
-    props = GProp_GProps()
-    brepgprop_VolumeProperties(shape, props)
-    volume = props.Mass()
-
-    props_surface = GProp_GProps()
-    brepgprop_SurfaceProperties(shape, props_surface)
-    area = props_surface.Mass()
-
-    bbox = Bnd_Box()
-    brepbndlib_Add(shape, bbox)
-    xmin, ymin, zmin, xmax, ymax, zmax = bbox.Get()
-    dx, dy, dz = xmax - xmin, ymax - ymin, zmax - zmin
+# --- Feature Extraction ---
+def extract_features(mesh):
+    # Basic geometric features
+    volume = mesh.volume
+    area = mesh.area
+    bbox = mesh.bounds  # [[minx, miny, minz], [maxx, maxy, maxz]]
+    dx, dy, dz = bbox[1] - bbox[0]
     aspect_xy = dx / dy if dy != 0 else 0
     aspect_xz = dx / dz if dz != 0 else 0
 
-    cross_section = calc_cross_section(shape)
-    features = np.array([volume, area, dx, dy, dz, aspect_xy, aspect_xz, cross_section])
+    # Slenderness ratio
+    slenderness = max(dx, dy, dz) / min(dx, dy, dz) if min(dx, dy, dz) != 0 else 0
 
-    return features, cross_section
+    # Convex hull volume
+    convex_vol = mesh.convex_hull.volume
 
+    # Bounding box diagonal length
+    diag = np.linalg.norm(bbox[1] - bbox[0])
 
+    # Mesh complexity
+    num_vertices = len(mesh.vertices)
+    num_faces = len(mesh.faces)
 
-
-
-def train_model(step_files, drag_values, lift_values):
-    X = []
+    # Average cross-section for ML features (multi-slice)
+    z_levels = np.linspace(bbox[0][2], bbox[1][2], num=3)
     cross_sections = []
+    for z in z_levels:
+        section = mesh.section(plane_origin=[0,0,z], plane_normal=[0,0,1])
+        cross_sections.append(section.area if section else 0)
+    avg_cross_section = np.mean(cross_sections)
 
-    for f in step_files:
-        shape = load_step_file(f)
-        features, cross_section = extract_features(shape)
-        X.append(features)
-        cross_sections.append(cross_section)
-    X = np.array(X)
-    y = np.column_stack((drag_values, lift_values))
+    # Frontal cross-section (top-down bounding box projection)
+    frontal_cross_section = dx * dy
 
+    # Assemble feature array for ML
+    features = np.array([
+        volume, area, dx, dy, dz, aspect_xy, aspect_xz,
+        avg_cross_section, convex_vol, diag, slenderness,
+        num_vertices, num_faces
+    ])
+
+    return features, frontal_cross_section
+
+# --- Save Training Data (only features + labels) ---
+def save_training_data(features, drag, lift):
+    df = pd.DataFrame([np.append(features, [drag, lift])])
+    df.to_csv(DATASET_PATH, mode="a", header=not os.path.exists(DATASET_PATH), index=False)
+
+# --- Train Model from Dataset ---
+def train_model_from_dataset():
+    if not os.path.exists(DATASET_PATH):
+        raise ValueError("No training data available yet.")
+
+    df = pd.read_csv(DATASET_PATH)
+    X = df.iloc[:, :-2].values   # features
+    y = df.iloc[:, -2:].values   # drag, lift
     rf = RandomForestRegressor(n_estimators=100, random_state=42)
     rf.fit(X, y)
-
     joblib.dump(rf, MODEL_PATH)
-    return rf, cross_sections
+    return rf
 
-# --- Prediction function ---
-def predict_coeffs(step_file_path):
-    if not os.path.exists(MODEL_PATH):
-        raise ValueError("Model not trained yet.")
-    rf = joblib.load(MODEL_PATH)
-    shape = load_step_file(step_file_path)
-    features, cross_section = extract_features(shape)
+# --- Predict Function (retrain before predicting) ---
+def predict_coeffs(obj_file_path):
+    rf = train_model_from_dataset()  # retrain every prediction
+
+    mesh = load_obj_file(obj_file_path)
+    features, frontal_cross_section = extract_features(mesh)
     features = features.reshape(1, -1)
     drag, lift = rf.predict(features)[0]
-    return float(drag), float(lift), cross_section
+    return float(drag), float(lift), frontal_cross_section
+
+
 
 
 # ------------------------------------------------------------------------------------------------------
@@ -533,25 +528,38 @@ def todo():
 
 @app.route("/chatbot", methods=["GET", "POST"])
 def chatbot():
-    
     answer = None
-   
+    chatbot_convo = []
+
     if request.method == "POST":
         query = request.form.get("chatbot_query")
-        
-        retrieved = search_query(query, chunks, index)
-        answer = generate_answer(query, retrieved)
+        if query:
+          
+            retrieved_chunks = search_query(query, chunks, index)
 
+            answer = generate_answer(query, retrieved_chunks)
+
+         
+            conn = sqlite3.connect("chat.db")
+            c = conn.cursor()
+            c.execute("INSERT INTO chatbot (query, answer) VALUES (?, ?)", (query, answer))
+            c.execute("SELECT id, query, answer FROM chatbot ORDER BY id")
+            chatbot_convo = c.fetchall()
+            conn.commit()
+            conn.close()
+    else:
+        # On GET request, just fetch existing conversation
         conn = sqlite3.connect("chat.db")
         c = conn.cursor()
-        c.execute("INSERT INTO chatbot (query, answer) VALUES (?, ?)", (query, answer))
         c.execute("SELECT id, query, answer FROM chatbot ORDER BY id")
         chatbot_convo = c.fetchall()
-        conn.commit()
         conn.close()
-           
-        
-    return render_template("chatbot.html", answer=answer, chatbot_convo=chatbot_convo)
+
+    return render_template(
+        "chatbot.html",
+        answer=answer,
+        chatbot_convo=chatbot_convo
+    )
 
 
 
@@ -595,52 +603,72 @@ def sim():
             return render_template("sim.html", time=time, graph=img_base64)
         
 
-        else:
-            action = request.form.get("action")
-            files = request.files.getlist("step_files")
+    else:
+        action = request.form.get("action")
+        files = request.files.getlist("obj_files")
+        message = ""
 
-            if action == "train":
-                drag_values_str = request.form.get("drag_values")
-                if not drag_values_str:
-                    return render_template("sim.html", message="Drag values are required for training")
+        if action == "train":
+            drag_values_str = request.form.get("drag_values")
+            lift_values_str = request.form.get("lift_values")
+
+            cross_sections = []
+
+            if drag_values_str and lift_values_str:
+                # --- Case 1: drag/lift provided ---
                 drag_values = [float(x.strip()) for x in drag_values_str.split(",")]
-                if len(drag_values) != len(files):
-                    return render_template("sim.html", message="Number of drag values must match number of STEP files")
-                
-
-                lift_values_str = request.form.get("lift_values")
-                if not lift_values_str:
-                    return render_template("sim.html", message="Lift values are required for training")
                 lift_values = [float(x.strip()) for x in lift_values_str.split(",")]
-                if len(lift_values) != len(files):
-                    return render_template("sim.html", message="Number of drag values must match number of STEP files")
 
-                saved_paths = []
+                if len(drag_values) != len(files) or len(lift_values) != len(files):
+                    return render_template("sim.html", message="Number of values must match number of OBJ files")
+
+                for f, drag, lift in zip(files, drag_values, lift_values):
+                    path = os.path.join(UPLOAD_FOLDER, f.filename)
+                    f.save(path)
+                    shape = load_obj_file(path)
+                    features, cross_section = extract_features(shape)
+                    save_training_data(features, drag, lift)
+                    cross_sections.append(round(cross_section, 3))
+
+                return render_template("sim.html",
+                                    message="Data saved successfully! Model will update on next prediction.",
+                                    cross_sections=cross_sections)
+
+            else:
+                # --- Case 2: no drag/lift values, just extract cross-sections ---
                 for f in files:
                     path = os.path.join(UPLOAD_FOLDER, f.filename)
                     f.save(path)
-                    saved_paths.append(path)
+                    shape = load_obj_file(path)
+                    _, cross_section = extract_features(shape)
+                    frontal_area = round(cross_section, 3)
 
-                rf_model, cross_sections = train_model(saved_paths, drag_values, lift_values)
-                cross_sections = [round(cs, 3) for cs in cross_sections]
-                    
-                
-                return render_template("sim.html", message="Model trained successfully!", cross_sections=cross_sections)
+                return render_template("sim.html",
+                                    message="Cross-section(s) extracted (no training data saved).",
+                                    frontal_area=frontal_area)
 
-            elif action == "predict":
-                if len(files) != 1:
-                    return render_template("sim.html", message="Please upload exactly one STEP file for prediction")
-                f = files[0]
-                path = os.path.join(UPLOAD_FOLDER, f.filename)
-                f.save(path)
-                drag, lift, frontal_area = predict_coeffs(path)
-                drag_mlsim_coeff = round(drag, 3)
-                lift_mlsim_coeff = round(lift, 3)
-                frontal_area = round(frontal_area, 3)
+        elif action == "predict":
+            if len(files) != 1:
+                return render_template("sim.html", message="Please upload exactly one OBJ file for prediction")
+            f = files[0]
+            path = os.path.join(UPLOAD_FOLDER, f.filename)
+            f.save(path)
 
-                return render_template("sim.html", drag=drag_mlsim_coeff, lift=lift_mlsim_coeff, frontal_area=frontal_area)
-            else:
-                return render_template("sim.html", message="Unknown action")
+            # Retrain model automatically before predicting
+            drag, lift, frontal_area = predict_coeffs(path)
+
+            drag_mlsim_coeff = round(drag, 3)
+            lift_mlsim_coeff = round(lift, 3)
+            frontal_area = round(frontal_area, 3)
+
+            return render_template("sim.html",
+                                drag=drag_mlsim_coeff,
+                                lift=lift_mlsim_coeff,
+                                frontal_area=frontal_area)
+
+        else:
+            return render_template("sim.html", message="Unknown action")
+    
 
 
 
@@ -648,7 +676,9 @@ def sim():
 # ------------------------------------------------------------------------------------------------------
     
 
-
+@app.route("/vr", methods=["GET", "POST"])
+def vr():
+    return render_template("Bolt_VR.html")
  
 
 

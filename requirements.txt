@@ -1,12 +1,13 @@
-flask
-pymupdf
+Flask
+PyMuPDF
 sentence-transformers
 faiss-cpu
-numpy
 transformers
+torch
 nltk
+numpy
 pandas
 matplotlib
 scikit-learn
 joblib
-pythonocc-core
+trimesh
