@@ -11,3 +11,5 @@ matplotlib
 scikit-learn
 joblib
 trimesh
+psycopg2-binary
+gunicorn
