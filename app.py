@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, redirect, session
-import sqlite3
 from datetime import datetime, date
 import fitz  # pymupdf
 from sentence_transformers import SentenceTransformer
@@ -18,7 +17,8 @@ import base64
 import joblib
 import trimesh
 import psycopg2
-from psycopg2.extras import execute_values
+from psycopg2.extras import RealDictCursor, execute_values
+import requests
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -33,89 +33,114 @@ USER_COLORS = {
     "User5": "salmon"
 }
 
-# ------------------------ SQLITE SETUP ------------------------
-conn = sqlite3.connect("chat.db")
-c = conn.cursor()
-c.execute("""
-CREATE TABLE IF NOT EXISTS messages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sender TEXT,
-    body TEXT,
-    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
-""")
-c.execute("""
-CREATE TABLE IF NOT EXISTS todolist (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT,
-    body TEXT,
-    creater TEXT,
-    deadline TEXT,
-    completed_at TIMESTAMP NULL
-)
-""")
-c.execute("""
-CREATE TABLE IF NOT EXISTS meta (
-    key TEXT PRIMARY KEY,
-    value TEXT,
-    key_day TEXT,
-    value_day TEXT
-)
-""")
-c.execute("""
-CREATE TABLE IF NOT EXISTS chatbot (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    query TEXT,
-    answer TEXT
-)
-""")
+# ------------------------ POSTGRES SETUP ------------------------
+DB_URL = os.getenv("DATABASE_URL")
 
-c.execute("""
-CREATE TABLE IF NOT EXISTS ml_features (
-    id SERIAL PRIMARY KEY,
-    volume DOUBLE PRECISION,
-    area DOUBLE PRECISION,
-    dx DOUBLE PRECISION,
-    dy DOUBLE PRECISION,
-    dz DOUBLE PRECISION,
-    aspect_xy DOUBLE PRECISION,
-    aspect_xz DOUBLE PRECISION,
-    avg_cross_section DOUBLE PRECISION,
-    convex_vol DOUBLE PRECISION,
-    diag DOUBLE PRECISION,
-    slenderness DOUBLE PRECISION,
-    num_vertices INTEGER,
-    num_faces INTEGER,
-    drag DOUBLE PRECISION,
-    lift DOUBLE PRECISION
-);
-""")
+def get_pg_conn():
+    return psycopg2.connect(DB_URL, cursor_factory=RealDictCursor)
 
-conn.commit()
-conn.close()
+def init_db():
+    conn = get_pg_conn()
+    c = conn.cursor()
+    
+    # Messages table
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS messages (
+        id SERIAL PRIMARY KEY,
+        sender TEXT,
+        body TEXT,
+        time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    
+    # Todo list
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS todolist (
+        id SERIAL PRIMARY KEY,
+        title TEXT,
+        body TEXT,
+        creater TEXT,
+        deadline DATE,
+        completed_at TIMESTAMP NULL
+    )
+    """)
+    
+    # Meta table
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS meta (
+        key TEXT PRIMARY KEY,
+        value TEXT,
+        key_day TEXT,
+        value_day TEXT
+    )
+    """)
+    
+    # Doc summary
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS doc_summary (
+        id SERIAL PRIMARY KEY,
+        summary TEXT
+    )
+    """)
+    
+    # Chatbot table
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS chatbot (
+        id SERIAL PRIMARY KEY,
+        query TEXT,
+        answer TEXT
+    )
+    """)
+    
+    # ML features table
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS ml_features (
+        id SERIAL PRIMARY KEY,
+        volume DOUBLE PRECISION,
+        area DOUBLE PRECISION,
+        dx DOUBLE PRECISION,
+        dy DOUBLE PRECISION,
+        dz DOUBLE PRECISION,
+        aspect_xy DOUBLE PRECISION,
+        aspect_xz DOUBLE PRECISION,
+        avg_cross_section DOUBLE PRECISION,
+        convex_vol DOUBLE PRECISION,
+        diag DOUBLE PRECISION,
+        slenderness DOUBLE PRECISION,
+        num_vertices INTEGER,
+        num_faces INTEGER,
+        drag DOUBLE PRECISION,
+        lift DOUBLE PRECISION
+    )
+    """)
+    
+    conn.commit()
+    conn.close()
+
+init_db()
 
 # ------------------------ WEEK / DAY CLEAR ------------------------
 def clear_if_new_week():
-    conn = sqlite3.connect("chat.db")
+    conn = get_pg_conn()
     c = conn.cursor()
     c.execute("SELECT value FROM meta WHERE key='last_cleared_week'")
     row = c.fetchone()
     current_week = datetime.now().isocalendar()[1]
-    if not row or int(row[0]) != current_week:
+    if not row or int(row['value']) != current_week:
         c.execute("DELETE FROM messages")
-        c.execute("REPLACE INTO meta (key, value) VALUES ('last_cleared_week', ?)", (str(current_week),))
+        c.execute("INSERT INTO meta (key, value) VALUES (%s, %s) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", ('last_cleared_week', str(current_week)))
         conn.commit()
     conn.close()
 
 def clear_if_new_day():
-    conn = sqlite3.connect("chat.db")
+    conn = get_pg_conn()
     c = conn.cursor()
     c.execute("SELECT value_day FROM meta WHERE key_day='last_cleared_day'")
     row = c.fetchone()
     today_str = date.today().isoformat()
-    if not row or row[0] != today_str:
+    if not row or row['value_day'] != today_str:
         c.execute("DELETE FROM chatbot")
-        c.execute("REPLACE INTO meta (key_day, value_day) VALUES ('last_cleared_day', ?)", (today_str,))
+        c.execute("INSERT INTO meta (key_day, value_day) VALUES (%s, %s) ON CONFLICT (key_day) DO UPDATE SET value_day = EXCLUDED.value_day", ('last_cleared_day', today_str))
         conn.commit()
     conn.close()
 
@@ -123,56 +148,30 @@ clear_if_new_week()
 clear_if_new_day()
 
 # ------------------------ NLP / CHATBOT ------------------------
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2", device=-1)
-summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=-1)
-qa_model = pipeline("text2text-generation", model="google/flan-t5-small", device=-1)
+API_URL = "https://api-inference.huggingface.co/models/Ay8/google/flan-t5-large"
+HUGGINGFACE_API_TOKEN = os.getenv("HUGGINGFACE_API_TOKEN")
+HEADERS = {"Authorization": f"Bearer {HUGGINGFACE_API_TOKEN}"}
 
-def extract_text_from_pdf(file_path):
+my_summary = "This is the summary string your answers will be based on."
+
+def ask_question_with_prompt(question):
+    prompt = f"""Summary:{my_summary} Question:{question} Answer concisely in bullet points: Use numbers and their explanations"""
+    payload = {"inputs": prompt}
+    
     try:
-        doc = fitz.open(file_path)
-        text = "\n".join([page.get_text("text") for page in doc])
-        return text
-    except Exception as e:
-        print(f"Error reading PDF: {e}")
-        return ""
-
-def chunk_text(text, chunk_size=500, overlap=50):
-    sentences = sent_tokenize(text)
-    chunks = []
-    current_chunk = []
-    for sent in sentences:
-        if len(current_chunk) + len(sent.split()) <= chunk_size:
-            current_chunk.append(sent)
+        response = requests.post(API_URL, headers=HEADERS, json=payload, timeout=15)
+        response.raise_for_status()
+        data = response.json()
+        if isinstance(data, list) and "generated_text" in data[0]:
+            return data[0]["generated_text"]
         else:
-            chunks.append(" ".join(current_chunk))
-            current_chunk = current_chunk[-overlap:] + [sent] if overlap > 0 else [sent]
-    if current_chunk:
-        chunks.append(" ".join(current_chunk))
-    return chunks
-
-def create_faiss_index(chunks):
-    embeddings = embedding_model.encode(chunks, convert_to_numpy=True, show_progress_bar=True)
-    dim = embeddings.shape[1]
-    index = faiss.IndexFlatL2(dim)
-    index.add(embeddings)
-    return index, embeddings
-
-def search_query(query, chunks, index, top_k=3):
-    query_vec = embedding_model.encode([query], convert_to_numpy=True)
-    D, I = index.search(query_vec, top_k)
-    return [chunks[i] for i in I[0]]
-
-def generate_answer(query, retrieved_chunks):
-    summaries = [summarizer(chunk, max_length=100, min_length=30, do_sample=False)[0]["summary_text"] for chunk in retrieved_chunks]
-    combined_summary = "\n".join(summaries)
-    prompt = f"Summary:\n{combined_summary}\n\nQuestion: {query}\n\nAnswer in bullet points. Include numbers from the summary with labels and short explanations. If no numbers are present, give a concise ~100-word bullet-point answer."
-    response = qa_model(prompt, max_new_tokens=250, num_beams=1, top_p=0.95, do_sample=True)
-    return response[0]["generated_text"]
-
-# ------------------------ INITIALIZE CHATBOT ------------------------
-pdf_text = extract_text_from_pdf("f1_in_schools_technical_regulations_2024-2025_development_class.pdf")
-chunks = chunk_text(pdf_text)
-index, embeddings = create_faiss_index(chunks)
+            return "Error: Unexpected response format from API."
+    except requests.exceptions.Timeout:
+        return "Error: API request timed out."
+    except requests.exceptions.RequestException as e:
+        return f"Error: API request failed ({str(e)})"
+    except (KeyError, IndexError, TypeError):
+        return "Error: Failed to parse API response."
 
 # ------------------------ TRACK TIME SIM ------------------------
 def run_track_time_sim(drag_co, lift_co, mass, cross_section):
@@ -239,10 +238,8 @@ def extract_features(mesh):
     return features, frontal_cross_section
 
 # ------------------------ POSTGRES ML DATA ------------------------
-DB_URL = os.getenv("DATABASE_URL")
-
 def save_training_data(features, drag, lift):
-    conn = psycopg2.connect(DB_URL)
+    conn = get_pg_conn()
     c = conn.cursor()
     query = """
         INSERT INTO ml_features
@@ -254,7 +251,7 @@ def save_training_data(features, drag, lift):
     conn.close()
 
 def train_model_from_dataset():
-    conn = psycopg2.connect(DB_URL)
+    conn = get_pg_conn()
     df = pd.read_sql("SELECT * FROM ml_features", conn)
     conn.close()
     if df.empty:
@@ -295,13 +292,13 @@ def chat():
     if request.method == "POST":
         message = request.form.get("message")
         if message:
-            conn = sqlite3.connect("chat.db")
+            conn = get_pg_conn()
             c = conn.cursor()
-            c.execute("INSERT INTO messages (sender, body) VALUES (?, ?)", (username, message))
+            c.execute("INSERT INTO messages (sender, body) VALUES (%s, %s)", (username, message))
             conn.commit()
             conn.close()
         return redirect(f"/chat?username={username}")
-    conn = sqlite3.connect("chat.db")
+    conn = get_pg_conn()
     c = conn.cursor()
     c.execute("SELECT sender, body, time FROM messages ORDER BY id ASC")
     messages = c.fetchall()
@@ -314,21 +311,24 @@ def todo():
     show_completed = request.args.get("show_completed") == "1"
     if request.method == "POST":
         form_id = request.form.get("form_id")
-        conn = sqlite3.connect("chat.db")
+        conn = get_pg_conn()
         c = conn.cursor()
         if form_id == 'create_task':
             todo_title = request.form.get("todo-title")
             todo_body = request.form.get("todo-body")
             todo_deadline = request.form.get("todo-deadline")
             if todo_title and todo_body and todo_deadline:
-                c.execute("INSERT INTO todolist (title, body, creater, deadline) VALUES (?, ?, ?, ?)", (todo_title, todo_body, username, todo_deadline))
+                c.execute("INSERT INTO todolist (title, body, creater, deadline) VALUES (%s, %s, %s, %s)", (todo_title, todo_body, username, todo_deadline))
                 conn.commit()
+            conn.close()
             return redirect(f"/todo?show_completed={int(show_completed)}")
         elif form_id == "complete_task":
             task_id = request.form.get("task_id")
-            c.execute("UPDATE todolist SET completed_at = CURRENT_TIMESTAMP WHERE id = ?", (task_id,))
+            c.execute("UPDATE todolist SET completed_at = CURRENT_TIMESTAMP WHERE id = %s", (task_id,))
             conn.commit()
+            conn.close()
             return redirect(f"/todo?show_completed={int(show_completed)}")
+    conn = get_pg_conn()
     c = conn.cursor()
     if show_completed:
         c.execute("SELECT id, title, body, creater, deadline, completed_at FROM todolist ORDER BY deadline ASC")
@@ -345,17 +345,8 @@ def chatbot_route():
     if request.method == "POST":
         query = request.form.get("chatbot_query")
         if query:
-            retrieved_chunks = search_query(query, chunks, index)
-            answer = generate_answer(query, retrieved_chunks)
-            conn = sqlite3.connect("chat.db")
-            c = conn.cursor()
-            c.execute("INSERT INTO chatbot (query, answer) VALUES (?, ?)", (query, answer))
-            c.execute("SELECT id, query, answer FROM chatbot ORDER BY id")
-            chatbot_convo = c.fetchall()
-            conn.commit()
-            conn.close()
-    else:
-        conn = sqlite3.connect("chat.db")
+            answer = ask_question_with_prompt(query)
+        conn = get_pg_conn()
         c = conn.cursor()
         c.execute("SELECT id, query, answer FROM chatbot ORDER BY id")
         chatbot_convo = c.fetchall()
@@ -429,18 +420,12 @@ def sim():
 def vr():
     return render_template("Bolt_VR.html")
 
-
 @app.route("/health", methods=["GET"])
 def health():
     return "OK", 200
 
-@app.route("/ping")
-def ping():
-    return "pong", 200
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
-
 
 
 
