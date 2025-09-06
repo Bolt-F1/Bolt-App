@@ -357,19 +357,28 @@ def todo():
 
 @app.route("/chatbot", methods=["GET", "POST"])
 def chatbot():
-    answer = None
     chatbot_convo = []
+
+    conn = get_pg_conn()
+    c = conn.cursor()
+
     if request.method == "POST":
         query = request.form.get("chatbot_query")
         if query:
             answer = ask_question_with_prompt(query)
-        conn = get_pg_conn()
-        c = conn.cursor()
-        c.execute("SELECT id, query, answer FROM chatbot ORDER BY id")
-        chatbot_convo = c.fetchall()
-        conn.close()
-    return render_template("chatbot.html", answer=answer, chatbot_convo=chatbot_convo)
+            # Save Q&A to the database
+            c.execute(
+                "INSERT INTO chatbot (query, answer) VALUES (%s, %s)",
+                (query, answer)
+            )
+            conn.commit()
 
+    # Fetch all conversation
+    c.execute("SELECT id, query, answer FROM chatbot ORDER BY id")
+    chatbot_convo = c.fetchall()
+    conn.close()
+
+    return render_template("chatbot.html", chatbot_convo=chatbot_convo)
 @app.route("/sim", methods=["GET", "POST"])
 def sim():
     if request.method == "POST":
