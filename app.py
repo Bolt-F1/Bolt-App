@@ -62,14 +62,11 @@ def init_db():
     
     # Meta table
     c.execute("""
-     DROP TABLE IF EXISTS meta;          
+    DROP TABLE IF EXISTS meta;          
     
     CREATE TABLE IF NOT EXISTS meta (
         key TEXT PRIMARY KEY,
-        value TEXT,
-        key_day TEXT UNIQUE,
-        value_day TEXT
-)
+        value TEXT
 
     """)
     
@@ -121,26 +118,27 @@ init_db()
 def clear_if_new_week():
     conn = get_pg_conn()
     c = conn.cursor()
-    c.execute("SELECT value FROM meta WHERE key='last_cleared_week'")
-    row = c.fetchone()
     current_week = datetime.now().isocalendar()[1]
-    if not row or int(row['value']) != current_week:
-        c.execute("DELETE FROM messages")
-        c.execute("INSERT INTO meta (key, value) VALUES (%s, %s) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", ('last_cleared_week', str(current_week)))
-        conn.commit()
+    c.execute(
+        "INSERT INTO meta (key, value) VALUES (%s, %s) "
+        "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+        ('last_cleared_week', str(current_week))
+    )
+    conn.commit()
     conn.close()
 
 def clear_if_new_day():
     conn = get_pg_conn()
     c = conn.cursor()
-    c.execute("SELECT value_day FROM meta WHERE key_day='last_cleared_day'")
-    row = c.fetchone()
     today_str = date.today().isoformat()
-    if not row or row['value_day'] != today_str:
-        c.execute("DELETE FROM chatbot")
-        c.execute("INSERT INTO meta (key_day, value_day) VALUES (%s, %s) ON CONFLICT (key_day) DO UPDATE SET value_day = EXCLUDED.value_day", ('last_cleared_day', today_str))
-        conn.commit()
+    c.execute(
+        "INSERT INTO meta (key, value) VALUES (%s, %s) "
+        "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+        ('last_cleared_day', today_str)
+    )
+    conn.commit()
     conn.close()
+
 
 clear_if_new_week()
 clear_if_new_day()
