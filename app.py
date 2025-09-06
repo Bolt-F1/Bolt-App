@@ -356,7 +356,7 @@ def todo():
     return render_template("todo.html", todolist_items=todolist_items, username=username, show_completed=show_completed)
 
 @app.route("/chatbot", methods=["GET", "POST"])
-def chatbot_route():
+def chatbot():
     answer = None
     chatbot_convo = []
     if request.method == "POST":
