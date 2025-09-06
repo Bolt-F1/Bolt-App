@@ -13,3 +13,4 @@ joblib
 trimesh
 psycopg2-binary
 gunicorn
+requests
