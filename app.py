@@ -1,15 +1,10 @@
 from flask import Flask, render_template, request, redirect, session
 from datetime import datetime, date
-import fitz  # pymupdf
-from sentence_transformers import SentenceTransformer
-import faiss
 import numpy as np
-from transformers import pipeline
 import os
-import nltk
-nltk.download('punkt')
-from nltk.tokenize import sent_tokenize
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')  # non-GUI backend
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestRegressor
 import io

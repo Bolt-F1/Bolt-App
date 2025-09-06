@@ -1,10 +1,4 @@
 Flask
-PyMuPDF
-sentence-transformers
-faiss-cpu
-transformers
-torch
-nltk
 numpy
 pandas
 matplotlib
