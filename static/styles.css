@@ -117,15 +117,16 @@ body {
 
 /* ----------------- Bottom Menu ----------------- */
 /* ----------------- Bottom Menu (Compact & Responsive) ----------------- */
+/* ----------------- Bottom Menu (Compact & Uniform Icons) ----------------- */
 .bottom-menu {
   position: fixed;
   bottom: 0;
   width: 95%;
   background-color: #FFC700;
-  padding: 0.5rem 0; /* reduced padding for smaller height */
+  padding: 0.5rem 0; /* smaller vertical padding for compact height */
   z-index: 1000;
-  border-top-left-radius: 8px;   /* optional rounded corners */
-  border-top-right-radius: 8px;  /* optional rounded corners */
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
   box-shadow: 0 -2px 5px rgba(0,0,0,0.3);
 }
 
@@ -138,16 +139,23 @@ body {
   align-items: center;
 }
 
+.bottom-menu li a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .bottom-menu li a img {
-  width: 35px; /* fixed size for consistent appearance */
-  max-width: 100%; /* ensures it never overflows */
-  height: auto;
+  width: 35px !important;       /* uniform fixed width */
+  height: 35px !important;      /* uniform fixed height */
+  object-fit: contain;           /* maintain icon aspect ratio */
+  display: block;                /* remove inline spacing issues */
   filter: brightness(2) drop-shadow(0 0 2px black);
   transition: transform 0.2s;
 }
 
 .bottom-menu li a img:hover {
-  transform: scale(1.2);
+  transform: scale(1.2);         /* hover scale effect */
 }
 
 
