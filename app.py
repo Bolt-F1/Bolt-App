@@ -65,9 +65,10 @@ def init_db():
     CREATE TABLE IF NOT EXISTS meta (
         key TEXT PRIMARY KEY,
         value TEXT,
-        key_day TEXT,
+        key_day TEXT UNIQUE,
         value_day TEXT
-    )
+)
+
     """)
     
     # Doc summary
