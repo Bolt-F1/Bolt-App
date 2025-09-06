@@ -70,8 +70,8 @@
 
     <nav class="bottom-menu">
         <ul>
-            <li><a href="{{ url_for('chat') }}"><img src="{{ url_for('static', filename='images/Message_Icon.png') }}" alt="Chat"></a></li>
-            <li><a href="{{ url_for('todo') }}"><img src="{{ url_for('static', filename='images/to_do_list_icon.png') }}" alt="Tasks"></a></li>
+            <li><a href="{{ url_for('chat', username=session.get('username')) }}"><img src="{{ url_for('static', filename='images/Message_Icon.png') }}" alt="Chat"></a></li>
+            <li><a href="{{ url_for('todo', username=session.get('username')) }}"><img src="{{ url_for('static', filename='images/to_do_list_icon.png') }}" alt="Tasks"></a></li>
             <li><a href="{{ url_for('chatbot') }}"><img src="{{ url_for('static', filename='images/Bolt_AI_Icon.png') }}" alt="Chatbot"></a></li>
             <li><a href="{{ url_for('sim') }}"><img src="{{ url_for('static', filename='images/Sim_icon.png') }}" alt="Sim"></a></li>
             <li><a href="{{ url_for('vr') }}"><img src="{{ url_for('static', filename='images/VR_icon.png') }}" alt="VR City"></a></li>
