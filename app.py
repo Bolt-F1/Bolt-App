@@ -306,7 +306,7 @@ def login():
 
 @app.route("/chat", methods=["GET", "POST"])
 def chat():
-    username = session.get("username")
+    username = session.get("username") or request.args.get("username")
     if not username or username not in USERS:
         return render_template("select_user.html", users=USERS)
     if request.method == "POST":
@@ -317,7 +317,7 @@ def chat():
             c.execute("INSERT INTO messages (sender, body) VALUES (%s, %s)", (username, message))
             conn.commit()
             conn.close()
-        return redirect(f"/chat?username={username}")
+        
     conn = get_pg_conn()
     c = conn.cursor()
     c.execute("SELECT sender, body, time FROM messages ORDER BY id ASC")
@@ -327,7 +327,7 @@ def chat():
 
 @app.route("/todo", methods=["GET", "POST"])
 def todo():
-    username = session.get("username")
+    username = session.get("username") or request.args.get("username")
     show_completed = request.args.get("show_completed") == "1"
     if request.method == "POST":
         form_id = request.form.get("form_id")
