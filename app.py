@@ -19,7 +19,7 @@ app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
 # ------------------------ USERS ------------------------
-USERS = ["Aanya", "Ayaan", "User3", "User4", "User5"]
+USERS = ["Ahoon", "Ayaan", "Ayush", "Vishak", "Nathan"]
 USER_COLORS = {
     "Aanya": "tomato",
     "Ayaan": "orange",
@@ -60,14 +60,15 @@ def init_db():
     )
     """)
     
-    # Meta table
+ # Drop table if it exists
+    c.execute("DROP TABLE IF EXISTS meta;")
+
+    # Create table
     c.execute("""
-    DROP TABLE IF EXISTS meta;          
-    
     CREATE TABLE IF NOT EXISTS meta (
         key TEXT PRIMARY KEY,
         value TEXT
-
+    )
     """)
     
     # Doc summary
@@ -119,24 +120,47 @@ def clear_if_new_week():
     conn = get_pg_conn()
     c = conn.cursor()
     current_week = datetime.now().isocalendar()[1]
-    c.execute(
-        "INSERT INTO meta (key, value) VALUES (%s, %s) "
-        "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
-        ('last_cleared_week', str(current_week))
-    )
-    conn.commit()
+
+    # Check last cleared week
+    c.execute("SELECT value FROM meta WHERE key = %s", ('last_cleared_week',))
+    row = c.fetchone()
+
+    if not row or int(row['value']) != current_week:
+        # Delete old messages
+        c.execute("DELETE FROM messages")
+
+        # Update meta table
+        c.execute(
+            "INSERT INTO meta (key, value) VALUES (%s, %s) "
+            "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+            ('last_cleared_week', str(current_week))
+        )
+        conn.commit()
+
     conn.close()
+
 
 def clear_if_new_day():
     conn = get_pg_conn()
     c = conn.cursor()
     today_str = date.today().isoformat()
-    c.execute(
-        "INSERT INTO meta (key, value) VALUES (%s, %s) "
-        "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
-        ('last_cleared_day', today_str)
-    )
-    conn.commit()
+
+    # Check last cleared day
+    c.execute("SELECT value FROM meta WHERE key = %s", ('last_cleared_day',))
+    row = c.fetchone()
+
+    if not row or row['value'] != today_str:
+        # Delete old chatbot data
+        c.execute("DELETE FROM chatbot")
+
+        # Update meta table
+        c.execute(
+            "INSERT INTO meta (key, value) VALUES (%s, %s) "
+            "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+            ('last_cleared_day', today_str)
+        )
+        conn.commit()
+
     conn.close()
 
 
