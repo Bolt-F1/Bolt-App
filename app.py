@@ -176,7 +176,7 @@ def ask_question_with_prompt(question):
     payload = {"inputs": prompt}
     
     try:
-        response = requests.post(API_URL, headers=HEADERS, json=payload, timeout=15)
+        response = requests.post(API_URL, headers=HEADERS, json=payload, timeout=60)
         response.raise_for_status()
         data = response.json()
         if isinstance(data, list) and "generated_text" in data[0]:
