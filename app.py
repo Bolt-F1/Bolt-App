@@ -21,11 +21,11 @@ app.secret_key = "supersecretkey"
 # ------------------------ USERS ------------------------
 USERS = ["Ahoon", "Ayaan", "Ayush", "Vishak", "Nathan"]
 USER_COLORS = {
-    "Aanya": "tomato",
+    "Ahoon": "tomato",
     "Ayaan": "orange",
-    "User3": "sienna",
-    "User4": "peru",
-    "User5": "salmon"
+    "Ayush": "sienna",
+    "Vishak": "peru",
+    "Nathan": "salmon"
 }
 
 # ------------------------ POSTGRES SETUP ------------------------
@@ -59,9 +59,6 @@ def init_db():
         completed_at TIMESTAMP NULL
     )
     """)
-    
- # Drop table if it exists
-    c.execute("DROP TABLE IF EXISTS meta;")
 
     # Create table
     c.execute("""
@@ -299,14 +296,14 @@ def login():
         password = request.form.get("enter_password")
         if username in USERS and password == "Bolt@StemRacing0":
             session["username"] = username 
-            return redirect(f"/chat?username={username}")
+            return redirect(f"/chat")
         else:
             return render_template("select_user.html", users=USERS)
     return render_template("select_user.html", users=USERS)
 
-@app.route("/chat/<username>", methods=["GET", "POST"])
+@app.route("/chat", methods=["GET", "POST"])
 def chat():
-    username = session.get("username") or request.args.get("username")
+    username = session.get("username")
     if not username or username not in USERS:
         return render_template("select_user.html", users=USERS)
     if request.method == "POST":
@@ -325,9 +322,9 @@ def chat():
     conn.close()
     return render_template("chat.html", messages=messages, username=username, user_colors=USER_COLORS)
 
-@app.route("/todo/<username>", methods=["GET", "POST"])
+@app.route("/todo", methods=["GET", "POST"])
 def todo():
-    username = session.get("username") or request.args.get("username")
+    username = session.get("username")
     show_completed = request.args.get("show_completed") == "1"
     if request.method == "POST":
         form_id = request.form.get("form_id")
