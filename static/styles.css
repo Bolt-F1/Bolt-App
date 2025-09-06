@@ -139,9 +139,9 @@ body {
 }
 
 .bottom-menu li a img {
-  width: 35px; /* fixed size for consistent appearance */
-  max-width: 100%; /* ensures it never overflows */
-  height: auto;
+  width: 35px !important; /* force same width */
+  height: 35px !important; /* force same height */
+  object-fit: contain;     /* ensures it scales properly */
   filter: brightness(2) drop-shadow(0 0 2px black);
   transition: transform 0.2s;
 }
