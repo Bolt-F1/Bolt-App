@@ -62,6 +62,8 @@ def init_db():
     
     # Meta table
     c.execute("""
+     DROP TABLE IF EXISTS meta;          
+    
     CREATE TABLE IF NOT EXISTS meta (
         key TEXT PRIMARY KEY,
         value TEXT,
