@@ -304,7 +304,7 @@ def login():
             return render_template("select_user.html", users=USERS)
     return render_template("select_user.html", users=USERS)
 
-@app.route("/chat", methods=["GET", "POST"])
+@app.route("/chat/<username>", methods=["GET", "POST"])
 def chat():
     username = session.get("username") or request.args.get("username")
     if not username or username not in USERS:
@@ -325,7 +325,7 @@ def chat():
     conn.close()
     return render_template("chat.html", messages=messages, username=username, user_colors=USER_COLORS)
 
-@app.route("/todo", methods=["GET", "POST"])
+@app.route("/todo/<username>", methods=["GET", "POST"])
 def todo():
     username = session.get("username") or request.args.get("username")
     show_completed = request.args.get("show_completed") == "1"
