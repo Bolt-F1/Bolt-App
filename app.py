@@ -170,34 +170,62 @@ API_URL = "https://router.huggingface.co/v1/chat/completions"
 HUGGINGFACE_API_TOKEN = os.getenv("HUGGINGFACE_API_TOKEN")
 HEADERS = {"Authorization": f"Bearer {HUGGINGFACE_API_TOKEN}"}
 
-summary = Rules_and_Regs_sum
+
+def split_summary_into_sections(summary, max_words=500):
+    words = summary.split()
+    sections = []
+    for i in range(0, len(words), max_words):
+        section = " ".join(words[i:i + max_words])
+        sections.append(section)
+    return sections
+
+def select_relevant_sections(question, sections, top_n=2):
+    question_lower = question.lower()
+    scores = []
+    for sec in sections:
+        score = sum(word in sec.lower() for word in question_lower.split())
+        scores.append(score)
+    # pick top N sections with highest score
+    top_sections = [sec for score, sec in sorted(zip(scores, sections), reverse=True)[:top_n]]
+    return "\n\n".join(top_sections)
+
 
 def ask_question_with_summary(question):
-    prompt = f"""Summary:
-{summary}
+   
+   summary_sections = split_summary_into_sections(Rules_and_Regs_sum, max_words=500)
+   
+   relevant_text = select_relevant_sections(question, summary_sections)
+
+   prompt = f"""Summary:
+{relevant_text}
 
 Question:
 {question}
 
 Answer concisely in bullet points with numbers and explanations.
-Answer clearly in **short paragraphs**, not in code or markdown. 
+Answer clearly in short paragraphs, not in code or markdown.
 Use plain text with simple bullet points only if it improves readability.
-Keep the answer conversational, like explaining to a student.
+Keep the answer conversational.
 """
 
-    payload = {
+   payload = {
         "messages": [
             {"role": "system", "content": "You are a helpful assistant that bases answers ONLY on the provided summary."},
             {"role": "user", "content": prompt}
         ],
-        "model": "deepseek-ai/DeepSeek-V3-0324",  # or another supported chat model
+        "model": "deepseek-ai/DeepSeek-V3-0324",
     }
 
-    response = requests.post(API_URL, headers=HEADERS, json=payload, timeout=30)
-    response.raise_for_status()
-    data = response.json()
+   try:
+        response = requests.post(API_URL, headers=HEADERS, json=payload, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+        return data["choices"][0]["message"]["content"]
+   except requests.exceptions.RequestException as e:
+        return f"Error: API request failed ({str(e)})"
+   except (KeyError, IndexError, TypeError):
+        return "Error: Failed to parse API response."
 
-    return data["choices"][0]["message"]["content"]
 
 # ------------------------ TRACK TIME SIM ------------------------
 def run_track_time_sim(drag_co, lift_co, mass, cross_section):
