@@ -213,7 +213,7 @@ Keep the answer conversational.
             {"role": "system", "content": "You are a helpful assistant that bases answers ONLY on the provided summary."},
             {"role": "user", "content": prompt}
         ],
-        "model": "google/gemini-2.5-pro-exp-03-25",
+        "model": "tiiuae/falcon-7b-instruct",
     }
 
    try:
