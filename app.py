@@ -395,6 +395,16 @@ def chatbot():
 
 @app.route("/sim", methods=["GET", "POST"])
 def sim():
+
+    time = None
+    img_base64 = None
+    drag = None
+    lift = None
+    frontal_area = None
+    message = None
+    cross_sections = None
+
+
     if request.method == "POST":
         form_id = request.form.get("form_id")
         if form_id == "track_time_calc":
@@ -414,7 +424,7 @@ def sim():
             buf.seek(0)
             plt.close()
             img_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
-            return render_template("sim.html", time=time, graph=img_base64)
+        
         
         else:
             action = request.form.get("action")
@@ -455,7 +465,9 @@ def sim():
                 return render_template("sim.html", drag=round(drag,3), lift=round(lift,3), frontal_area=round(frontal_area,3))
             else:
                 return render_template("sim.html", message="Unknown action")
-    return render_template("sim.html")
+            
+    return render_template("sim.html", time=time, graph=img_base64, drag=round(drag,3), lift=round(lift,3), frontal_area=round(frontal_area,3))
+    
 
 @app.route("/vr", methods=["GET", "POST"])
 def vr():
