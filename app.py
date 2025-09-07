@@ -14,6 +14,7 @@ import trimesh
 import psycopg2
 from psycopg2.extras import RealDictCursor, execute_values
 import requests
+from PDF_summary import Rules_and_Regs_sum
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -169,26 +170,31 @@ API_URL = "https://api-inference.huggingface.co/models/Ay8/google/flan-t5-large"
 HUGGINGFACE_API_TOKEN = os.getenv("HUGGINGFACE_API_TOKEN")
 HEADERS = {"Authorization": f"Bearer {HUGGINGFACE_API_TOKEN}"}
 
-my_summary = "This is the summary string your answers will be based on."
+summary = Rules_and_Regs_sum
 
-def ask_question_with_prompt(question):
-    prompt = f"""Summary:{my_summary} Question:{question} Answer concisely in bullet points: Use numbers and their explanations"""
-    payload = {"inputs": prompt}
-    
-    try:
-        response = requests.post(API_URL, headers=HEADERS, json=payload, timeout=60)
-        response.raise_for_status()
-        data = response.json()
-        if isinstance(data, list) and "generated_text" in data[0]:
-            return data[0]["generated_text"]
-        else:
-            return "Error: Unexpected response format from API."
-    except requests.exceptions.Timeout:
-        return "Error: API request timed out."
-    except requests.exceptions.RequestException as e:
-        return f"Error: API request failed ({str(e)})"
-    except (KeyError, IndexError, TypeError):
-        return "Error: Failed to parse API response."
+def ask_question_with_summary(question):
+    prompt = f"""Summary:
+{summary}
+
+Question:
+{question}
+
+Answer concisely in bullet points with numbers and explanations.
+"""
+
+    payload = {
+        "messages": [
+            {"role": "system", "content": "You are a helpful assistant that bases answers ONLY on the provided summary."},
+            {"role": "user", "content": prompt}
+        ],
+        "model": "deepseek-ai/DeepSeek-V3-0324",  # or another supported chat model
+    }
+
+    response = requests.post(API_URL, headers=HEADERS, json=payload, timeout=30)
+    response.raise_for_status()
+    data = response.json()
+
+    return data["choices"][0]["message"]["content"]
 
 # ------------------------ TRACK TIME SIM ------------------------
 def run_track_time_sim(drag_co, lift_co, mass, cross_section):
@@ -294,7 +300,10 @@ def login():
     if request.method == "POST":
         username = request.form.get("enter_username")
         password = request.form.get("enter_password")
-        if username in USERS and password == "Bolt@StemRacing0":
+        if username in USERS and password == "Bolt@StemRacing0" and not username == 'Ayaan':
+            session["username"] = username 
+            return redirect(f"/chat")
+        elif username == 'Ayaan' and password == "Bolt@StemRacing8":
             session["username"] = username 
             return redirect(f"/chat")
         else:
@@ -365,7 +374,7 @@ def chatbot():
     if request.method == "POST":
         query = request.form.get("chatbot_query")
         if query:
-            answer = ask_question_with_prompt(query)
+            answer = ask_question_with_summary(query)
             # Save Q&A to the database
             c.execute(
                 "INSERT INTO chatbot (query, answer) VALUES (%s, %s)",
@@ -379,6 +388,8 @@ def chatbot():
     conn.close()
 
     return render_template("chatbot.html", chatbot_convo=chatbot_convo)
+
+
 @app.route("/sim", methods=["GET", "POST"])
 def sim():
     if request.method == "POST":
@@ -401,6 +412,7 @@ def sim():
             plt.close()
             img_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
             return render_template("sim.html", time=time, graph=img_base64)
+        
         else:
             action = request.form.get("action")
             files = request.files.getlist("obj_files")

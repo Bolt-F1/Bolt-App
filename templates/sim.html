@@ -15,35 +15,38 @@
 
     <form class="track_time_calc_form">
       <input type="hidden" name="form_id" value="track_time_calc">
-      <input type="number" name="drag_co" placeholder="drag coefficent (e.g. 0.0007)">
-      <input type="number" name="lift_co" placeholder="lift coefficent (e.g. 0.0007)">
-      <input type="number" name="mass" placeholder="mass (kg) (e.g. 0.065)">
-      <input type="number" name="cross_section" placeholder="Frontal cross section (m) (e.g. 0.3)">
+      <input type="number" step="any" name="drag_co" placeholder="drag coefficent (e.g. 0.0007)">
+      <input type="number" step="any" name="lift_co" placeholder="lift coefficent (e.g. 0.0007)">
+      <input type="number" step="any" name="mass" placeholder="mass (kg) (e.g. 0.065)">
+      <input type="number" step="any" name="cross_section" placeholder="Frontal cross section (m) (e.g. 0.3)">
       <button type="submit">Submit</button>
     </form>
 
+
+    <div class="track_time_calc_results"> 
+        <h4>Results</h4>
+        <p>Final Time = {{ time }}</p>
+        <img src="data:image/png;base64,{{ img_base64 }}" alt="Simulation Graph">
+    </div>
+
     <div class="ml_sim">
-      <h1>Drag Prediction App</h1>
+      <h1>Drag Prediction </h1>
       <form method="POST" action="/sim" enctype="multipart/form-data">
         <input type="hidden" name="form_id" value="ml_sim">
-        <label>Upload OBJ file(s):</label><br>
-        <input type="file" name="obj_files" multiple><br><br>
+        <label>Upload OBJ file(s):</label>
+        <input type="file" name="obj_files" multiple><br>
 
-        <label>Drag Co-efficent values (comma-separated, only used for training):</label><br>
-        <input type="text" name="drag_values" placeholder="10.5, 12.3, 9.8"><br>
-        <label>Lift Co-efficent values (comma-separated, only used for training):</label><br>
-        <input type="text" name="lift_values" placeholder="10.5, 12.3, 9.8"><br><br>
+        <label>Drag Co-efficent values (comma-separated, only used for training):</label>
+        <input type="text" name="drag_values" placeholder="10.5, 12.3, 9.8">
+        <label>Lift Co-efficent values (comma-separated, only used for training):</label>
+        <input type="text" name="lift_values" placeholder="10.5, 12.3, 9.8"><br>
 
         <button type="submit" name="action" value="train">Train</button>
         <button type="submit" name="action" value="predict">Predict</button>
       </form>
     </div>
 
-    <div class="track_time_calc_results"> 
-      <h4>Results</h4>
-      <p>Final Time = {{ time }}</p>
-      <img src="data:image/png;base64,{{ img_base64 }}" alt="Simulation Graph">
-    </div>
+    
 
     <div class="ml_sim_results">
 

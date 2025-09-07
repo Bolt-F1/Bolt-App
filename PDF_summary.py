@@ -1,0 +1,549 @@
+Rules_and_Regs_sum = """- 65 – T3.5 Total height (8g Pack) Max: 65 -5 mm mm 
+                    - 65mm – D7.8.1: 65mm); this makes the job of the specification judge much easier in identifying the different features of your car.
+                    - 6mm – A monofilament tether line of diameter 0.6mm, fixed at the finish end, passes down the centre of each lane.
+                    - 6mm – Absolute Min: 3.5mm / Absolute Max: 6mm
+                    - 6mm – D9.2 Internal dimension Min: 3.5mm Max: 6mm -5 mm mm
+                    - 6mm – To accommodate the 'Halo' your car will require two 6mm holes to be cut 40mm apart (using the jig provided) using the manufacturing instructions in appendix iv.
+                    - 6mm – To accommodate the 'Halo' your car will require two 6mm holes to be drilled 40mm apart (using the jig provided) using the manufacturing instructions in appendix iv.
+                    - 6mm – Using a 6mm drill in a pillar drill; securely fasten the block and jig.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 3D Modelling Basic application.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Application of Computer Aided Analysis Limited CFD/FEA analysis shown Appropriate analysis shown.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Budget and Risk Management Limited evidence of strategies to manage budget and/or risk Some evidence of budgeting.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Collaboration Little collaboration discussed Links with industry or higher education described Collaborations justified with links to learning and project outcomes
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Communication, Monitoring & Controlling Limited or isolated evaluation of project status Ongoing evaluation of project status.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Composition Total /40 Subject Innovation Little project innovation presented Project innovations described and justified Originality.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Corporate Identity Total /40 Pit Display Total + Corporate Identity Total = Brand Identity Total = /100 Notes:
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Design & Engineering Portfolio Only Assessment Total = /180 Notes: STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2025 - STEM Racing Ltd Page 35 of 55
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Design Process Evaluation Limited design process evaluation Ideas or process evaluations at different stages Excellent ongoing idea evaluations linked to improvement actions
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Digital Media Limited or low level of documented planning, understanding and execution Some evidence of strategic planning and execution in line with documented strategy, consideration for audience and platforms Clear, structured, well-communicated digital strategy with execution in line with documented plans, proactive use of platforms, creativity and audience engagement
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Document Presentation Difficult to follow with basic presentation Document clearly structured and well organised Document has high impact and professional throughout.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Energy / Engagement Artificial and/or low energy, with minimal engagement Speakers generally enthusiastic with lively delivery.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Other Manufacturing & Assembly Limited manufacturing presented.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Pit Display Content Limited detail, with some basic items of relevance Clear and effective use of relevant items to engage visitors.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Pit Display Total /60 Corporate Identity Graphic Identity Inconsistent, limited or obscure graphic identity Effective brand identity consistent through various project elements e.g.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Project Management Total /80 Sponsorship & Marketing Marketing Limited evidence of marketing activities Some evidence of marketing strategy, delivery and marketing materials Clear, well planned marketing activities and delivery of an effective marketing strategy, including development of suitable marketing materials
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Quality of Finish and Assembly Reasonable finish with some inconsistencies Good overall finish quality and assembly with attention to details Excellent finish quality on all components.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Rendering Basic use of colour and 3D to show finished car Well-proportioned full colour 3D renders showing more than 1 view.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Research & Development Limited evidence of R&D Some scientific & mathematical theories and principles considered.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Roles and Responsibilities Limited evidence of clear roles and responsibilities within team Team roles and responsibilities identified, with some evidence of task and/or activity breakdown Team members identified and a highly structured team created with clearly defined job functions and appropriate responsibilities.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 STEM Racing Learning Experiences No real reflections discussed Good explanation of some learning outcomes with reference to career aims Compelling accounts of how the competition has impacted on life skills and career aspirations for a range of team members
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Scrutineering Total = /60 Notes:
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Sponsorship & Marketing Total /80 Project Management Total + Sponsorship & Marketing Total = Enterprise Total = /160 Notes: STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2024 - STEM Racing Ltd.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Sponsorship Limited evidence of strategy to achieve sponsorship Sponsor/partner hierarchy and benefits identified.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Subject Total /60 Technique Total + Composition Total + Subject Total = Verbal Presentation Total = /160 Notes: STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2025 - STEM Racing Ltd Page 39 of 55
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Team Contribution Minimal team participation Good contributions from most team members Excellent teamwork with all members participating effectively
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Team Identity Limited consideration given to establishing a team identity Some consideration given to choosing an appropriate team name, motto and organisational style Excellent and highly effective team name, trademark and operating style, in line with the team’s graphic identity.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Technique Total /60 Composition Concept Clarification Several concepts lacked clarification Clear and appropriate concept explanations Everything presented was understood through excellent explanations
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Testing Limited evidence of testing Limited testing.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Time / Presentation Too fast or ran out of time.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Use of CAM/CNC Limited evidence of CAM/CNC understanding Effective use and understanding of CAM/CNC processes used Evidence of excellent understanding of CAM/CNC technologies.
+                    - 7 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Visual appearance Limited, relevant graphics or advertising methods employed Attractive display, including relevant graphic elements and implementation of some advertising methods Professional looking display, incorporating highly effective graphics, use of ambient advertising and use of lighting to enhance display
+                    - 7 – 10 9 8 7 6 5 4 3 2 1 STEM Racing™ - Development Class Technical Regulations 2025-2026
+                    - 7 – 14 D2.7 MEASUREMENTS .......................................................................................................................................................
+                    - 7 – 17 C1.7 REACTION TIME VALUE ..............................................................................................................................
+                    - 7 – 18 C2.7 DESIGN IDEAS AND REGULATION COMPLIANCE QUERIES ...................................................................................
+                    - 7 – 19 D3.7 STATUS DURING RACING – [GENERAL | PENALTY – 5PTS] ..................................................................................
+                    - 7 – 21 Article 7: Wings
+                    - 7 – 29 ARTICLE D7 – FRONT WING ............................................................................................
+                    - 7 – 3 June 2025 ARTICLE C7 – VERBAL PRESENTATION JUDGING (160 points) C7.1 What will be judged?
+                    - 7 – 31 D7.1 DESCRIPTION AND PLACEMENT – [PERFORMANCE | PENALTY – 25PTS] ........................................................
+                    - 7 – 31 D7.2 WING IDENTIFICATION – [GENERAL | PENALTY – 5PTS] ......................................................................................
+                    - 7 – 31 D7.3 CONSTRUCTION AND RIGIDITY – [SAFETY | PENALTY – 5PTS] .............................................................................
+                    - 7 – 31 D7.4 FRONT WING LOCATION – [PERFORMANCE | PENALTY – 10PTS] ....................................................................
+                    - 7 – 31 D7.5 VISIBILITY OF FRONT WING – [PERFORMANCE | PENALTY – 15PTS] ...............................................................
+                    - 7 – 31 D7.6 FRONT WING DIMENSIONS – [GENERAL] ..............................................................................................................
+                    - 7 – 35 ARTICLE C7 – VERBAL PRESENTATION JUDGING (160 POINTS) ............................
+                    - 7 – 37 C7.1 WHAT WILL BE JUDGED?
+                    - 7 – 37 C7.2 TEAM PREPARATION .................................................................................................................................
+                    - 7 – 37 C7.3 WHO NEEDS TO ATTEND?
+                    - 7 – 37 C7.4 JUDGING PROCESS / PROCEDURE .................................................................................................................
+                    - 7 – 37 C7.5 VERBAL PRESENTATION JUDGING PROVISIONS ................................................................................................
+                    - 7 – 37 C7.6 VERBAL PRESENTATION VIDEO RECORDINGS ...................................................................................................
+                    - 7 – 43 C9.7 DNF (DID NOT FINISH) RACE RESULTS ..........................................................................................................
+                    - 7 – 7.
+                    - 7 – 9 D1.7 POWER UNIT CARTRIDGE CHAMBER ..........................................................................................................................
+                    - 7 – ARTICLE 7:
+                    - 7 – ARTICLE D7 – FRONT WING D7.1 Description and placement – [PERFORMANCE | Penalty – 25pts] The design of the car should resemble an actual F1 car through the inclusion of a wing on the nose of the car and a wing at the rear of the car.
+                    - 7 – ARTICLE T7 – WHEELS AND WHEEL SUPPORT STRUCTURES
+                    - 7 – Absolute Min: 60.0g D3.7 Status during racing – [GENERAL | Penalty – 5pts] The car assembly must be designed so that no items other than those listed in D1.1, or Power Unit cartridges are removed, replaced or added to the assembly during scheduled race events.
+                    - 7 – Applies to BOTH classes STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2025 - STEM Racing Ltd Page 7 of 55
+                    - 7 – Behind front wheels Min: 15mm -5 mm mm In front of rear wheels Min: 5mm -5 mm mm Behind rear wheels Min: 5mm -2.5 mm mm T7.10 Visibility in side views Side views -10
+                    - 7 – C1.7 Reaction time value
+                    - 7 – C2.7 Design ideas and regulation compliance queries Teams are not permitted to seek a ruling from STEM Racing, any competition official or judge before the event as to whether a design idea complies with the regulations.
+                    - 7 – C7.3 Who needs to attend?
+                    - 7 – C7.4 Judging process / procedure Verbal Presentation judging is scheduled for the same duration of other judging sessions, usually 15 minutes.
+                    - 7 – C7.5 Verbal presentation judging provisions STEM Racing will provide a dedicated private space, such as a small meeting room, where each team will deliver their presentation to the judges.
+                    - 7 – C7.6 Verbal presentation video recordings The Verbal Presentations of all teams may be video recorded by STEM Racing for the purpose of judging review and/or post event publicity and promotional purposes by STEM Racing™.
+                    - 7 – Create your two Portfolios •You must create one Design and Engineering Portfolio and one Enterprise Portfolio. •See the Judging: Criteria and the Scorecards section for guidance. 7.
+                    - 7 – D1.7 Power unit cartridge chamber In simple terms: The hole for the power unit gas cartridge In technical terms: The power unit cartridge chamber is a cylindrical clear space bounded around its inner circumference and one end by car body only.
+                    - 7 – D2.7 Measurements D2.7.1 All dimensions and weights are presented as absolute minimum or maximum, unless stated otherwise.
+                    - 7 – D2.7.2 Dimensional measures - all car component dimensions are inclusive of any applied paint finish or decal.
+                    - 7 – D2.7.3 Weight measures – all weight measurements will be made using the STEM Racing Ltd.
+                    - 7 – D3.7 Status during racing Nothing removed -5
+                    - 7 – D7.2 Wing identification Check Eng Drawing -5
+                    - 7 – D7.2 Wing identification – [GENERAL | Penalty – 5pts] The span, chord and thicknesses of both the front and rear wings MUST be identified clearly within the engineering drawings submitted for scrutineering judging.
+                    - 7 – D7.3 Construction and Rigidity Span constant during racing + rigid -5
+                    - 7 – D7.3 Construction and rigidity – [SAFETY | Penalty – 5pts] The front wing, rear wing and any support structures may be manufactured directly from the model block, or from any separate materials, including laser cut and 3D printed materials.
+                    - 7 – D7.4 Front wing location In Front of FW CL -10
+                    - 7 – D7.4 Front wing location – [PERFORMANCE | Penalty – 10pts] The whole of the front wing and any support structure must be in front of the centre line of the front wheel when viewed in the side elevation.
+                    - 7 – D7.5 Visibility of front wing Visible from Front -15
+                    - 7 – D7.5 Visibility of front wing – [PERFORMANCE | Penalty – 15pts] Visibility of the front wing must not be obstructed by any other component when viewed in the front elevation.
+                    - 7 – D7.6 Front wing dimensions – [GENERAL] D7.6.1 Front wing dimensions – [GENERAL | Penalty – 5pts each per millimetre] The wing span is measured on the top or bottom surface of the wing, whichever is shortest, parallel to the track surface and normal to the vertical reference plane.
+                    - 7 – D7.6.1 Front wing span Min: 60mm -5 mm mm
+                    - 7 – D7.6.2 Front wing chord Min: 15mm Max: 30mm -5 mm mm
+                    - 7 – D7.6.2 Front wing chord – [GENERAL | Penalty – 5pts each] The wing chord minimum and maximum dimensions must exist throughout the wing span.
+                    - 7 – D7.6.3 Front wing thickness Min: 5mm Max: 15mm -5 mm mm
+                    - 7 – D7.6.3 Front wing thickness – [GENERAL | Penalty – 5pts each] The wing thickness minimum dimension must exist throughout the wing’s minimum span, measured perpendicular (at 90º to) to the chord line.
+                    - 7 – D7.6: Wing / support structure in front of centre line of front wheel Centre line of front wheel D7.7: Visibility of front wing not obstructed in this view STEM Racing™ - Development Class Technical Regulations 2025-2026
+                    - 7 – D7.8.1: 65mm); this makes the job of the specification judge much easier in identifying the different features of your car.
+                    - 7 – Driver and team stand trackside with corresponding lane start trigger 7.
+                    - 7 – FR: FR: RL: RL: RR: RR: T7.7 Rolling surface Consistent, no tread -2.5 per wheel FL: FL:
+                    - 7 – FR: FR: RL: RL: RR: RR: T7.8 Rotation Abs.
+                    - 7 – FR: FR: RL: RL: RR: RR: T7.9 Visibility in top and bottom views In front of front wheels Min: 5mm -2.5 mm mm
+                    - 7 – FR: mm FR: mm RL: mm RL: mm RR: mm RR: mm T7.5 Diameter
+                    - 7 – FR: mm FR: mm RL: mm RL: mm RR: mm RR: mm T7.6 Racetrack contact (8g Pack) All 4 in contact -2.5 per wheel FL: FL:
+                    - 7 – Judges will not be able to assist teams with any additional resource requirements • C10.1.7 If the Judges rule that damaged sustained was not due to engineering deficiencies, immediate repairs will be permitted without penalty.
+                    - 7 – R: mm R: mm T7.3 Wheelbase
+                    - 7 – Rear wing assembly 7.
+                    - 7 – Reg Regulation Overview Min/Max Quick Guide Penalty per car Car A Car B Notes ARTICLE D7 – FRONT WING D7.1 Description and placement Refer D1.10 -25
+                    - 7 – STEM Racing engineering drawings must include detail to specifically identify and prove compliance for wing surfaces (refer to D7.2).
+                    - 7 – T3.7 Track clearance (8g Pack) Min: 1.5 -10 mm mm
+                    - 7 – T4.7 Team Number Min: 4.0 -2 mm mm
+                    - 7 – T7.1 Number and location 4, 2 x 2 -25
+                    - 7 – T7.11 Visibility in front view (8g Pack)
+                    - 7 – T7.12.1 Wheel support systems Cylindrical volume -5
+                    - 7 – T7.12.2 Wheel support systems identification Check Eng.
+                    - 7 – T7.13 Wheel Safety Test 100g test per wheel -2.5
+                    - 7 – T7.2 Distance between opposing wheels
+                    - 7 – T7.4 Track contact width
+                    - 7 – T8.7 Front wing clear airflow 5mm clear ‘air’ space -5 mm mm
+                    - 7 – T9.7 Rear wing visibility Visible and not obstructed in front view -10
+                    - 7 – To further discriminate between these teams, a deduction will be made of 5 points for any did not finish (DNF) time trial result • If after discarding a team’s fastest time there remains less than two (2) times from races finished, due to DNF’s, the slowest time recorded is again input to the average equation until there are a total of four (4) times to average C9.7 DNF (Did not Finish) race results Damage or part separation occurring during a race, before the car crosses the finish line, (e.g.
+                    - 7 – ©2025 – STEM Racing™ Page 7 of 47
+                    - 7 – • C12.3.7 Marketing Judges (UK National Finals only) – will assess each team’s use of marketing and social media.
+                    - 7 – • Presentation technique (how your team comes across during the presentation) • Presentation composition (how well you structure your presentation) • Subject Matter (the topics which need to be talked about) C7.2 Team preparation Each team is required to prepare a 5-minute (Regional) and 10-minute (UK National Finals) Verbal Presentation as per the requirements at ARTICLE C2.9.4.
+                    - 728 – 01484 728 000 contactus@f1inschools.co.uk www.f1inschools.co.uk
+                    - 728 – If you need any help at all, just get in touch with us: STEM Racing™ Engineering in Motion T: 01484 728 100 E: contactus@stemracing.co.uk W: www.stemracing.co.uk
+                    - 728000 – Denford Limited F1 Sales Armytage Road Brighouse West Yorkshire United Kingdom T: 01484 728000 E: sales@denford.co.uk W: www.denford.co.uk / denfordwebshop.com
+                    - 75 – There may be a small cost to cover the materials, costs and time required, but these are capped at no more than £75 per car and are often much less.
+                    - 7mm – Start Box and Finish Line The Start Boxes are designed to sit centrally within each lane of the track The distance from the emitter centre line to the race track surface on both lanes is ~7mm
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 3D Modelling Basic application.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Application of Computer Aided Analysis Limited CFD/FEA analysis shown Appropriate analysis shown.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Budget and Risk Management Limited evidence of strategies to manage budget and/or risk Some evidence of budgeting.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Collaboration Little collaboration discussed Links with industry or higher education described Collaborations justified with links to learning and project outcomes
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Communication, Monitoring & Controlling Limited or isolated evaluation of project status Ongoing evaluation of project status.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Composition Total /40 Subject Innovation Little project innovation presented Project innovations described and justified Originality.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Corporate Identity Total /40 Pit Display Total + Corporate Identity Total = Brand Identity Total = /100 Notes:
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Design & Engineering Portfolio Only Assessment Total = /180 Notes: STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2025 - STEM Racing Ltd Page 35 of 55
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Design Process Evaluation Limited design process evaluation Ideas or process evaluations at different stages Excellent ongoing idea evaluations linked to improvement actions
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Digital Media Limited or low level of documented planning, understanding and execution Some evidence of strategic planning and execution in line with documented strategy, consideration for audience and platforms Clear, structured, well-communicated digital strategy with execution in line with documented plans, proactive use of platforms, creativity and audience engagement
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Document Presentation Difficult to follow with basic presentation Document clearly structured and well organised Document has high impact and professional throughout.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Energy / Engagement Artificial and/or low energy, with minimal engagement Speakers generally enthusiastic with lively delivery.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Other Manufacturing & Assembly Limited manufacturing presented.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Pit Display Content Limited detail, with some basic items of relevance Clear and effective use of relevant items to engage visitors.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Pit Display Total /60 Corporate Identity Graphic Identity Inconsistent, limited or obscure graphic identity Effective brand identity consistent through various project elements e.g.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Project Management Total /80 Sponsorship & Marketing Marketing Limited evidence of marketing activities Some evidence of marketing strategy, delivery and marketing materials Clear, well planned marketing activities and delivery of an effective marketing strategy, including development of suitable marketing materials
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Quality of Finish and Assembly Reasonable finish with some inconsistencies Good overall finish quality and assembly with attention to details Excellent finish quality on all components.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Rendering Basic use of colour and 3D to show finished car Well-proportioned full colour 3D renders showing more than 1 view.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Research & Development Limited evidence of R&D Some scientific & mathematical theories and principles considered.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Roles and Responsibilities Limited evidence of clear roles and responsibilities within team Team roles and responsibilities identified, with some evidence of task and/or activity breakdown Team members identified and a highly structured team created with clearly defined job functions and appropriate responsibilities.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 STEM Racing Learning Experiences No real reflections discussed Good explanation of some learning outcomes with reference to career aims Compelling accounts of how the competition has impacted on life skills and career aspirations for a range of team members
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Scrutineering Total = /60 Notes:
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Sponsorship & Marketing Total /80 Project Management Total + Sponsorship & Marketing Total = Enterprise Total = /160 Notes: STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2024 - STEM Racing Ltd.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Sponsorship Limited evidence of strategy to achieve sponsorship Sponsor/partner hierarchy and benefits identified.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Subject Total /60 Technique Total + Composition Total + Subject Total = Verbal Presentation Total = /160 Notes: STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2025 - STEM Racing Ltd Page 39 of 55
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Team Contribution Minimal team participation Good contributions from most team members Excellent teamwork with all members participating effectively
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Team Identity Limited consideration given to establishing a team identity Some consideration given to choosing an appropriate team name, motto and organisational style Excellent and highly effective team name, trademark and operating style, in line with the team’s graphic identity.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Technique Total /60 Composition Concept Clarification Several concepts lacked clarification Clear and appropriate concept explanations Everything presented was understood through excellent explanations
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Testing Limited evidence of testing Limited testing.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Time / Presentation Too fast or ran out of time.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Use of CAM/CNC Limited evidence of CAM/CNC understanding Effective use and understanding of CAM/CNC processes used Evidence of excellent understanding of CAM/CNC technologies.
+                    - 8 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Visual appearance Limited, relevant graphics or advertising methods employed Attractive display, including relevant graphic elements and implementation of some advertising methods Professional looking display, incorporating highly effective graphics, use of ambient advertising and use of lighting to enhance display
+                    - 8 – 10 9 8 7 6 5 4 3 2 1 STEM Racing™ - Development Class Technical Regulations 2025-2026
+                    - 8 – 10 D1.8 WHEELS .....................................................................................................................................................................
+                    - 8 – 12 D1.20 FULL 8 GRAM POWER UNIT CARTRIDGE ....................................................................................................................
+                    - 8 – 14 D2.8 BENEFIT OF DOUBT ....................................................................................................................................................
+                    - 8 – 17 C1.8 PROJECT ELEMENTS ..................................................................................................................................
+                    - 8 – 18 C2.8 TEAM PARTNERSHIPS ................................................................................................................................
+                    - 8 – 19 D3.8 REPLACEMENT COMPONENTS [GENERAL] ...........................................................................................................
+                    - 8 – 23 Article 8: Tether Line Guides
+                    - 8 – 3 June 2025 ARTICLE C8 – BRAND IDENTITY JUDGING (100 points) C8.1 What will be judged?
+                    - 8 – 3 June 2025 C2.8 Team partnerships • C2.8.1 STEM Racing teams are encouraged to develop mentoring partnerships with businesses, industry or higher education organisations throughout their project.
+                    - 8 – 3 June 2025 • C9.8.4 During any manual / driver starts, if a driver false starts and distracts the other driver the race will be re-run and the driver who caused the distraction will forfeit their race.
+                    - 8 – 32 ARTICLE D8 – REAR WING ................................................................................................
+                    - 8 – 33 D8.1 DESCRIPTION AND PLACEMENT – [PERFORMANCE | PENALTY – 25PTS] ........................................................
+                    - 8 – 34 D8.2 WING IDENTIFICATION – [GENERAL | PENALTY – 5PTS] ......................................................................................
+                    - 8 – 34 D8.3 CONSTRUCTION AND RIGIDITY – [SAFETY | PENALTY – 5PTS] .............................................................................
+                    - 8 – 34 D8.4 REAR WING LOCATION – [PERFORMANCE | PENALTY – 10PTS].......................................................................
+                    - 8 – 34 D8.5 REAR WING HEIGHT – [PERFORMANCE | PENALTY – 10PTS] ...........................................................................
+                    - 8 – 34 D8.6 REAR WING DIMENSIONS ...........................................................................................................................................
+                    - 8 – 37 ARTICLE C8 – BRAND IDENTITY JUDGING (100 POINTS) .........................................
+                    - 8 – 39 C8.1 WHAT WILL BE JUDGED?
+                    - 8 – 39 C8.2 TEAM PREPARATION .................................................................................................................................
+                    - 8 – 39 C8.3 WHO NEEDS TO ATTEND?
+                    - 8 – 39 C8.4 JUDGING PROCESS / PROCEDURE .................................................................................................................
+                    - 8 – 39 C8.5 PIT DISPLAY SETUP AND PARAMETERS ..........................................................................................................
+                    - 8 – 43 C9.8 FALSE STARTS ..........................................................................................................................................
+                    - 8 – 8 ARTICLE C1 – DEFINITIONS ..............................................................................................
+                    - 8 – 8 D1.1 STEM RACING CAR ......................................................................................................................................................
+                    - 8 – 8 D1.2 FULLY ASSEMBLED CAR ................................................................................................................................................
+                    - 8 – 8.
+                    - 8 – ARTICLE 8:
+                    - 8 – ARTICLE D8 – REAR WING D8.1 Description and placement F & R & Height (D1.10) -25
+                    - 8 – ARTICLE D8 – REAR WING D8.1 Description and placement – [PERFORMANCE | Penalty – 25pts] The design of the car should resemble an actual F1 car through the inclusion of a wing on the nose of the car and a wing at the rear of the car.
+                    - 8 – ARTICLE T8 – NOSE, FRONT WING AND WING SUPPORT STRUCTURES
+                    - 8 – C1.8 Project elements
+                    - 8 – C8.2 Team Preparation Each team must prepare a Pit Display as per ARTICLE C2.9.
+                    - 8 – C8.3 Who needs to attend?
+                    - 8 – C8.4 Judging process / procedure The Brand Identity judging will take place at each teams Pit Display.
+                    - 8 – C8.5 Pit Display setup and parameters • C8.5.1 At Regional Finals, teams will be given a classroom style table (no bigger than 2m x 1m) to present their pit display.
+                    - 8 – C9.8 False starts • C9.8.1 A false start (jump start) occurs when the driver presses the trigger button before the five (5) start gate lights have extinguished.
+                    - 8 – D1.20 Full 8 gram Power unit cartridge A metallic cartridge which contains a compressed 8 gram charge of CO2.
+                    - 8 – D1.8 Wheels
+                    - 8 – D2.8 Benefit of doubt The chair of judges will, where appropriate, seek to use ‘benefit of doubt’ when the assessment of compliance is marginal or unclear.
+                    - 8 – D3.8 Replacement Components [GENERAL] Any spare / replacement components should be identical in design and geometry to those fitted to the car and must be submitted with the cars at registration.
+                    - 8 – D3.8 Replacement components Check list -5
+                    - 8 – D7.8.1: 65mm); this makes the job of the specification judge much easier in identifying the different features of your car.
+                    - 8 – D8.2 Wing identification Check Eng Drawing -5
+                    - 8 – D8.2 Wing identification – [GENERAL | Penalty – 5pts] The span, chord and thicknesses of both the front and rear wings MUST be identified clearly within the engineering drawings submitted for scrutineering judging.
+                    - 8 – D8.3 Construction and Rigidity Span constant during racing + rigid -5
+                    - 8 – D8.3 Construction and rigidity – [SAFETY | Penalty – 5pts] The front wing, rear wing and any support structures may be manufactured directly from the model block, or from any separate materials, including laser cut and 3D printed materials.
+                    - 8 – D8.4 Rear wing location In Front of FW CL -10
+                    - 8 – D8.4 Rear wing location – [PERFORMANCE | Penalty – 10pts] The whole of the rear wing and any support structure must be behind the centre line of the rear wheel when viewed in the side elevation.
+                    - 8 – D8.5 Rear wing height Min: 35mm -10
+                    - 8 – D8.5 Rear wing height – [PERFORMANCE | Penalty – 10pts] The bottom surface of the rear wing must be higher than 35mm when measured from and normal to the track surface.
+                    - 8 – D8.6 Rear wing dimensions D8.6.1 Rear wing span – [GENERAL | Penalty – 5pts each per millimetre] The wing span is measured on the top or bottom surface of the wing, whichever is shortest, parallel to the track surface and normal to the vertical reference plane.
+                    - 8 – D8.6.1 Rear wing span
+                    - 8 – D8.6.2 Rear wing chord Min: 15mm Max: 30mm -5 mm mm
+                    - 8 – D8.6.2 Rear wing chord – [GENERAL | Penalty – 5pts each] The wing chord minimum and maximum dimensions must exist throughout the wing span.
+                    - 8 – D8.6.3 Rear wing thickness Min: 5mm Max: 15mm -5 mm mm
+                    - 8 – D8.6.3 Rear wing thickness – [GENERAL | Penalty – 5pts each] The wing thickness minimum dimension must exist throughout the wing’s minimum span, measured perpendicular (at 90º to) to the chord line.
+                    - 8 – Designed and manufactured according to these regulations for the purpose of participating in races on the STEM Racing track at the UK Regional and National Finals events, powered only by a single compressed air cartridge containing 8 grams of pressurised CO2.
+                    - 8 – FR: FR: RL: RL: RR: RR: T7.8 Rotation Abs.
+                    - 8 – IMPORTANT: Some regulations are assessed with a full 8.0g race cartridge fully inserted into the cartridge chamber.
+                    - 8 – Judge checks deceleration system is ready, track is clear for racing, switches launch pod - SAFETY OFF 8.
+                    - 8 – Please refer to D3.8 and also the corresponding UK Competition Regulations.
+                    - 8 – Prepare your Verbal Presentation •You must prepare a 5 minute (Regional Final) or 10 minute (National Final) Verbal Presentation. •See the Judging: Criteria and the Scorecards section for guidance. 8.
+                    - 8 – Rear wing examples Both examples are compliant with D8.6.1 Rear wing span *Please not these are for illustration purposes only, full compliance against all regulations during specification judging will apply.
+                    - 8 – Refer to ARTICLE C8 for further pit display specifications and content requirements.
+                    - 8 – Surface finishing 8.
+                    - 8 – T3.8 Status during racing Nothing removed -5
+                    - 8 – T4.8 Decal Thickness Max: 0.5 -5
+                    - 8 – T8.1 Nose, front wing & wing support structure identification Check Eng.
+                    - 8 – T8.2 Nose cone assembly dimension Min: 30 Max: 40 -5 mm mm
+                    - 8 – T8.3 Front wing(s) description and placement F & R & height -5
+                    - 8 – T8.4 Front wing(s) construction and rigidity Span constant during racing + rigid -5
+                    - 8 – T8.5 Front wing and wing support structure location In front of Reference Plane A & below 25mm -10
+                    - 8 – T8.6.1 Front wing span Min: 50 -2 mm mm
+                    - 8 – T8.6.2 Front wing chord Min: 15 Max: 25 -1 mm mm
+                    - 8 – T8.6.3 Front wing thickness Min: 2 Max: 6 -1 mm mm
+                    - 8 – T8.7 Front wing clear airflow 5mm clear ‘air’ space -5 mm mm
+                    - 8 – T8.8 Front wing visibility Visible and not obstructed in front view -10
+                    - 8 – WHEN - This optional challenge will be available during your registration slot on the 8th of September before element submission.
+                    - 8 – What to do Your first steps STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2025 - STEM Racing Ltd Page 8 of 55
+                    - 8 – ©2025 – STEM Racing™ Page 8 of 47
+                    - 8 – • C10.1.8 No penalty is applied for damage incurred during knock-out racing or a car’s final race of any race event.
+                    - 8 – • C2.8.2 All design work, text and scripting for all project elements presented for assessment must be wholly undertaken and created by the team.
+                    - 8 – • C2.8.3 All aspects of any partnerships should also be represented in the team’s portfolio.
+                    - 8 – • C2.8.4 ‘Common sense’ will prevail for project elements or components that a team has purchased from a supplier.
+                    - 8 – • C8.5.2 At UK National Finals, no part of the teams completed Pit Display is allowed to protrude beyond the physical dimensions of their allocated pit space.
+                    - 8 – • C8.5.3 ONLY student team members are permitted to set-up their pit displays.
+                    - 8 – • C8.5.5 STEM Racing and / or the Chair of Judges may instruct a team to take action to reduce noise or remove display inclusions deemed to be inappropriate.
+                    - 8 – • C8.5.6 Any electrical appliance connected to the power supply must be PAT tested and approved.
+                    - 8 – • C9.8.2 All reaction false starts will incur a 2.5-point penalty and by default, forfeit that race.
+                    - 8 – • C9.8.3 During knock-out racing – if one team false starts (jump starts), the other team should continue to race as normal.
+                    - 8 – • C9.8.5 Distractions outside of the race start area will be assessed by the lead track judge and track officials to determine if the race should be re-run.
+                    - 80 points – Specification and Scrutineering Judging (170 points) Specifications 110 points Engineering Drawings 20 points Renderings 20 points Quality of Finish and Assembly 20 points Design and Engineering Judging (180 points) Design & Engineering Portfolio 180 points Enterprise Judging (160 points) Project Management 80 points Sponsorship & Marketing 80 points Brand Identity Judging (100 points) Corporate Identity 40 points Pit Display 60 points Verbal Presentation Judging (160 points) Technique 60 points Composition 40 points Subject Matter 60 points Racing (220 points) Time Trials 110 points Reaction Racing 110 points TOTAL 990 points STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2025 - STEM Racing Ltd Page 23 of 55
+                    - 80 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Project Management Total /80 Sponsorship & Marketing Marketing Limited evidence of marketing activities Some evidence of marketing strategy, delivery and marketing materials Clear, well planned marketing activities and delivery of an effective marketing strategy, including development of suitable marketing materials
+                    - 80 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Sponsorship & Marketing Total /80 Project Management Total + Sponsorship & Marketing Total = Enterprise Total = /160 Notes: STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2024 - STEM Racing Ltd.
+                    - 80 – Specification and Scrutineering Judging (170 points) Specifications 110 points Engineering Drawings 20 points Renderings 20 points Quality of Finish and Assembly 20 points Design and Engineering Judging (180 points) Design & Engineering Portfolio 180 points Enterprise Judging (160 points) Project Management 80 points Sponsorship & Marketing 80 points Brand Identity Judging (100 points) Corporate Identity 40 points Pit Display 60 points Verbal Presentation Judging (160 points) Technique 60 points Composition 40 points Subject Matter 60 points Racing (220 points) Time Trials 110 points Reaction Racing 110 points TOTAL 990 points STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2025 - STEM Racing Ltd Page 23 of 55
+                    - 80 – time score points using the following formula: Team Points = 20 + (80/(Base Time – 3rd fastest avg.)) x (Base Time – teams avg.) • Any team that has an average slower than the base time will score 20 points.
+                    - 85 – T3.4 Total width Min: 65 Max: 85 -5 mm mm
+                    - 8g – ARTICLE D5 - POWER UNIT CARTRIDGE CHAMBER D5.1 Distance from track surface – [GENERAL | Penalty – 5pts per millimetre] This is measured with a full 8g power unit cartridge inserted into the cartridge chamber, from the rear centre of the power unit cartridge to the track surface, measured normal to the track surface with the car sitting on all four (4) wheels with no outside assistance.
+                    - 8g – D5.2 Power unit cartridge visibility (8g)
+                    - 8g – FR: mm FR: mm RL: mm RL: mm RR: mm RR: mm T7.6 Racetrack contact (8g Pack) All 4 in contact -2.5 per wheel FL: FL:
+                    - 8g – Individual wheel weight: 3.5-3.8g
+                    - 8g – Please enter for a pass and F for a fail (8g Pack) – measured with full 8g race power pack cartridges Team Number: Sample Team Name: Sample Country: Sample Initial Scrutineering Post Safety Fix Post Review Interview Remarks Reg Regulation Overview Min/Max Quick Guide Penalty Per Car Car A Car B CoJ CS Car A Car B CoJ CS Car A Car B CoJ CS
+                    - 8g – Specifications Score Card Please enter ✓ for a pass and F for a fail (8g Pack) – measured with full 8g race power pack cartridges Team Number: Team Name: School: SAMPLE Sample Sample
+                    - 8g – T3.5 Total height (8g Pack) Max: 65 -5 mm mm
+                    - 8g – T3.7 Track clearance (8g Pack) Min: 1.5 -10 mm mm
+                    - 8g – T5.2 Distance from track surface (8g Pack) Min: 30 Max: 40 -5 mm mm
+                    - 8g – T5.4 Max angle of chamber (8g Pack) Min: -3° Max: 3° -5 ° °
+                    - 8g – T5.5 Chamber safety zone (8g Pack) Min: 3 -10
+                    - 8g – T5.6 Power unit cartridge visibility (8g Pack)
+                    - 8g – T7.11 Visibility in front view (8g Pack)
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 3D Modelling Basic application.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Application of Computer Aided Analysis Limited CFD/FEA analysis shown Appropriate analysis shown.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Budget and Risk Management Limited evidence of strategies to manage budget and/or risk Some evidence of budgeting.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Collaboration Little collaboration discussed Links with industry or higher education described Collaborations justified with links to learning and project outcomes
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Communication, Monitoring & Controlling Limited or isolated evaluation of project status Ongoing evaluation of project status.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Composition Total /40 Subject Innovation Little project innovation presented Project innovations described and justified Originality.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Corporate Identity Total /40 Pit Display Total + Corporate Identity Total = Brand Identity Total = /100 Notes:
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Design & Engineering Portfolio Only Assessment Total = /180 Notes: STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2025 - STEM Racing Ltd Page 35 of 55
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Design Process Evaluation Limited design process evaluation Ideas or process evaluations at different stages Excellent ongoing idea evaluations linked to improvement actions
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Digital Media Limited or low level of documented planning, understanding and execution Some evidence of strategic planning and execution in line with documented strategy, consideration for audience and platforms Clear, structured, well-communicated digital strategy with execution in line with documented plans, proactive use of platforms, creativity and audience engagement
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Document Presentation Difficult to follow with basic presentation Document clearly structured and well organised Document has high impact and professional throughout.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Energy / Engagement Artificial and/or low energy, with minimal engagement Speakers generally enthusiastic with lively delivery.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Other Manufacturing & Assembly Limited manufacturing presented.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Pit Display Content Limited detail, with some basic items of relevance Clear and effective use of relevant items to engage visitors.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Pit Display Total /60 Corporate Identity Graphic Identity Inconsistent, limited or obscure graphic identity Effective brand identity consistent through various project elements e.g.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Project Management Total /80 Sponsorship & Marketing Marketing Limited evidence of marketing activities Some evidence of marketing strategy, delivery and marketing materials Clear, well planned marketing activities and delivery of an effective marketing strategy, including development of suitable marketing materials
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Quality of Finish and Assembly Reasonable finish with some inconsistencies Good overall finish quality and assembly with attention to details Excellent finish quality on all components.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Rendering Basic use of colour and 3D to show finished car Well-proportioned full colour 3D renders showing more than 1 view.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Research & Development Limited evidence of R&D Some scientific & mathematical theories and principles considered.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Roles and Responsibilities Limited evidence of clear roles and responsibilities within team Team roles and responsibilities identified, with some evidence of task and/or activity breakdown Team members identified and a highly structured team created with clearly defined job functions and appropriate responsibilities.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 STEM Racing Learning Experiences No real reflections discussed Good explanation of some learning outcomes with reference to career aims Compelling accounts of how the competition has impacted on life skills and career aspirations for a range of team members
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Scrutineering Total = /60 Notes:
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Sponsorship & Marketing Total /80 Project Management Total + Sponsorship & Marketing Total = Enterprise Total = /160 Notes: STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2024 - STEM Racing Ltd.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Sponsorship Limited evidence of strategy to achieve sponsorship Sponsor/partner hierarchy and benefits identified.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Subject Total /60 Technique Total + Composition Total + Subject Total = Verbal Presentation Total = /160 Notes: STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2025 - STEM Racing Ltd Page 39 of 55
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Team Contribution Minimal team participation Good contributions from most team members Excellent teamwork with all members participating effectively
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Team Identity Limited consideration given to establishing a team identity Some consideration given to choosing an appropriate team name, motto and organisational style Excellent and highly effective team name, trademark and operating style, in line with the team’s graphic identity.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Technique Total /60 Composition Concept Clarification Several concepts lacked clarification Clear and appropriate concept explanations Everything presented was understood through excellent explanations
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Testing Limited evidence of testing Limited testing.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Time / Presentation Too fast or ran out of time.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Use of CAM/CNC Limited evidence of CAM/CNC understanding Effective use and understanding of CAM/CNC processes used Evidence of excellent understanding of CAM/CNC technologies.
+                    - 9 – 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 Visual appearance Limited, relevant graphics or advertising methods employed Attractive display, including relevant graphic elements and implementation of some advertising methods Professional looking display, incorporating highly effective graphics, use of ambient advertising and use of lighting to enhance display
+                    - 9 – 10 9 8 7 6 5 4 3 2 1 STEM Racing™ - Development Class Technical Regulations 2025-2026
+                    - 9 – 10 D1.9 AXLES .........................................................................................................................................................................
+                    - 9 – 14 D2.9 SPIRIT OF THE COMPETITION .....................................................................................................................................
+                    - 9 – 17 C1.9 ENGINEERING DRAWINGS ..........................................................................................................................
+                    - 9 – 19 C2.9 MANDATORY PROJECT ELEMENTS FOR REGIONAL AND UK NATIONAL FINALS ENTRY ..............................................
+                    - 9 – 3 June 2025 ARTICLE C9 – RACING (220 points) C9.1 What races will be conducted?
+                    - 9 – 3 June 2025 • C2.9.4 Verbal Presentation - teams will be required to deliver a Verbal Presentation in relation to their project to the Judges.
+                    - 9 – 3 June 2025 • C9.8.4 During any manual / driver starts, if a driver false starts and distracts the other driver the race will be re-run and the driver who caused the distraction will forfeit their race.
+                    - 9 – 3.5mm Axle centre Line 15.0mm 15.0mm D9.2: Internal dimension test with a 3.5mm drill bit STEM Racing™ - Development Class Technical Regulations 2025-2026
+                    - 9 – 34 ARTICLE D9 – TETHER LINE GUIDES .............................................................................
+                    - 9 – 38 D9.2 INTERNAL DIMENSION – [SAFETY | PENALTY – 5PTS] .........................................................................................
+                    - 9 – 38 D9.3 TETHER LINE GUIDE SAFETY – [SAFETY | PENALTY – 10PTS] ..............................................................................
+                    - 9 – 39 ARTICLE C9 – RACING (220 POINTS) ..............................................................................
+                    - 9 – 42 C9.1 WHAT RACES WILL BE CONDUCTED?
+                    - 9 – 42 C9.2 TEAM PREPARATION .................................................................................................................................
+                    - 9 – 42 C9.4 REACTION RACE PROCEDURE (REGIONAL AND UK NATIONAL FINALS) .................................................................
+                    - 9 – 42 C9.5 REACTION RACE SCORING ...........................................................................................................................
+                    - 9 – 43 C9.6 TIME TRIAL RACE SCORING .........................................................................................................................
+                    - 9 – 43 C9.7 DNF (DID NOT FINISH) RACE RESULTS ..........................................................................................................
+                    - 9 – 43 C9.8 FALSE STARTS ..........................................................................................................................................
+                    - 9 – 43 C9.9 TRACK, TETHER LINE AND TIMING SYSTEM INFORMATION .................................................................................
+                    - 9 – 44 C9.10 CAR DECELERATION SYSTEM .......................................................................................................................
+                    - 9 – 44 C9.11 CO2 RACE CARTRIDGES .............................................................................................................................
+                    - 9 – 44 C9.12 CAR WEIGHT CHECKS.................................................................................................................................
+                    - 9 – 44 C9.13 JUDGES HANDLING CARS ............................................................................................................................
+                    - 9 – 9 D1.3 BODY .............................................................................................................................................................................
+                    - 9 – 9 D1.4 OFFICIAL F1® MODEL BLOCK ......................................................................................................................................
+                    - 9 – 9 D1.5 ‘NO-GO-ZONE’ .............................................................................................................................................................
+                    - 9 – 9 D1.6 HALO .............................................................................................................................................................................
+                    - 9 – 9 D1.7 POWER UNIT CARTRIDGE CHAMBER ..........................................................................................................................
+                    - 9 – 9.
+                    - 9 – A Detail A D9.2: Internal dimension Abs.
+                    - 9 – A team member is then allowed 30 seconds to ‘fine tune’ the alignment of their car, please see C9.2.4 for more detail 6.
+                    - 9 – A universal 3D CAD part of the standard wheel can be downloaded and 3D printed from: www.f1inschools.co.uk/downloads D1.9 Axles In simple terms: The standard axles you must use (Included in the F1 Development Class starter kit available from denfordwebshop.com) In technical terms: Axles are single parts that connect a wheel to any other part of the car.
+                    - 9 – ARTICLE 9:
+                    - 9 – ARTICLE D9 – TETHER LINE GUIDES D9.1 Location – [SAFETY | Penalty – 10pts] Each car must have only two (2) firmly secured tether line guides, one on or up to 15.0mm in front of the front axle centre line and one on or up to 15.0mm behind the rear axle centre line of the car.
+                    - 9 – ARTICLE D9 – Tether Line Guides D9.1 Location 2 guides, 15mm fore/aft CL’s -10
+                    - 9 – ARTICLE T9 – REAR WING AND WING SUPPORT STRUCTURES T9.1 Rear wing and wing support structure identification Check Eng drawing -5
+                    - 9 – C1.9 Engineering Drawings Hand drawn or CAD produced drawings, which along with relevant machinery and/or CAM programs, could theoretically be used to manufacture the fully assembled car by a third party.
+                    - 9 – C2.9 Mandatory project elements for Regional and UK National Finals entry The following is a summary of the mandatory elements required for judging: Regional Finals: • One (1) STEM Racing car including all optional replacement components • One (1) A3 or similar Design & Engineering Portfolio • One (1) A3 or similar Enterprise Portfolio • A 5-minute Verbal Presentation with laptop • A Pit Display • A4 Engineering Drawings of your completed race car • A4 Renderings of your finished race car UK National Finals: • Two (2) identical STEM Racing cars and replacement components • Two (2) identical A3 or similar Design & Engineering Portfolios • Two (2) identical A3 or similar Enterprise Portfolios • Electronic version of both portfolios submitted to STEM Racing • A Pit Display • A 10-Minute Verbal Presentation with laptop • A4 Engineering Drawings of your completed race car • A4 Renderings of your finished race car • A Project Elements Submission Checklist which must include the official F1® Model Block holographic sticker if applicable (see p51/52).
+                    - 9 – C8.2 Team Preparation Each team must prepare a Pit Display as per ARTICLE C2.9.
+                    - 9 – C9.10 Car Deceleration system • C9.10.1 The Car Deceleration System acts to bring cars to rest once crossing the finish line.
+                    - 9 – C9.11 CO2 Race cartridges CO2 cartridges to be used for all competition races will be supplied by STEM Racing.
+                    - 9 – C9.12 Car weight checks Cars will have their weight checked at the racetrack prior to commencing a race event.
+                    - 9 – C9.13 Judges handling cars The race Judges will not be required to comply with any special car handling requests made of them by teams.
+                    - 9 – C9.2 Team preparation • C9.2.1 Teams should be familiar with the operation of the STEM Racing Race System.
+                    - 9 – C9.4 Reaction race procedure (Regional and UK National Finals) Cars are launched in manual (driver launched) mode with four (4) races total per team, two (2) races in each lane.
+                    - 9 – C9.8 False starts • C9.8.1 A false start (jump start) occurs when the driver presses the trigger button before the five (5) start gate lights have extinguished.
+                    - 9 – C9.9 Track, tether line and timing system information • C9.9.1 The STEM Racing Elevated Racetrack, supplied by Denford Ltd will be used.
+                    - 9 – Cars removed from track and returned to Parc Fermé C9.5 Reaction race scoring All four (4) ‘total race times’ recorded from the reaction races are considered.
+                    - 9 – D2.9 Spirit of the competition Teams are expected to act in the spirit of the competition, both before and during any STEM Racing events.
+                    - 9 – D9.1 LOCATION – [SAFETY | PENALTY – 10PTS] ..........................................................................................................
+                    - 9 – D9.2 Internal dimension Min: 3.5mm Max: 6mm -5 mm mm
+                    - 9 – D9.2 Internal dimension – [SAFETY | Penalty – 5pts] The internal measurement of the opening within the guide which the tether line passes through.
+                    - 9 – D9.3 Tether line guide safety 200g test -10
+                    - 9 – D9.3 Tether line guide safety – [SAFETY | Penalty – 10pts] The guide holes must be completely closed to prevent the tether line from slipping out during racing.
+                    - 9 – FR: FR: RL: RL: RR: RR: T7.9 Visibility in top and bottom views In front of front wheels Min: 5mm -2.5 mm mm
+                    - 9 – For more information, refer to ARTICLE C2.9 and C3.6.
+                    - 9 – Judge presses the start system reset button – cars are launched by driver pressing start trigger 9.
+                    - 9 – Judges will be looking for the following: • Project Management (how your team has planned and carried out all the work required, following processes and working together as a team to complete your objectives) • Sponsorship & Marketing (the activities you have carried out to raise awareness, support and finance to help your team function in order to complete the project) C6.2 Team preparation Each team must prepare an Enterprise Portfolio as per ARTICLE C2.9.
+                    - 9 – Please refer to T3.9.1 of our technical regulations.
+                    - 9 – Rear overhang height Max: 65 T9.5.1 Rear wing span Min: 50 -2 mm mm
+                    - 9 – STEM Racing logo decals 9.
+                    - 9 – See F1inschools.co.uk for full details... STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2025 - STEM Racing Ltd Page 9 of 55
+                    - 9 – T3.9 Replacement Components Identical to fitted
+                    - 9 – T9.2 Rear wing(s) description and placement F & R & height -5
+                    - 9 – T9.3 Rear wing(s) construction and rigidity Span constant during racing + rigid -5
+                    - 9 – T9.4 Rear wing and wing support structure location Rear overhang length Min: 30 Max: 40 -10
+                    - 9 – T9.5.2 Rear wing chord Min: 15 Max: 25 -1 mm mm
+                    - 9 – T9.5.3 Rear wing thickness Min: 2 Max: 6 -1 mm mm
+                    - 9 – T9.5.4 Rear wing height deviation Max: 15 -1 mm mm
+                    - 9 – T9.6 Rear wing clear airflow Min: 5 -5 mm mm
+                    - 9 – T9.7 Rear wing visibility Visible and not obstructed in front view -10
+                    - 9 – The average 'car race time' value from all reaction races will determine the Fastest Car Award (refer to C9.6).
+                    - 9 – To further discriminate between any teams scoring 5 points, a deduction of 1 point will be made for any did not finish (DNF) reaction race result C9.6 Time Trial race scoring The four (4) ‘car race times’ recorded during the reaction races will be considered.
+                    - 9 – To further discriminate between these teams, a deduction will be made of 5 points for any did not finish (DNF) time trial result • If after discarding a team’s fastest time there remains less than two (2) times from races finished, due to DNF’s, the slowest time recorded is again input to the average equation until there are a total of four (4) times to average C9.7 DNF (Did not Finish) race results Damage or part separation occurring during a race, before the car crosses the finish line, (e.g.
+                    - 9 – ©2025 – STEM Racing™ Page 9 of 47
+                    - 9 – • C2.9.1 Car(s) - each team must produce a minimum of one (1) race car for Regionals and two (2) identical race cars for the UK National Finals.
+                    - 9 – • C2.9.2 Portfolios – each team must produce the following: Development Class: o One (1) ‘hard copy’ 5-page maximum Design & Engineering Portfolio o One (1) ‘hard copy’ 5-page maximum Enterprise Portfolio.
+                    - 9 – • C2.9.3 Pit Display - each team will be provided with a dedicated exhibition style space for set-up of their pit display elements.
+                    - 9 – • C2.9.5 Project Element Submission Checklist – teams must complete the checklist (please refer to Appendix iii) and attach their official F1 Model Block holographic sticker (if applicable) for submission at the event.
+                    - 9 – • C9.10.2 Teams may supply their own deceleration system and the team will be responsible for its management.
+                    - 9 – • C9.10.3 Deceleration systems must be located a minimum of 250mm after the finish line.
+                    - 9 – • C9.2.2 Manual / driver starts - one or more team members (driver/s) must be appointed for launching of the teams’ car using the manual launch method.
+                    - 9 – • C9.2.3 Finish line management - at least one member of the team must be appointed as responsible for managing the finish line deceleration system or teams’ own system (refer C9.10.2) and return of car along the track to the start.
+                    - 9 – • C9.2.4 Start line car staging – one team member may be appointed as being responsible for ‘aligning’ the car.
+                    - 9 – • C9.2.5 Teams must ensure that both cars are race ready, a car service session will be provided before the next race event (refer C10.2).
+                    - 9 – • C9.8.2 All reaction false starts will incur a 2.5-point penalty and by default, forfeit that race.
+                    - 9 – • C9.8.3 During knock-out racing – if one team false starts (jump starts), the other team should continue to race as normal.
+                    - 9 – • C9.8.5 Distractions outside of the race start area will be assessed by the lead track judge and track officials to determine if the race should be re-run.
+                    - 9 – • C9.9.2 Launch/Timing - The STEM Racing Launch/Timing System will be used for launching cars and timing races and driver reaction times to 1/1000th of a second.
+                    - 9 – • Presentation technique (how your team comes across during the presentation) • Presentation composition (how well you structure your presentation) • Subject Matter (the topics which need to be talked about) C7.2 Team preparation Each team is required to prepare a 5-minute (Regional) and 10-minute (UK National Finals) Verbal Presentation as per the requirements at ARTICLE C2.9.4.
+                    - 90 – At the start end the line passes through 90 degrees over a single pulley then attached to a 1.0kg mass suspended above the floor.
+                    - 90 – D1.18 Normal In simple terms: At right angles to another object In technical terms: The term ‘normal’ is used in geometry to describe a line or object that is perpendicular or at 90 degrees to another given object.
+                    - 90 – D7.6.3 Front wing thickness – [GENERAL | Penalty – 5pts each] The wing thickness minimum dimension must exist throughout the wing’s minimum span, measured perpendicular (at 90º to) to the chord line.
+                    - 90 – D8.6.3 Rear wing thickness – [GENERAL | Penalty – 5pts each] The wing thickness minimum dimension must exist throughout the wing’s minimum span, measured perpendicular (at 90º to) to the chord line.
+                    - 90mm – (See diagram below for example) Absolute Max: 90mm
+                    - 90mm – Max: 90mm -5 mm mm
+                    - 95 – The fastest of these four (4) times is used in the following formulae to calculate the points awarded: • Fastest ‘total race time’ = 110 pts • 2nd fastest ‘total race time’ = 105 pts • 3rd fastest ‘total race time’ = 100 pts • Slowest ‘total race time’ = 5 pts • Base Time = 120% of 3rd fastest ‘total race time’ • 4th fastest and all other teams score points using the following formula: • Team Points = 5 + (95 / (Base Time – fastest ‘total race time’)) x (Base Time – teams fastest ‘total race time’) • Any team with a best ‘total race time’ that is slower than the base time will score 5 points.
+                    - 990 points – Specification and Scrutineering Judging (170 points) Specifications 110 points Engineering Drawings 20 points Renderings 20 points Quality of Finish and Assembly 20 points Design and Engineering Judging (180 points) Design & Engineering Portfolio 180 points Enterprise Judging (160 points) Project Management 80 points Sponsorship & Marketing 80 points Brand Identity Judging (100 points) Corporate Identity 40 points Pit Display 60 points Verbal Presentation Judging (160 points) Technique 60 points Composition 40 points Subject Matter 60 points Racing (220 points) Time Trials 110 points Reaction Racing 110 points TOTAL 990 points STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2025 - STEM Racing Ltd Page 23 of 55
+                    - 990 – Specification and Scrutineering Judging (170 points) Specifications 110 points Engineering Drawings 20 points Renderings 20 points Quality of Finish and Assembly 20 points Design and Engineering Judging (180 points) Design & Engineering Portfolio 180 points Enterprise Judging (160 points) Project Management 80 points Sponsorship & Marketing 80 points Brand Identity Judging (100 points) Corporate Identity 40 points Pit Display 60 points Verbal Presentation Judging (160 points) Technique 60 points Composition 40 points Subject Matter 60 points Racing (220 points) Time Trials 110 points Reaction Racing 110 points TOTAL 990 points STEM Racing™ - Competition Regulations 2025-2026 Development / Professional Class ©2025 - STEM Racing Ltd Page 23 of 55
+                    - 9g – MIN Weight Absolute Min: 60.0g MIN Dimension Absolute Min: 170.0mm MAX Dimension Absolute Max: 210.0mm 60.0g - PASS 170.0mm - PASS 210.0mm - PASS 59.9g - FAIL 169.9mm - FAIL 210.1mm - FAIL STEM Racing™ - Development Class Technical Regulations 2025-2026
+                    - 9g – Regulation example Measurement Pass/Fail Margin of fail Penalty D3.5 Total weight – [PERFORMANCE | Penalty – 10pts] Absolute Min: 60.0g 59.9g – 59.0g FAIL 0.1g-1.0g 10pts 58.9g – 58.0g FAIL 1.1g-2.0g 20pts 57.9g – 57.0g FAIL 2.1g-3.0g 30pts
+                    - 9mm – MIN Weight Absolute Min: 60.0g MIN Dimension Absolute Min: 170.0mm MAX Dimension Absolute Max: 210.0mm 60.0g - PASS 170.0mm - PASS 210.0mm - PASS 59.9g - FAIL 169.9mm - FAIL 210.1mm - FAIL STEM Racing™ - Development Class Technical Regulations 2025-2026
+                    - ARTICLE 
+                    C3.5 and further information following for details on how points are calculated and awarded. – Refer to ARTICLE C3.5 and further information following for details on how points are calculated and awarded.
+                    - ARTICLE 
+                    D3.2 for more information. – The construction of the tether line guides will be closely examined in relation to safety, please refer to ARTICLE D3.2 for more information.
+                    - ARTICLE 3:  – ARTICLE 3:
+                    - ARTICLE 4:  – ARTICLE 4:
+                    - ARTICLE 5:  – ARTICLE 5:
+                    - ARTICLE 6:  – ARTICLE 6:
+                    - ARTICLE 7:  – ARTICLE 7:
+                    - ARTICLE 8:  – ARTICLE 8:
+                    - ARTICLE 9:  – ARTICLE 9:
+                    - ARTICLE C1 – DEFINITIONS .............................................................................................. – 8 ARTICLE C1 – DEFINITIONS ..............................................................................................
+                    - ARTICLE C10 – CAR REPAIRS AND CAR SERVICING ................................................... – 44 ARTICLE C10 – CAR REPAIRS AND CAR SERVICING ...................................................
+                    - ARTICLE C11 – PROTESTS ................................................................................................. – 3 June 2025 ARTICLE C11 – PROTESTS .................................................................................................
+                    - ARTICLE C12 – JUDGES ...................................................................................................... – 46 ARTICLE C12 – JUDGES ......................................................................................................
+                    - ARTICLE C13 - AWARDS .................................................................................................... – 47 ARTICLE C13 - AWARDS ....................................................................................................
+                    - ARTICLE C2 – GENERAL INFORMATION ....................................................................... – 17 ARTICLE C2 – GENERAL INFORMATION .......................................................................
+                    - ARTICLE C2.10. – An orthographic drawing and 3D render must also be included in the portfolio, refer ARTICLE C2.10.
+                    - ARTICLE C2.9 and C3.6. – For more information, refer to ARTICLE C2.9 and C3.6.
+                    - ARTICLE C2.9. – C8.2 Team Preparation Each team must prepare a Pit Display as per ARTICLE C2.9.
+                    - ARTICLE C2.9. – Judges will be looking for the following: • Project Management (how your team has planned and carried out all the work required, following processes and working together as a team to complete your objectives) • Sponsorship & Marketing (the activities you have carried out to raise awareness, support and finance to help your team function in order to complete the project) C6.2 Team preparation Each team must prepare an Enterprise Portfolio as per ARTICLE C2.9.
+                    - ARTICLE C2.9.4. – • Presentation technique (how your team comes across during the presentation) • Presentation composition (how well you structure your presentation) • Subject Matter (the topics which need to be talked about) C7.2 Team preparation Each team is required to prepare a 5-minute (Regional) and 10-minute (UK National Finals) Verbal Presentation as per the requirements at ARTICLE C2.9.4.
+                    - ARTICLE C3 – COMPETITION AND JUDGING FORMAT ............................................. – 20 ARTICLE C3 – COMPETITION AND JUDGING FORMAT .............................................
+                    - ARTICLE C3.5 and further information following for details on how points are calculated and awarded. – Refer to ARTICLE C3.5 and further information following for details on how points are calculated and awarded.
+                    - ARTICLE C3.5). – C3.4 UK Regional and National Champions The F1® in Schools UK Regional and National Champions trophies will be awarded to the team with the highest total score, sum of all judging categories (ARTICLE C3.5).
+                    - ARTICLE C4 – SPECIFICATION & SCRUTINEERING JUDGING (170 POINTS) ........ – 22 ARTICLE C4 – SPECIFICATION & SCRUTINEERING JUDGING (170 POINTS) ........
+                    - ARTICLE C5 – DESIGN & ENGINEERING JUDGING (180 POINTS) ............................ – 24 ARTICLE C5 – DESIGN & ENGINEERING JUDGING (180 POINTS) ............................
+                    - ARTICLE C6 – ENTERPRISE JUDGING (160 POINTS) ................................................... – 33 ARTICLE C6 – ENTERPRISE JUDGING (160 POINTS) ...................................................
+                    - ARTICLE C7 – VERBAL PRESENTATION JUDGING (160 POINTS) ............................ – 35 ARTICLE C7 – VERBAL PRESENTATION JUDGING (160 POINTS) ............................
+                    - ARTICLE C8 for further pit display specifications and content requirements. – Refer to ARTICLE C8 for further pit display specifications and content requirements.
+                    - ARTICLE C8 – BRAND IDENTITY JUDGING (100 POINTS) ......................................... – 37 ARTICLE C8 – BRAND IDENTITY JUDGING (100 POINTS) .........................................
+                    - ARTICLE C9 – RACING (220 POINTS) .............................................................................. – 39 ARTICLE C9 – RACING (220 POINTS) ..............................................................................
+                    - ARTICLE D1 – DEFINITIONS (A USEFUL GLOSSARY OF TERMS) .............................. – 6 ARTICLE D1 – DEFINITIONS (A USEFUL GLOSSARY OF TERMS) ..............................
+                    - ARTICLE D1.1. – D3.3 Undefined features – [PERFORMANCE | Penalty – 20pts] The car assembly must only consist of components listed in ARTICLE D1.1.
+                    - ARTICLE D2 – GENERAL PRINCIPLES (THE SMALL PRINT!) ............................................... – 12 ARTICLE D2 – GENERAL PRINCIPLES (THE SMALL PRINT!) ...............................................
+                    - ARTICLE D3 – FULLY ASSEMBLED CAR ......................................................................... – ARTICLE D3 – FULLY ASSEMBLED CAR .........................................................................
+                    - ARTICLE D4 – BODY ........................................................................................................... – 19 ARTICLE D4 – BODY ...........................................................................................................
+                    - ARTICLE D5 - POWER UNIT CARTRIDGE CHAMBER ................................................. – 24 ARTICLE D5 - POWER UNIT CARTRIDGE CHAMBER .................................................
+                    - ARTICLE D6 – WHEELS ...................................................................................................... – 26 ARTICLE D6 – WHEELS ......................................................................................................
+                    - ARTICLE D7 – FRONT WING ............................................................................................ – 29 ARTICLE D7 – FRONT WING ............................................................................................
+                    - ARTICLE D8 – REAR WING ................................................................................................ – 32 ARTICLE D8 – REAR WING ................................................................................................
+                    - ARTICLE D9 – TETHER LINE GUIDES ............................................................................. – 34 ARTICLE D9 – TETHER LINE GUIDES .............................................................................
+                    - ARTICLE T3 – FULLY ASSEMBLED CAR  – ARTICLE T3 – FULLY ASSEMBLED CAR
+                    - ARTICLE T4 – BODY  – ARTICLE T4 – BODY
+                    - ARTICLE T5 – RACE POWER PACK CARTRIDGE CHAMBER  – ARTICLE T5 – RACE POWER PACK CARTRIDGE CHAMBER
+                    - ARTICLE T6 – TETHER LINE GUIDES  – ARTICLE T6 – TETHER LINE GUIDES
+                    - ARTICLE T7 – WHEELS AND WHEEL SUPPORT STRUCTURES  – ARTICLE T7 – WHEELS AND WHEEL SUPPORT STRUCTURES
+                    - ARTICLE T8 – NOSE, FRONT WING AND WING SUPPORT STRUCTURES  – ARTICLE T8 – NOSE, FRONT WING AND WING SUPPORT STRUCTURES
+                    - Max: 0.5 – T4.8 Decal Thickness Max: 0.5 -5
+                    - Max: 140 – Min: 120 Max: 140 -5 mm mm
+                    - Max: 15 – T9.5.4 Rear wing height deviation Max: 15 -1 mm mm
+                    - Max: 15mm – (See illustration below) Absolute Min: 5mm / Absolute Max: 15mm
+                    - Max: 15mm – D7.6.3 Front wing thickness Min: 5mm Max: 15mm -5 mm mm
+                    - Max: 15mm – D8.6.3 Rear wing thickness Min: 5mm Max: 15mm -5 mm mm
+                    - Max: 18.5 – T5.1 Diameter Min: 18 Max: 18.5 -5 mm mm
+                    - Max: 2 – Nose Cone & Front Wing Assembly Max: 2 -5
+                    - Max: 2 – Supplied: Front Wheel Support Structure Max: 2 -5
+                    - Max: 2 – Supplied: Rear Wheel Support Structure Max: 2 -5
+                    - Max: 2 – Supplied: Rear Wing Assembly Max: 2 -5
+                    - Max: 210.0mm – MIN Weight Absolute Min: 60.0g MIN Dimension Absolute Min: 170.0mm MAX Dimension Absolute Max: 210.0mm 60.0g - PASS 170.0mm - PASS 210.0mm - PASS 59.9g - FAIL 169.9mm - FAIL 210.1mm - FAIL STEM Racing™ - Development Class Technical Regulations 2025-2026
+                    - Max: 210mm – (See diagram below for example) Absolute Min: 170mm / Absolute Max: 210mm
+                    - Max: 210mm – Min: 170mm Max: 210mm -5 mm mm
+                    - Max: 25 – T8.6.2 Front wing chord Min: 15 Max: 25 -1 mm mm
+                    - Max: 25 – T9.5.2 Rear wing chord Min: 15 Max: 25 -1 mm mm
+                    - Max: 3 – 1 x Car A (Green dot applied by F1S) TICK TICK Weight: g 1 x Car B (Red dot applied by F1S) (NF) TICK TICK Weight: g Rear Wing / Support Structure (Optional) TICK TICK Max: 3 sets Number Submitted: Front Wing / Support Structure (Optional) TICK TICK Max: 3 sets Number Submitted: Wheel / Wheel Support System (Optional) TICK TICK Max: 3 car sets Number Submitted: 2 x Official F1 Model Block Holographic Stickers (if applicable) TICK TICK
+                    - Max: 3 – T5.4 Max angle of chamber (8g Pack) Min: -3° Max: 3° -5 ° °
+                    - Max: 30mm – (See illustration below) Absolute Min: 15mm / Absolute Max: 30mm
+                    - Max: 30mm – D7.6.2 Front wing chord Min: 15mm Max: 30mm -5 mm mm
+                    - Max: 30mm – D8.6.2 Rear wing chord Min: 15mm Max: 30mm -5 mm mm
+                    - Max: 32 – Min: 28 Max: 32 -2.5 per wheel FL: mm FL: mm
+                    - Max: 4 – Supplied: Front Wheels Max: 4 -5
+                    - Max: 4 – Supplied: Rear Wheels Max: 4 -5
+                    - Max: 40 – T5.2 Distance from track surface (8g Pack) Min: 30 Max: 40 -5 mm mm
+                    - Max: 40 – T8.2 Nose cone assembly dimension Min: 30 Max: 40 -5 mm mm
+                    - Max: 40 – T9.4 Rear wing and wing support structure location Rear overhang length Min: 30 Max: 40 -10
+                    - Max: 40.0mm – Absolute Min: 30.0mm / Absolute Max: 40.0mm
+                    - Max: 40mm – Min: 30mm Max: 40mm -5 mm mm
+                    - Max: 58 – Min: 45 Max: 58 -5 mm mm
+                    - Max: 6 – T6.2 Internal diameter Min: 3.5 Max: 6 -5
+                    - Max: 6 – T8.6.3 Front wing thickness Min: 2 Max: 6 -1 mm mm
+                    - Max: 6 – T9.5.3 Rear wing thickness Min: 2 Max: 6 -1 mm mm
+                    - Max: 65 – Rear overhang height Max: 65 T9.5.1 Rear wing span Min: 50 -2 mm mm
+                    - Max: 65 – T3.5 Total height (8g Pack) Max: 65 -5 mm mm
+                    - Max: 6mm – Absolute Min: 3.5mm / Absolute Max: 6mm
+                    - Max: 6mm – D9.2 Internal dimension Min: 3.5mm Max: 6mm -5 mm mm
+                    - Max: 85 – T3.4 Total width Min: 65 Max: 85 -5 mm mm
+                    - Max: 90mm – (See diagram below for example) Absolute Max: 90mm
+                    - Max: 90mm – Max: 90mm -5 mm mm
+                    - Min: 1.5 – T3.7 Track clearance (8g Pack) Min: 1.5 -10 mm mm
+                    - Min: 120 – Min: 120 Max: 140 -5 mm mm
+                    - Min: 13 – Front Min: 13 Rear Min: 17 exc.
+                    - Min: 15 – T8.6.2 Front wing chord Min: 15 Max: 25 -1 mm mm
+                    - Min: 15 – T9.5.2 Rear wing chord Min: 15 Max: 25 -1 mm mm
+                    - Min: 15mm – (See illustration below) Absolute Min: 15mm / Absolute Max: 30mm
+                    - Min: 15mm – Behind front wheels Min: 15mm -5 mm mm In front of rear wheels Min: 5mm -5 mm mm Behind rear wheels Min: 5mm -2.5 mm mm T7.10 Visibility in side views Side views -10
+                    - Min: 15mm – D7.6.2 Front wing chord Min: 15mm Max: 30mm -5 mm mm
+                    - Min: 15mm – D8.6.2 Rear wing chord Min: 15mm Max: 30mm -5 mm mm
+                    - Min: 17 – Front Min: 13 Rear Min: 17 exc.
+                    - Min: 170.0mm – MIN Weight Absolute Min: 60.0g MIN Dimension Absolute Min: 170.0mm MAX Dimension Absolute Max: 210.0mm 60.0g - PASS 170.0mm - PASS 210.0mm - PASS 59.9g - FAIL 169.9mm - FAIL 210.1mm - FAIL STEM Racing™ - Development Class Technical Regulations 2025-2026
+                    - Min: 170mm – (See diagram below for example) Absolute Min: 170mm / Absolute Max: 210mm
+                    - Min: 170mm – Min: 170mm Max: 210mm -5 mm mm
+                    - Min: 18 – T5.1 Diameter Min: 18 Max: 18.5 -5 mm mm
+                    - Min: 2 – T8.6.3 Front wing thickness Min: 2 Max: 6 -1 mm mm
+                    - Min: 2 – T9.5.3 Rear wing thickness Min: 2 Max: 6 -1 mm mm
+                    - Min: 28 – Min: 28 Max: 32 -2.5 per wheel FL: mm FL: mm
+                    - Min: 3 – T5.5 Chamber safety zone (8g Pack) Min: 3 -10
+                    - Min: 3.5 – T6.2 Internal diameter Min: 3.5 Max: 6 -5
+                    - Min: 3.5mm – Absolute Min: 3.5mm / Absolute Max: 6mm
+                    - Min: 3.5mm – D9.2 Internal dimension Min: 3.5mm Max: 6mm -5 mm mm
+                    - Min: 30 – Front Min: 38 Rear Min: 30 -2.5 F: mm F: mm
+                    - Min: 30 – T5.2 Distance from track surface (8g Pack) Min: 30 Max: 40 -5 mm mm
+                    - Min: 30 – T8.2 Nose cone assembly dimension Min: 30 Max: 40 -5 mm mm
+                    - Min: 30 – T9.4 Rear wing and wing support structure location Rear overhang length Min: 30 Max: 40 -10
+                    - Min: 30.0mm – Absolute Min: 30.0mm / Absolute Max: 40.0mm
+                    - Min: 30mm – Min: 30mm Max: 40mm -5 mm mm
+                    - Min: 35mm – Absolute Min: 35mm STEM Racing™ - Development Class Technical Regulations 2025-2026
+                    - Min: 35mm – D8.5 Rear wing height Min: 35mm -10
+                    - Min: 38 – Front Min: 38 Rear Min: 30 -2.5 F: mm F: mm
+                    - Min: 3mm – Absolute Min: 3mm
+                    - Min: 4.0 – T4.7 Team Number Min: 4.0 -2 mm mm
+                    - Min: 45 – Min: 45 Max: 58 -5 mm mm
+                    - Min: 5 – T9.6 Rear wing clear airflow Min: 5 -5 mm mm
+                    - Min: 50 – Rear overhang height Max: 65 T9.5.1 Rear wing span Min: 50 -2 mm mm
+                    - Min: 50 – T8.6.1 Front wing span Min: 50 -2 mm mm
+                    - Min: 50.0g – T3.6 Total weight Min: 50.0g -10 g g
+                    - Min: 5mm – (See illustration below) Absolute Min: 5mm / Absolute Max: 15mm
+                    - Min: 5mm – Behind front wheels Min: 15mm -5 mm mm In front of rear wheels Min: 5mm -5 mm mm Behind rear wheels Min: 5mm -2.5 mm mm T7.10 Visibility in side views Side views -10
+                    - Min: 5mm – D7.6.3 Front wing thickness Min: 5mm Max: 15mm -5 mm mm
+                    - Min: 5mm – D8.6.3 Rear wing thickness Min: 5mm Max: 15mm -5 mm mm
+                    - Min: 5mm – FR: FR: RL: RL: RR: RR: T7.9 Visibility in top and bottom views In front of front wheels Min: 5mm -2.5 mm mm
+                    - Min: 5mm – Min: 5mm top view -10 mm mm
+                    - Min: 60.0g – Absolute Min: 60.0g D3.7 Status during racing – [GENERAL | Penalty – 5pts] The car assembly must be designed so that no items other than those listed in D1.1, or Power Unit cartridges are removed, replaced or added to the assembly during scheduled race events.
+                    - Min: 60.0g – MIN Weight Absolute Min: 60.0g MIN Dimension Absolute Min: 170.0mm MAX Dimension Absolute Max: 210.0mm 60.0g - PASS 170.0mm - PASS 210.0mm - PASS 59.9g - FAIL 169.9mm - FAIL 210.1mm - FAIL STEM Racing™ - Development Class Technical Regulations 2025-2026
+                    - Min: 60.0g – Min: 60.0g -10 g g
+                    - Min: 60.0g – Regulation example Measurement Pass/Fail Margin of fail Penalty D3.5 Total weight – [PERFORMANCE | Penalty – 10pts] Absolute Min: 60.0g 59.9g – 59.0g FAIL 0.1g-1.0g 10pts 58.9g – 58.0g FAIL 1.1g-2.0g 20pts 57.9g – 57.0g FAIL 2.1g-3.0g 30pts
+                    - Min: 60mm – (See illustration below) Absolute Min: 60mm
+                    - Min: 60mm – D7.6.1 Front wing span Min: 60mm -5 mm mm
+                    - Min: 60mm – Min: 60mm -5 mm mm
+                    - Min: 65 – T3.4 Total width Min: 65 Max: 85 -5 mm mm"""
