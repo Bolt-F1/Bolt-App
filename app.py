@@ -213,7 +213,7 @@ Keep the answer conversational.
             {"role": "system", "content": "You are a helpful assistant that bases answers ONLY on the provided summary."},
             {"role": "user", "content": prompt}
         ],
-        "model": "meta-llama/Llama-2-7b-chat",
+        "model": "google/gemma-2-2b-it",
     }
 
    try:
