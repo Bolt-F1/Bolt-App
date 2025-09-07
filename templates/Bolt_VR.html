@@ -5,13 +5,13 @@
     <title>Bolt City VR Pitch</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.0.1/dist/aframe-physics-system.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
   </head>
   <body>
     <a-scene physics="gravity: -9.8" vr-mode-ui="enabled: true">
 
       <!-- Assets -->
       <a-assets>
-        <!-- Replace with your OBJ file -->
         <a-asset-item id="cityObj" src="{{ url_for('static', filename='models/Bolt_City_Prototype_norender.obj') }}"></a-asset-item>
       </a-assets>
 
@@ -21,11 +21,11 @@
       <!-- City placeholder OBJ -->
       <a-entity obj-model="obj: #cityObj" material="color: gray" static-body position="0 0 0" scale="1 1 1"></a-entity>
 
-      <!-- Player with camera -->
-      <a-entity id="player" dynamic-body position="0 2 5">
+      <!-- Player with camera + movement controls -->
+      <a-entity id="player" position="0 2 5" movement-controls="speed: 20">
         <a-camera>
           <!-- Speed display HUD -->
-          <a-text id="speedText" value="Speed: 0 m/s" position="0 -0.3 -1" width="4" color="#FFF"></a-text>
+          <a-text id="speedText" value="Use WASD or Arrow Keys to Move" position="0 -0.3 -1" width="4" color="#FFF"></a-text>
         </a-camera>
       </a-entity>
 
@@ -38,6 +38,7 @@
       <a-entity light="type: directional; intensity: 1" position="10 20 10" rotation="-45 0 0"></a-entity>
 
     </a-scene>
+  
 
     <!-- Speed display script -->
     <script>
@@ -57,15 +58,15 @@
       document.querySelector('a-scene').setAttribute('speed-display', '');
     </script>
 
-<nav class="bottom-menu">
-    <ul>
-        <li><a href="{{ url_for('chat') }}"><img src="{{ url_for('static', filename='images/Message_Icon.png') }}" width="100" height="100" alt="Chat"></a></li>
-        <li><a href="{{ url_for('todo') }}"><img src="{{ url_for('static', filename='images/to_do_list_icon.png') }}" alt="Tasks"></a></li>
-        <li><a href="{{ url_for('chatbot') }}"><img src="{{ url_for('static', filename='images/Bolt_AI_Icon.png') }}" alt="Chatbot"></a></li>
-        <li><a href="{{ url_for('sim') }}"><img src="{{ url_for('static', filename='images/Sim_icon.png') }}" alt="Sim"></a></li>
-        <li><a href="{{ url_for('vr') }}"><img src="{{ url_for('static', filename='images/VR_icon.png') }}" alt="VR City"></a></li>
-    </ul>
-</nav>
+    <nav class="bottom-menu">
+        <ul>
+            <li><a href="{{ url_for('chat') }}"><img src="{{ url_for('static', filename='images/Message_Icon.png') }}" width="100" height="100" alt="Chat"></a></li>
+            <li><a href="{{ url_for('todo') }}"><img src="{{ url_for('static', filename='images/to_do_list_icon.png') }}" alt="Tasks"></a></li>
+            <li><a href="{{ url_for('chatbot') }}"><img src="{{ url_for('static', filename='images/Bolt_AI_Icon.png') }}" alt="Chatbot"></a></li>
+            <li><a href="{{ url_for('sim') }}"><img src="{{ url_for('static', filename='images/Sim_icon.png') }}" alt="Sim"></a></li>
+            <li><a href="{{ url_for('vr') }}"><img src="{{ url_for('static', filename='images/VR_icon.png') }}" alt="VR City"></a></li>
+        </ul>
+    </nav>
 
 
 

@@ -180,6 +180,9 @@ Question:
 {question}
 
 Answer concisely in bullet points with numbers and explanations.
+Answer clearly in **short paragraphs**, not in code or markdown. 
+Use plain text with simple bullet points only if it improves readability.
+Keep the answer conversational, like explaining to a student.
 """
 
     payload = {
