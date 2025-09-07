@@ -213,7 +213,7 @@ Keep the answer conversational.
             {"role": "system", "content": "You are a helpful assistant that bases answers ONLY on the provided summary."},
             {"role": "user", "content": prompt}
         ],
-        "model": "google/gemma-2-2b-it",
+        "model": "deepseek-ai/DeepSeek-V3-0324",
     }
 
    try:
@@ -425,17 +425,10 @@ def chatbot():
     conn.close()
     return render_template("chatbot.html", chatbot_convo=chatbot_convo)
 
-    # Fetch all conversation
-    c.execute("SELECT id, query, answer FROM chatbot ORDER BY id")
-    chatbot_convo = c.fetchall()
-    conn.close()
-
-    return render_template("chatbot.html", chatbot_convo=chatbot_convo)
-
 
 @app.route("/sim", methods=["GET", "POST"])
 def sim():
-
+    
     time = None
     img_base64 = None
     drag = None
@@ -444,69 +437,93 @@ def sim():
     message = None
     cross_sections = None
 
-
     if request.method == "POST":
         form_id = request.form.get("form_id")
+
         if form_id == "track_time_calc":
-            drag_co = float(request.form.get("drag_co"))
-            lift_co = float(request.form.get("lift_co"))
-            mass = float(request.form.get("mass"))
-            cross_section = float(request.form.get("cross_section"))
-            distances, speeds, energies, time = run_track_time_sim(drag_co, lift_co, mass, cross_section)
-            buf = io.BytesIO()
-            plt.figure(figsize=(8,5))
-            plt.plot(distances, speeds, label="Speed (m/s)", color="gold")
-            plt.xlabel("Distance (m)")
-            plt.ylabel("Speed (m/s)")
-            plt.legend()
-            plt.tight_layout()
-            plt.savefig(buf, format="png")
-            buf.seek(0)
-            plt.close()
-            img_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
-        
-        
+            try:
+                drag_co = float(request.form.get("drag_co"))
+                lift_co = float(request.form.get("lift_co"))
+                mass = float(request.form.get("mass"))
+                cross_section = float(request.form.get("cross_section"))
+
+                distances, speeds, energies, time = run_track_time_sim(drag_co, lift_co, mass, cross_section)
+
+                buf = io.BytesIO()
+                plt.figure(figsize=(8,5))
+                plt.plot(distances, speeds, label="Speed (m/s)", color="gold")
+                plt.xlabel("Distance (m)")
+                plt.ylabel("Speed (m/s)")
+                plt.legend()
+                plt.tight_layout()
+                plt.savefig(buf, format="png")
+                buf.seek(0)
+                plt.close()
+                img_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+            except Exception as e:
+                message = f"Simulation error: {str(e)}"
+
         else:
             action = request.form.get("action")
             files = request.files.getlist("obj_files")
-            message = ""
-            if action == "train":
-                drag_values_str = request.form.get("drag_values")
-                lift_values_str = request.form.get("lift_values")
-                cross_sections = []
-                if drag_values_str and lift_values_str:
-                    drag_values = [float(x.strip()) for x in drag_values_str.split(",")]
-                    lift_values = [float(x.strip()) for x in lift_values_str.split(",")]
-                    if len(drag_values) != len(files) or len(lift_values) != len(files):
-                        return render_template("sim.html", message="Number of values must match number of OBJ files")
-                    for f, drag, lift in zip(files, drag_values, lift_values):
+
+            try:
+                if action == "train":
+                    drag_values_str = request.form.get("drag_values")
+                    lift_values_str = request.form.get("lift_values")
+                    cross_sections = []
+
+                    if drag_values_str and lift_values_str:
+                        drag_values = [float(x.strip()) for x in drag_values_str.split(",")]
+                        lift_values = [float(x.strip()) for x in lift_values_str.split(",")]
+
+                        if len(drag_values) != len(files) or len(lift_values) != len(files):
+                            message = "Number of values must match number of OBJ files"
+                        else:
+                            for f, drag_val, lift_val in zip(files, drag_values, lift_values):
+                                path = os.path.join(UPLOAD_FOLDER, f.filename)
+                                f.save(path)
+                                shape = load_obj_file(path)
+                                features, cross_section = extract_features(shape)
+                                save_training_data(features, drag_val, lift_val)
+                                cross_sections.append(round(cross_section, 3))
+                            message = "Data saved successfully! Model will update on next prediction."
+                    else:
+                        
+                        cross_sections = []
+                        for f in files:
+                            path = os.path.join(UPLOAD_FOLDER, f.filename)
+                            f.save(path)
+                            shape = load_obj_file(path)
+                            _, cross_section = extract_features(shape)
+                            cross_sections.append(round(cross_section,3))
+                        message = "Cross-section(s) extracted (no training data saved)."
+
+                elif action == "predict":
+                    if len(files) != 1:
+                        message = "Please upload exactly one OBJ file for prediction"
+                    else:
+                        f = files[0]
                         path = os.path.join(UPLOAD_FOLDER, f.filename)
                         f.save(path)
-                        shape = load_obj_file(path)
-                        features, cross_section = extract_features(shape)
-                        save_training_data(features, drag, lift)
-                        cross_sections.append(round(cross_section, 3))
-                    return render_template("sim.html", message="Data saved successfully! Model will update on next prediction.", cross_sections=cross_sections)
+                        drag, lift, frontal_area = predict_coeffs(path)
                 else:
-                    for f in files:
-                        path = os.path.join(UPLOAD_FOLDER, f.filename)
-                        f.save(path)
-                        shape = load_obj_file(path)
-                        _, cross_section = extract_features(shape)
-                        frontal_area = round(cross_section, 3)
-                    return render_template("sim.html", message="Cross-section(s) extracted (no training data saved).", frontal_area=frontal_area)
-            elif action == "predict":
-                if len(files) != 1:
-                    return render_template("sim.html", message="Please upload exactly one OBJ file for prediction")
-                f = files[0]
-                path = os.path.join(UPLOAD_FOLDER, f.filename)
-                f.save(path)
-                drag, lift, frontal_area = predict_coeffs(path)
-                return render_template("sim.html", drag=round(drag,3), lift=round(lift,3), frontal_area=round(frontal_area,3))
-            else:
-                return render_template("sim.html", message="Unknown action")
-            
-    return render_template("sim.html", time=time, graph=img_base64, drag=round(drag,3), lift=round(lift,3), frontal_area=round(frontal_area,3))
+                    message = "Unknown action"
+            except Exception as e:
+                message = f"Error processing files: {str(e)}"
+
+    
+    return render_template(
+        "sim.html",
+        time=time,
+        graph=img_base64,
+        drag=round(drag,3) if drag is not None else None,
+        lift=round(lift,3) if lift is not None else None,
+        frontal_area=round(frontal_area,3) if frontal_area is not None else None,
+        message=message,
+        cross_sections=cross_sections
+    )
+
     
 
 @app.route("/vr", methods=["GET", "POST"])
