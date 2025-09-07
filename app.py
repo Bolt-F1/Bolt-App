@@ -213,7 +213,7 @@ Keep the answer conversational.
             {"role": "system", "content": "You are a helpful assistant that bases answers ONLY on the provided summary."},
             {"role": "user", "content": prompt}
         ],
-        "model": "HuggingFaceM4/idefics2-3b-chat",
+        "model": "Qwen/Qwen2.5-0.5B-Instruct",
     }
 
    try:
@@ -229,12 +229,14 @@ Keep the answer conversational.
 
 # ------------------------ TRACK TIME SIM ------------------------
 def run_track_time_sim(drag_co, lift_co, mass, cross_section):
-    rolling_co = 0
+    rolling_co = 0.02
     friction = 0.05
     gravity = 9.8
     air_density = 1.225
     dt = 0.001
     
+    axle_torque = 0.005
+    wheel_radius = 0.03
     initial_energy = 15
     distance = 0
     speed = np.sqrt((2 * initial_energy)/mass)
@@ -248,8 +250,9 @@ def run_track_time_sim(drag_co, lift_co, mass, cross_section):
         downforce = 0.5 * air_density * (-lift_co) * cross_section * (speed ** 2)
         drag_energy_loss = 0.5 * air_density * drag_co * cross_section * (speed ** 2) * dis_travelled
         rolling_energy_loss = rolling_co * ((mass * gravity) + downforce) * dis_travelled
-        friction_energy_loss = friction * (dis_travelled / 20)
-        total_energy_loss = drag_energy_loss + rolling_energy_loss + friction_energy_loss
+
+        axle_energy_loss = axle_torque * (dis_travelled / wheel_radius)
+        total_energy_loss = drag_energy_loss + rolling_energy_loss + axle_energy_loss
         energy -= total_energy_loss
         time += dt
         speed = np.sqrt((2 * energy) / mass) if energy > 0 else 0
