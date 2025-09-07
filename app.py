@@ -229,36 +229,58 @@ Keep the answer conversational.
 
 # ------------------------ TRACK TIME SIM ------------------------
 def run_track_time_sim(drag_co, lift_co, mass, cross_section):
-    rolling_co = 0.02
-    friction = 0.05
-    gravity = 9.8
-    air_density = 1.225
-    dt = 0.001
-    
-    axle_torque = 0.005
-    wheel_radius = 0.03
-    initial_energy = 15
+  
+
+    # Constants
+    total_energy = 15
+    rolling_co = 0.02        # Rolling resistance coefficient
+    axle_torque = 0.005      # Nm, energy lost in axle friction
+    wheel_radius = 0.03      # m
+    gravity = 9.8            # m/s^2
+    air_density = 1.225      # kg/m^3
+    dt = 0.001               # timestep (s)
+    track_length = 20        # m
+
+    # Initialize
     distance = 0
-    speed = np.sqrt((2 * initial_energy)/mass)
-    energy = initial_energy
+    speed = 0
+    energy = total_energy
     time = 0
     distances, speeds, energies = [], [], []
 
-    while distance < 20 and energy > 0:
-        dis_travelled = speed * dt
-        distance += dis_travelled
-        downforce = 0.5 * air_density * (-lift_co) * cross_section * (speed ** 2)
-        drag_energy_loss = 0.5 * air_density * drag_co * cross_section * (speed ** 2) * dis_travelled
-        rolling_energy_loss = rolling_co * ((mass * gravity) + downforce) * dis_travelled
+    while distance < track_length and energy > 0:
+        # Distance traveled this timestep
+        dx = speed * dt
+        distance += dx
 
-        axle_energy_loss = axle_torque * (dis_travelled / wheel_radius)
+        # Downforce
+        downforce = 0.5 * air_density * lift_co * cross_section * speed**2
+
+        # Energy losses
+        drag_energy_loss = 0.5 * air_density * drag_co * cross_section * speed**2 * dx
+        rolling_energy_loss = rolling_co * (mass * gravity + downforce) * dx
+        axle_energy_loss = axle_torque * (dx / wheel_radius)
+
         total_energy_loss = drag_energy_loss + rolling_energy_loss + axle_energy_loss
+
+        # Update remaining energy
         energy -= total_energy_loss
+        energy = max(energy, 0)  # prevent negative energy
+
+        # Update speed
+        speed = np.sqrt(2 * energy / mass)
+
+        # Update time
         time += dt
-        speed = np.sqrt((2 * energy) / mass) if energy > 0 else 0
+
+        # Save for analysis
         distances.append(distance)
         speeds.append(speed)
         energies.append(energy)
+
+        # Stop if car effectively stops
+        if speed <= 0:
+            break
 
     return distances, speeds, energies, time
 
