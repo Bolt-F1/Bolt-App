@@ -166,7 +166,7 @@ clear_if_new_week()
 clear_if_new_day()
 
 # ------------------------ NLP / CHATBOT ------------------------
-API_URL = "https://api-inference.huggingface.co/models/Ay8/google/flan-t5-large"
+API_URL = "https://router.huggingface.co/v1/chat/completions"
 HUGGINGFACE_API_TOKEN = os.getenv("HUGGINGFACE_API_TOKEN")
 HEADERS = {"Authorization": f"Bearer {HUGGINGFACE_API_TOKEN}"}
 
