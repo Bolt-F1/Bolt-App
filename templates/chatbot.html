@@ -2,21 +2,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <html>
     <head>
-        <title> Bolt Chatbot: </title>
-        <h2> Welcome to the Chatbot.</h2>
+        <title>Bolt Chatbot</title>
+        <h2>Welcome to the Chatbot.</h2>
         <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     </head>
 
     <body>
         <div class="chatbot_body">
-            <div class="chatbot_output">
+            <div class="chatbot_output" id="chatbot_output">
                 {% for i in chatbot_convo %}
                     <p class="chatbot_query"><b>Q:</b> {{ i['query'] }}</p>
                     <p class="chatbot_answer"><b>A:</b> {{ i['answer'] }}</p>
                 {% endfor %}
             </div>
+
             <div class="chatbot_input_box">
-                <form method="POST" class="chatbot_input_form">
+                <form id="chatbot_form" class="chatbot_input_form">
                     <input type="text" name="chatbot_query" placeholder="Ask any question..." required>
                     <button type="submit" style="background-color: black; color: wheat; outline: wheat;">Send</button>
                 </form>
@@ -32,8 +33,40 @@
                 <li><a href="{{ url_for('vr') }}"><img src="{{ url_for('static', filename='images/VR_icon.png') }}" alt="VR City"></a></li>
             </ul>
         </nav>
-    
-    
-    
-        
+
+        <!-- AJAX for submitting without reload -->
+        <script>
+        document.getElementById("chatbot_form").addEventListener("submit", async function(e) {
+            e.preventDefault(); // Prevent page reload
+
+            const form = e.target;
+            const query = form.chatbot_query.value;
+
+            // Send POST request to Flask
+            const response = await fetch("/chatbot", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chatbot_query: query })
+            });
+
+            const data = await response.json();
+
+            // Append new question and answer
+            const outputDiv = document.getElementById("chatbot_output");
+            const qElem = document.createElement("p");
+            qElem.className = "chatbot_query";
+            qElem.innerHTML = `<b>Q:</b> ${query}`;
+            const aElem = document.createElement("p");
+            aElem.className = "chatbot_answer";
+            aElem.innerHTML = `<b>A:</b> ${data.answer}`;
+
+            outputDiv.appendChild(qElem);
+            outputDiv.appendChild(aElem);
+
+            // Clear input
+            form.chatbot_query.value = "";
+            form.chatbot_query.focus();
+        });
+        </script>
     </body>
+</html>

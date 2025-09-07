@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, jsonify
 from datetime import datetime, date
 import numpy as np
 import os
@@ -213,7 +213,7 @@ Keep the answer conversational.
             {"role": "system", "content": "You are a helpful assistant that bases answers ONLY on the provided summary."},
             {"role": "user", "content": prompt}
         ],
-        "model": "tiiuae/falcon-7b-instruct",
+        "model": "meta-llama/Llama-2-7b-chat",
     }
 
    try:
@@ -397,21 +397,33 @@ def todo():
 
 @app.route("/chatbot", methods=["GET", "POST"])
 def chatbot():
-    chatbot_convo = []
-
     conn = get_pg_conn()
     c = conn.cursor()
 
     if request.method == "POST":
-        query = request.form.get("chatbot_query")
+        # Get JSON from the AJAX request
+        data = request.get_json()
+        query = data.get("chatbot_query")
+        
         if query:
+            # Get answer from your summary-based function
             answer = ask_question_with_summary(query)
+
             # Save Q&A to the database
             c.execute(
                 "INSERT INTO chatbot (query, answer) VALUES (%s, %s)",
                 (query, answer)
             )
             conn.commit()
+
+            # Return JSON for AJAX
+            return jsonify({"answer": answer})
+
+    # For GET requests, fetch all previous conversation
+    c.execute("SELECT id, query, answer FROM chatbot ORDER BY id")
+    chatbot_convo = [{"query": q, "answer": a} for _, q, a in c.fetchall()]
+    conn.close()
+    return render_template("chatbot.html", chatbot_convo=chatbot_convo)
 
     # Fetch all conversation
     c.execute("SELECT id, query, answer FROM chatbot ORDER BY id")
