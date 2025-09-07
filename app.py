@@ -213,7 +213,7 @@ Keep the answer conversational.
             {"role": "system", "content": "You are a helpful assistant that bases answers ONLY on the provided summary."},
             {"role": "user", "content": prompt}
         ],
-        "model": "deepseek-ai/DeepSeek-V3-0324",
+        "model": "google/flan-t5-base",
     }
 
    try:
