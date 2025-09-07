@@ -235,7 +235,7 @@ def run_track_time_sim(drag_co, lift_co, mass, cross_section):
     air_density = 1.225
     dt = 0.001
     
-    initial_energy = 27
+    initial_energy = 15
     distance = 0
     speed = np.sqrt((2 * initial_energy)/mass)
     energy = initial_energy
