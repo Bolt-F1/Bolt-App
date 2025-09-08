@@ -15,6 +15,8 @@ import psycopg2
 from psycopg2.extras import RealDictCursor, execute_values
 import requests
 from PDF_summary import Rules_and_Regs_sum
+import math
+from huggingface_hub import InferenceClient
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -166,9 +168,9 @@ clear_if_new_week()
 clear_if_new_day()
 
 # ------------------------ NLP / CHATBOT ------------------------
-API_URL = "https://router.huggingface.co/v1/chat/completions"
-HUGGINGFACE_API_TOKEN = os.getenv("HUGGINGFACE_API_TOKEN")
-HEADERS = {"Authorization": f"Bearer {HUGGINGFACE_API_TOKEN}"}
+
+
+client = InferenceClient(token=os.environ["HF_TOKEN"])
 
 
 def split_summary_into_sections(summary, max_words=500):
@@ -179,24 +181,27 @@ def split_summary_into_sections(summary, max_words=500):
         sections.append(section)
     return sections
 
+
 def select_relevant_sections(question, sections, top_n=2):
     question_lower = question.lower()
     scores = []
     for sec in sections:
         score = sum(word in sec.lower() for word in question_lower.split())
         scores.append(score)
-    # pick top N sections with highest score
+    
     top_sections = [sec for score, sec in sorted(zip(scores, sections), reverse=True)[:top_n]]
     return "\n\n".join(top_sections)
 
 
 def ask_question_with_summary(question):
-   
-   summary_sections = split_summary_into_sections(Rules_and_Regs_sum, max_words=500)
-   
-   relevant_text = select_relevant_sections(question, summary_sections)
+    
+    summary_sections = split_summary_into_sections(Rules_and_Regs_sum, max_words=500)
 
-   prompt = f"""Summary:
+    
+    relevant_text = select_relevant_sections(question, summary_sections)
+
+    
+    prompt = f"""Summary:
 {relevant_text}
 
 Question:
@@ -208,81 +213,127 @@ Use plain text with simple bullet points only if it improves readability.
 Keep the answer conversational.
 """
 
-   payload = {
-        "messages": [
-            {"role": "system", "content": "You are a helpful assistant that bases answers ONLY on the provided summary."},
-            {"role": "user", "content": prompt}
-        ],
-        "model": "Qwen/Qwen2.5-0.5B-Instruct",
-    }
+    try:
+        
+        result = client.chat_completion(
+            model="meta-llama/Llama-3.2-1B-Instruct",  
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that bases answers ONLY on the provided summary."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=500,
+        )
 
-   try:
-        response = requests.post(API_URL, headers=HEADERS, json=payload, timeout=30)
-        response.raise_for_status()
-        data = response.json()
-        return data["choices"][0]["message"]["content"]
-   except requests.exceptions.RequestException as e:
+        return result.choices[0].message["content"]
+
+    except Exception as e:
         return f"Error: API request failed ({str(e)})"
-   except (KeyError, IndexError, TypeError):
-        return "Error: Failed to parse API response."
-
 
 # ------------------------ TRACK TIME SIM ------------------------
-def run_track_time_sim(drag_co, lift_co, mass, cross_section):
+def simulate_co2_car(drag_coefficient, lift_coefficient, frontal_area, car_mass):
+   
+
+   track_length = 20.0
+   cartridge_mass = 0.016 # kg (16g CO2 cartridge)
+
+  
+   rolling_resistance_coeff = 0.01 # rolling resistance coefficient (tire deformation)
+   axle_friction_force = 0.005   # N (constant bearing friction)
+   nozzle_diameter = 0.002       # m (2mm nozzle)
+   dt = 0.001          # time step in seconds
+   air_density = 1.225 
   
 
-    # Constants
-    total_energy = 15
-    rolling_co = 0.02        # Rolling resistance coefficient
-    axle_torque = 0.005      # Nm, energy lost in axle friction
-    wheel_radius = 0.03      # m
-    gravity = 9.8            # m/s^2
-    air_density = 1.225      # kg/m^3
-    dt = 0.001               # timestep (s)
-    track_length = 20        # m
-
-    # Initialize
-    distance = 0
-    speed = 0
-    energy = total_energy
-    time = 0
-    distances, speeds, energies = [], [], []
-
-    while distance < track_length and energy > 0:
-        # Distance traveled this timestep
-        dx = speed * dt
-        distance += dx
-
-        # Downforce
-        downforce = 0.5 * air_density * lift_co * cross_section * speed**2
-
-        # Energy losses
-        drag_energy_loss = 0.5 * air_density * drag_co * cross_section * speed**2 * dx
-        rolling_energy_loss = rolling_co * (mass * gravity + downforce) * dx
-        axle_energy_loss = axle_torque * (dx / wheel_radius)
-
-        total_energy_loss = drag_energy_loss + rolling_energy_loss + axle_energy_loss
-
-        # Update remaining energy
-        energy -= total_energy_loss
-        energy = max(energy, 0)  # prevent negative energy
-
-        # Update speed
-        speed = np.sqrt(2 * energy / mass)
-
-        # Update time
-        time += dt
-
-        # Save for analysis
-        distances.append(distance)
-        speeds.append(speed)
-        energies.append(energy)
-
-        # Stop if car effectively stops
-        if speed <= 0:
-            break
-
-    return distances, speeds, energies, time
+   g = 9.81  # gravity (m/s²)
+   R_co2 = 188.9  # specific gas constant for CO2 (J/kg·K)
+   T_initial = 293.15  # initial temperature (K) - room temp
+   P_initial = 5.8e6   # initial pressure (Pa) - ~58 bar typical for CO2 cartridge
+   
+   position = 0.0
+   velocity = 0.0
+   time = 0.0
+   remaining_co2 = cartridge_mass
+   total_mass = car_mass + cartridge_mass
+   
+   speeds = []
+   positions = []
+  
+   nozzle_area = math.pi * (nozzle_diameter / 2) ** 2
+   while position < track_length and remaining_co2 > 0.001: 
+       positions.append(position)
+       speeds.append(velocity)
+       
+       if remaining_co2 > 0:
+           #
+           pressure_ratio = remaining_co2 / cartridge_mass
+           current_pressure = P_initial * pressure_ratio ** 1.3 
+       else:
+           current_pressure = 0
+       
+       if current_pressure > 101325:  #
+           
+           exit_velocity = math.sqrt(1.3 * R_co2 * T_initial * 2 / (1.3 + 1) *
+                                   ((1.3 + 1) / 2) ** ((1.3 + 1) / (1.3 - 1)))
+           
+           mass_flow_rate = nozzle_area * current_pressure / math.sqrt(R_co2 * T_initial) * 0.3
+           
+           thrust_force = mass_flow_rate * exit_velocity
+           
+           remaining_co2 -= mass_flow_rate * dt
+           if remaining_co2 < 0:
+               remaining_co2 = 0
+       else:
+           thrust_force = 0
+           mass_flow_rate = 0
+       
+       total_mass = car_mass + remaining_co2
+       
+       drag_force = 0.5 * air_density * velocity ** 2 * drag_coefficient * frontal_area
+       
+       downforce = 0.5 * air_density * velocity ** 2 * -lift_coefficient * frontal_area
+       
+       weight = total_mass * g
+       normal_force = weight + downforce
+       
+       rolling_resistance = rolling_resistance_coeff * normal_force
+       
+       total_axle_friction = axle_friction_force
+       
+       total_resistance = drag_force + rolling_resistance + total_axle_friction
+       
+       net_force = thrust_force - total_resistance
+       
+       acceleration = net_force / total_mass
+       
+       velocity += acceleration * dt
+       if velocity < 0:  
+           velocity = 0
+       position += velocity * dt
+       time += dt
+       
+       if time > 30:  
+           break
+   
+   while position < track_length and velocity > 0.01:  
+       positions.append(position)
+       speeds.append(velocity)
+       
+       drag_force = 0.5 * air_density * velocity ** 2 * drag_coefficient * frontal_area
+       downforce = 0.5 * air_density * velocity ** 2 * -lift_coefficient * frontal_area
+       
+       normal_force = total_mass * g + downforce
+       rolling_resistance = rolling_resistance_coeff * normal_force
+       
+       total_resistance = drag_force + rolling_resistance + total_axle_friction
+       deceleration = total_resistance / total_mass
+       velocity -= deceleration * dt
+       if velocity < 0:
+           velocity = 0
+       position += velocity * dt
+       time += dt
+       if time > 60:  
+           break
+   return positions, speeds, time
 
 # ------------------------ CONFIG ------------------------
 UPLOAD_FOLDER = "uploads"
@@ -472,7 +523,7 @@ def sim():
                 mass = float(request.form.get("mass"))
                 cross_section = float(request.form.get("cross_section"))
 
-                distances, speeds, energies, time = run_track_time_sim(drag_co, lift_co, mass, cross_section)
+                distances, speeds, time = simulate_co2_car(drag_co, lift_co, cross_section, mass)
 
                 buf = io.BytesIO()
                 plt.figure(figsize=(8,5))
