@@ -170,7 +170,7 @@ clear_if_new_day()
 # ------------------------ NLP / CHATBOT ------------------------
 
 
-client = InferenceClient(token=os.environ["HF_TOKEN"])
+client = InferenceClient(token=os.environ["HUGGINGFACE_API_TOKEN"])
 
 
 def split_summary_into_sections(summary, max_words=500):
