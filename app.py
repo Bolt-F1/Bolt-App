@@ -230,110 +230,94 @@ Keep the answer conversational.
         return f"Error: API request failed ({str(e)})"
 
 # ------------------------ TRACK TIME SIM ------------------------
+
 def simulate_co2_car(drag_coefficient, lift_coefficient, frontal_area, car_mass):
-   
+    track_length = 20.0
+    cartridge_mass = 0.008
+    slope_angle_deg = 6
+    rolling_resistance_coeff = math.tan(math.radians(slope_angle_deg))
+    axle_friction_force = 0.005
+    nozzle_diameter = 0.002
+    dt = 0.001
+    air_density = 1.225
+    g = 9.81
+    R_co2 = 188.9
+    T_initial = 293.15
+    P_initial = 5.8e6
 
-   track_length = 20.0
-   cartridge_mass = 0.016 # kg (16g CO2 cartridge)
+    position = 0.0
+    velocity = 0.0
+    time = 0.0
+    remaining_co2 = cartridge_mass * 0.9
+    total_mass = car_mass + remaining_co2
 
-  
-   rolling_resistance_coeff = 0.01 # rolling resistance coefficient (tire deformation)
-   axle_friction_force = 0.005   # N (constant bearing friction)
-   nozzle_diameter = 0.002       # m (2mm nozzle)
-   dt = 0.001          # time step in seconds
-   air_density = 1.225 
-  
+    speeds = []
+    positions = []
 
-   g = 9.81  # gravity (m/s²)
-   R_co2 = 188.9  # specific gas constant for CO2 (J/kg·K)
-   T_initial = 293.15  # initial temperature (K) - room temp
-   P_initial = 5.8e6   # initial pressure (Pa) - ~58 bar typical for CO2 cartridge
-   
-   position = 0.0
-   velocity = 0.0
-   time = 0.0
-   remaining_co2 = cartridge_mass
-   total_mass = car_mass + cartridge_mass
-   
-   speeds = []
-   positions = []
-  
-   nozzle_area = math.pi * (nozzle_diameter / 2) ** 2
-   while position < track_length and remaining_co2 > 0.001: 
-       positions.append(position)
-       speeds.append(velocity)
-       
-       if remaining_co2 > 0:
-           #
-           pressure_ratio = remaining_co2 / cartridge_mass
-           current_pressure = P_initial * pressure_ratio ** 1.3 
-       else:
-           current_pressure = 0
-       
-       if current_pressure > 101325:  #
-           
-           exit_velocity = math.sqrt(1.3 * R_co2 * T_initial * 2 / (1.3 + 1) *
-                                   ((1.3 + 1) / 2) ** ((1.3 + 1) / (1.3 - 1)))
-           
-           mass_flow_rate = nozzle_area * current_pressure / math.sqrt(R_co2 * T_initial) * 0.3
-           
-           thrust_force = mass_flow_rate * exit_velocity
-           
-           remaining_co2 -= mass_flow_rate * dt
-           if remaining_co2 < 0:
-               remaining_co2 = 0
-       else:
-           thrust_force = 0
-           mass_flow_rate = 0
-       
-       total_mass = car_mass + remaining_co2
-       
-       drag_force = 0.5 * air_density * velocity ** 2 * drag_coefficient * frontal_area
-       
-       downforce = 0.5 * air_density * velocity ** 2 * -lift_coefficient * frontal_area
-       
-       weight = total_mass * g
-       normal_force = weight + downforce
-       
-       rolling_resistance = rolling_resistance_coeff * normal_force
-       
-       total_axle_friction = axle_friction_force
-       
-       total_resistance = drag_force + rolling_resistance + total_axle_friction
-       
-       net_force = thrust_force - total_resistance
-       
-       acceleration = net_force / total_mass
-       
-       velocity += acceleration * dt
-       if velocity < 0:  
-           velocity = 0
-       position += velocity * dt
-       time += dt
-       
-       if time > 30:  
-           break
-   
-   while position < track_length and velocity > 0.01:  
-       positions.append(position)
-       speeds.append(velocity)
-       
-       drag_force = 0.5 * air_density * velocity ** 2 * drag_coefficient * frontal_area
-       downforce = 0.5 * air_density * velocity ** 2 * -lift_coefficient * frontal_area
-       
-       normal_force = total_mass * g + downforce
-       rolling_resistance = rolling_resistance_coeff * normal_force
-       
-       total_resistance = drag_force + rolling_resistance + total_axle_friction
-       deceleration = total_resistance / total_mass
-       velocity -= deceleration * dt
-       if velocity < 0:
-           velocity = 0
-       position += velocity * dt
-       time += dt
-       if time > 60:  
-           break
-   return positions, speeds, time
+    nozzle_area = math.pi * (nozzle_diameter / 2) ** 2
+    gamma = 1.3
+    Cd = 0.9
+    system_efficiency = 0.00095
+
+    while position < track_length and remaining_co2 > 0.0001:
+        positions.append(position)
+        speeds.append(velocity)
+
+        if remaining_co2 > 0.1 * cartridge_mass:
+            current_pressure = P_initial
+        else:
+            frac = remaining_co2 / (0.1 * cartridge_mass)
+            current_pressure = P_initial * frac
+            if current_pressure < 101325:
+                current_pressure = 101325
+
+        exit_velocity = math.sqrt(gamma * R_co2 * T_initial * (2 / (gamma + 1)))
+        mass_flow_rate = (Cd * nozzle_area * current_pressure *
+                         math.sqrt(gamma / (R_co2 * T_initial)) *
+                         (2 / (gamma + 1)) ** ((gamma + 1) / (2 * (gamma - 1))))
+        thrust_force = system_efficiency * mass_flow_rate * exit_velocity
+
+        remaining_co2 -= mass_flow_rate * dt
+        if remaining_co2 < 0:
+            remaining_co2 = 0
+
+        total_mass = car_mass + remaining_co2
+        drag_force = 0.5 * air_density * velocity ** 2 * drag_coefficient * frontal_area
+        downforce = 0.5 * air_density * velocity ** 2 * lift_coefficient * frontal_area
+        normal_force = total_mass * g + downforce
+        rolling_resistance = rolling_resistance_coeff * normal_force
+        total_resistance = drag_force + rolling_resistance + axle_friction_force
+
+        net_force = thrust_force - total_resistance
+        acceleration = net_force / total_mass
+
+        velocity += acceleration * dt
+        if velocity < 0:
+            velocity = 0
+        position += velocity * dt
+        time += dt
+        if time > 30:
+            break
+
+    while position < track_length and velocity > 0.01:
+        positions.append(position)
+        speeds.append(velocity)
+        drag_force = 0.5 * air_density * velocity ** 2 * drag_coefficient * frontal_area
+        downforce = 0.5 * air_density * velocity ** 2 * lift_coefficient * frontal_area
+        normal_force = total_mass * g + downforce
+        rolling_resistance = rolling_resistance_coeff * normal_force
+        total_resistance = drag_force + rolling_resistance + axle_friction_force
+        deceleration = total_resistance / total_mass
+        velocity -= deceleration * dt
+        if velocity < 0:
+            velocity = 0
+        position += velocity * dt
+        time += dt
+        if time > 60:
+            break
+
+    return positions, speeds, time
+
 
 # ------------------------ CONFIG ------------------------
 UPLOAD_FOLDER = "uploads"
@@ -442,6 +426,7 @@ def chat():
 def todo():
     username = session.get("username")
     show_completed = request.args.get("show_completed") == "1"
+
     if request.method == "POST":
         form_id = request.form.get("form_id")
         conn = get_pg_conn()
@@ -451,25 +436,57 @@ def todo():
             todo_body = request.form.get("todo-body")
             todo_deadline = request.form.get("todo-deadline")
             if todo_title and todo_body and todo_deadline:
-                c.execute("INSERT INTO todolist (title, body, creater, deadline) VALUES (%s, %s, %s, %s)", (todo_title, todo_body, username, todo_deadline))
+                c.execute(
+                    """
+                    INSERT INTO todolist (title, body, creater, deadline)
+                    VALUES (%s, %s, %s, %s)
+                    """,
+                    (todo_title, todo_body, username, todo_deadline)
+                )
                 conn.commit()
             conn.close()
             return redirect(f"/todo?show_completed={int(show_completed)}")
+
         elif form_id == "complete_task":
             task_id = request.form.get("task_id")
-            c.execute("UPDATE todolist SET completed_at = CURRENT_TIMESTAMP WHERE id = %s", (task_id,))
+            c.execute(
+                "UPDATE todolist SET completed_at = CURRENT_TIMESTAMP WHERE id = %s",
+                (task_id,)
+            )
             conn.commit()
             conn.close()
             return redirect(f"/todo?show_completed={int(show_completed)}")
+
     conn = get_pg_conn()
-    c = conn.cursor()
+    c = conn.cursor(cursor_factory=RealDictCursor)
+
     if show_completed:
-        c.execute("SELECT id, title, body, creater, deadline, completed_at FROM todolist ORDER BY deadline ASC")
+        c.execute(
+            """
+            SELECT id, title, body, creater, deadline, completed_at
+            FROM todolist
+            ORDER BY deadline ASC
+            """
+        )
     else:
-        c.execute("SELECT id, title, body, creater, deadline, completed_at FROM todolist WHERE completed_at IS NULL ORDER BY deadline ASC")
-    todolist_items = c.fetchall()
+        c.execute(
+            """
+            SELECT id, title, body, creater, deadline, completed_at
+            FROM todolist
+            WHERE completed_at IS NULL
+            ORDER BY deadline ASC
+            """
+        )
+
+    todolist_items = c.fetchall()  # already list of dicts
     conn.close()
-    return render_template("todo.html", todolist_items=todolist_items, username=username, show_completed=show_completed)
+
+    return render_template(
+        "todo.html",
+        todolist_items=todolist_items,
+        username=username,
+        show_completed=show_completed
+    )
 
 @app.route("/chatbot", methods=["GET", "POST"])
 def chatbot():
