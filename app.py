@@ -231,66 +231,100 @@ Keep the answer conversational.
 
 # ------------------------ TRACK TIME SIM ------------------------
 
+
 def simulate_co2_car(drag_coefficient, lift_coefficient, frontal_area, car_mass):
+    # ----- track & car params -----
     track_length = 20.0
-    cartridge_mass = 0.008
-    slope_angle_deg = 6
-    rolling_resistance_coeff = math.tan(math.radians(slope_angle_deg))
+    cartridge_mass = 0.008      # total CO2 mass
+    slope_angle_deg = 6.0
     axle_friction_force = 0.005
     nozzle_diameter = 0.002
     dt = 0.001
     air_density = 1.225
     g = 9.81
-    R_co2 = 188.9
-    T_initial = 293.15
-    P_initial = 5.8e6
 
+    # ----- gas constants -----
+    R_co2 = 188.9
+    gamma = 1.3
+    T_initial = 293.15
+    P_initial = 5.8e6           # Pa, initial CO2 pressure
+    Cd_nozzle = 0.9
+    system_efficiency = 0.0095  # thermodynamic efficiency
+
+    # ----- derived -----
+    theta = math.radians(slope_angle_deg)
+    nozzle_area = math.pi * (nozzle_diameter/2)**2
+
+    # ----- initial state -----
     position = 0.0
     velocity = 0.0
     time = 0.0
-    remaining_co2 = cartridge_mass * 0.9
+    remaining_co2 = cartridge_mass
     total_mass = car_mass + remaining_co2
+    liquid_mass = 0.9 * cartridge_mass  # assume 90% liquid at start
 
     speeds = []
     positions = []
 
-    nozzle_area = math.pi * (nozzle_diameter / 2) ** 2
-    gamma = 1.3
-    Cd = 0.9
-    system_efficiency = 0.0095
+    C_rr = 0.015  
 
+
+    choked_factor = math.sqrt(gamma/(R_co2*T_initial)) * (2/(gamma+1))**((gamma+1)/(2*(gamma-1)))
+   
+    v_exit = math.sqrt(gamma*R_co2*T_initial)
+ 
+    mdot0 = Cd_nozzle * nozzle_area * P_initial * choked_factor
+    thrust0 = system_efficiency * mdot0 * v_exit
+
+
+    normal0 = total_mass * g * math.cos(theta)
+    slope_force0 = total_mass * g * math.sin(theta)
+    rolling_resistance0 = C_rr * normal0
+    total_resistance0 = rolling_resistance0 + axle_friction_force + slope_force0
+
+    # ----- simulation loop: thrust active -----
     while position < track_length and remaining_co2 > 0.0001:
         positions.append(position)
         speeds.append(velocity)
 
-        if remaining_co2 > 0.1 * cartridge_mass:
-            current_pressure = P_initial
+        # ----- pressure model -----
+        if liquid_mass > 0:
+            current_pressure = P_initial   # constant while liquid remains
+            mdot = Cd_nozzle * nozzle_area * current_pressure * choked_factor
+            liquid_mass -= mdot * dt
+            if liquid_mass < 0:
+                liquid_mass = 0.0
         else:
+            # ideal gas depletion (linear with remaining mass)
             frac = remaining_co2 / (0.1 * cartridge_mass)
-            current_pressure = P_initial * frac
-            if current_pressure < 101325:
-                current_pressure = 101325
+            current_pressure = max(101325, P_initial * frac)
+            mdot = Cd_nozzle * nozzle_area * current_pressure * choked_factor
 
-        exit_velocity = math.sqrt(gamma * R_co2 * T_initial * (2 / (gamma + 1)))
-        mass_flow_rate = (Cd * nozzle_area * current_pressure *
-                         math.sqrt(gamma / (R_co2 * T_initial)) *
-                         (2 / (gamma + 1)) ** ((gamma + 1) / (2 * (gamma - 1))))
-        thrust_force = system_efficiency * mass_flow_rate * exit_velocity
 
-        remaining_co2 -= mass_flow_rate * dt
+        exit_velocity = math.sqrt(gamma * R_co2 * T_initial * (2/(gamma+1)))
+
+        thrust_force = system_efficiency * mdot * exit_velocity
+
+  
+        remaining_co2 -= mdot * dt
         if remaining_co2 < 0:
-            remaining_co2 = 0
+            remaining_co2 = 0.0
 
         total_mass = car_mass + remaining_co2
-        drag_force = 0.5 * air_density * velocity ** 2 * drag_coefficient * frontal_area
-        downforce = 0.5 * air_density * velocity ** 2 * lift_coefficient * frontal_area
-        normal_force = total_mass * g + downforce
-        rolling_resistance = rolling_resistance_coeff * normal_force
-        total_resistance = drag_force + rolling_resistance + axle_friction_force
 
+      
+        drag_force = 0.5 * air_density * velocity**2 * drag_coefficient * frontal_area
+        downforce = -0.5 * air_density * velocity**2 * lift_coefficient * frontal_area
+        normal_force = total_mass * g * math.cos(theta) + downforce
+        rolling_resistance = C_rr * normal_force
+        slope_force = total_mass * g * math.sin(theta)
+        total_resistance = drag_force + rolling_resistance + axle_friction_force + slope_force
+
+    
         net_force = thrust_force - total_resistance
         acceleration = net_force / total_mass
 
+        # integrate
         velocity += acceleration * dt
         if velocity < 0:
             velocity = 0
@@ -299,14 +333,18 @@ def simulate_co2_car(drag_coefficient, lift_coefficient, frontal_area, car_mass)
         if time > 30:
             break
 
+    # ----- coasting loop -----
     while position < track_length and velocity > 0.01:
         positions.append(position)
         speeds.append(velocity)
-        drag_force = 0.5 * air_density * velocity ** 2 * drag_coefficient * frontal_area
-        downforce = 0.5 * air_density * velocity ** 2 * lift_coefficient * frontal_area
-        normal_force = total_mass * g + downforce
-        rolling_resistance = rolling_resistance_coeff * normal_force
-        total_resistance = drag_force + rolling_resistance + axle_friction_force
+
+        drag_force = 0.5 * air_density * velocity**2 * drag_coefficient * frontal_area
+        downforce = -0.5 * air_density * velocity**2 * lift_coefficient * frontal_area
+        normal_force = total_mass * g * math.cos(theta) + downforce
+        rolling_resistance = C_rr * normal_force
+        slope_force = total_mass * g * math.sin(theta)
+        total_resistance = drag_force + rolling_resistance + axle_friction_force + slope_force
+
         deceleration = total_resistance / total_mass
         velocity -= deceleration * dt
         if velocity < 0:
@@ -317,6 +355,7 @@ def simulate_co2_car(drag_coefficient, lift_coefficient, frontal_area, car_mass)
             break
 
     return positions, speeds, time
+
 
 
 # ------------------------ CONFIG ------------------------
