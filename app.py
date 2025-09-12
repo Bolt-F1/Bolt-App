@@ -257,7 +257,7 @@ def simulate_co2_car(drag_coefficient, lift_coefficient, frontal_area, car_mass)
     nozzle_area = math.pi * (nozzle_diameter / 2) ** 2
     gamma = 1.3
     Cd = 0.9
-    system_efficiency = 0.00095
+    system_efficiency = 0.0095
 
     while position < track_length and remaining_co2 > 0.0001:
         positions.append(position)
