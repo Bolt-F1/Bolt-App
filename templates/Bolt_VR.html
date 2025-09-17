@@ -16,49 +16,43 @@
         <a-asset-item id="cityMtl" src="{{ url_for('static', filename='models/Bolt_City_Proto_2.mtl') }}"></a-asset-item>
       </a-assets>
 
-      <!-- Ground plane for safety -->
-      <a-box static-body position="0 -0.5 0" width="500" height="1" depth="500" color="#7BC8A4"></a-box>
-
-      <!-- City OBJ with proper scale and collidable -->
-      <a-entity obj-model="obj: #cityObj; mtl: #cityMtl" 
-                material="flatShading: true"
+      <!-- City with automatic collision -->
+      <a-entity id="city"
+                obj-model="obj: #cityObj; mtl: #cityMtl"
                 static-body
+                shape="auto"
                 position="0 0 0"
-                scale="1 1 1">
+                scale="1 1 1"
+                material="flatShading: true">
       </a-entity>
 
-      <!-- Player (camera + physics body) -->
+      <!-- Player -->
       <a-entity id="player"
-          position="0 10 5" 
-          geometry="primitive: box; width: 1; height: 2; depth: 1"
-          material="opacity:0; transparent:true"
-          dynamic-body="mass: 80; linearDamping: 0.02; angularDamping:0.9"
-          player-controls="maxForce:20000; maxSpeed:500; steerSpeed:150">
-    <a-camera>
-    <a-text id="speedText" value="Speed: 0" position="0 -0.4 -1.5" width="4" color="#FFF"></a-text>
-    </a-camera>
-    </a-entity>
-
-
-      <!-- Example dynamic objects -->
-      <a-box dynamic-body position="0 5 -5" width="1" height="1" depth="1" color="red"></a-box>
-      <a-sphere dynamic-body position="2 7 -3" radius="1.25" color="blue"></a-sphere>
+                position="0 10 5"
+                geometry="primitive: box; width: 1; height: 2; depth: 1"
+                material="color: red; opacity:1"
+                dynamic-body="mass: 80; linearDamping: 0.02; angularDamping: 0.9"
+                player-controls="maxForce:20000; maxSpeed:500; steerSpeed:150">
+        <a-camera>
+          <a-text id="speedText" value="Speed: 0" position="0 -0.4 -1.5" width="4" color="#FFF"></a-text>
+        </a-camera>
+      </a-entity>
 
       <!-- Lighting -->
-      <a-entity light="type: ambient; intensity: 1.5"></a-entity>
-      <a-entity light="type: directional; intensity: 2" position="0 20 10" rotation="-45 0 0"></a-entity>
+      <a-entity light="type: ambient; intensity: 2.5; color: #ffffff"></a-entity>
+      <a-entity light="type: directional; intensity: 1.5" position="10 20 10" rotation="-45 0 0"></a-entity>
+      <a-entity light="type: directional; intensity: 1" position="-10 20 -10" rotation="-45 180 0"></a-entity>
 
     </a-scene>
 
     <script>
-      // Player controls: accelerate the physics body forward/back, steer with A/D.
+      // Player controls
       AFRAME.registerComponent('player-controls', {
         schema: {
-          maxForce: {type: 'number', default: 20000}, // very high for testing
+          maxForce: {type: 'number', default: 20000},
           steerSpeed: {type: 'number', default: 150},
           maxSpeed: {type: 'number', default: 500}
         },
-
         init: function () {
           this.forward = 0;
           this.steer = 0;
@@ -66,7 +60,6 @@
           window.addEventListener('keydown', e => this.handleKey(e, true));
           window.addEventListener('keyup', e => this.handleKey(e, false));
         },
-
         handleKey: function (e, down) {
           const k = e.key.toLowerCase();
           if (k === 'w' || k === 'arrowup') this.forward = down ? 1 : 0;
@@ -74,13 +67,12 @@
           if (k === 'a' || k === 'arrowleft') this.steer = down ? -1 : 0;
           if (k === 'd' || k === 'arrowright') this.steer = down ? 1 : 0;
         },
-
         tick: function (time, delta) {
           if (!this.body) return;
           const dt = delta / 1000;
           const vel = this.body.velocity;
 
-          // forward vector (camera looks -Z)
+          // Forward vector
           const forward = new THREE.Vector3(0, 0, -1);
           this.el.object3D.getWorldDirection(forward);
           const fVec = new CANNON.Vec3(forward.x, forward.y, forward.z);
@@ -95,7 +87,7 @@
             this.body.applyForce(applied, this.body.position);
           }
 
-          // Steering (rotate the body visually)
+          // Steering
           if (this.steer !== 0 && Math.abs(currentSpeed) > 0.5) {
             const steerAmount = THREE.MathUtils.degToRad(this.data.steerSpeed) * this.steer * dt;
             const q = new CANNON.Quaternion();
