@@ -29,15 +29,16 @@
 
       <!-- Player (camera + physics body) -->
       <a-entity id="player"
-                position="0 2 5"
-                geometry="primitive: box; width: 1; height: 2; depth: 1"
-                material="opacity:0; transparent:true"
-                dynamic-body="mass: 80; linearDamping: 0.02; angularDamping: 0.9"
-                player-controls="maxForce:20000; maxSpeed:500; steerSpeed:150">
-        <a-camera>
-          <a-text id="speedText" value="Speed: 0" position="0 -0.4 -1.5" width="4" color="#FFF"></a-text>
-        </a-camera>
-      </a-entity>
+          position="0 10 5" 
+          geometry="primitive: box; width: 1; height: 2; depth: 1"
+          material="opacity:0; transparent:true"
+          dynamic-body="mass: 80; linearDamping: 0.02; angularDamping:0.9"
+          player-controls="maxForce:20000; maxSpeed:500; steerSpeed:150">
+    <a-camera>
+    <a-text id="speedText" value="Speed: 0" position="0 -0.4 -1.5" width="4" color="#FFF"></a-text>
+    </a-camera>
+    </a-entity>
+
 
       <!-- Example dynamic objects -->
       <a-box dynamic-body position="0 5 -5" width="1" height="1" depth="1" color="red"></a-box>
