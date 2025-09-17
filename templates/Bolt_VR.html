@@ -2,14 +2,13 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Bolt City VR — Fast Camera Test</title>
+    <title>Bolt City VR — Fast Camera + Collidable City</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.0.1/dist/aframe-physics-system.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-environment-component@1.3.2/dist/aframe-environment-component.min.js"></script>
     <style>body{margin:0;font-family:Arial,Helvetica,sans-serif}</style>
   </head>
   <body>
-    <a-scene physics="gravity: -9.8" vr-mode-ui="enabled: true" environment="preset: default; lighting: bright; groundColor: #7BC8A4">
+    <a-scene physics="gravity: -9.8" vr-mode-ui="enabled: true">
 
       <!-- Assets -->
       <a-assets>
@@ -17,18 +16,24 @@
         <a-asset-item id="cityMtl" src="{{ url_for('static', filename='models/Bolt_City_Proto_2.mtl') }}"></a-asset-item>
       </a-assets>
 
-      <!-- Ground plane -->
-      <a-box static-body position="0 -0.5 0" width="200" height="1" depth="200" color="#7BC8A4"></a-box>
+      <!-- Ground plane for safety -->
+      <a-box static-body position="0 -0.5 0" width="500" height="1" depth="500" color="#7BC8A4"></a-box>
 
-      <!-- City OBJ with flat color fallback -->
-      <a-entity obj-model="obj: #cityObj" material="color: gray; flatShading: true" static-body position="0 0 0" scale="1 1 1"></a-entity>
+      <!-- City OBJ with proper scale and collidable -->
+      <a-entity obj-model="obj: #cityObj; mtl: #cityMtl" 
+                material="flatShading: true"
+                static-body
+                position="0 0 0"
+                scale="1 1 1">
+      </a-entity>
 
       <!-- Player (camera + physics body) -->
-      <a-entity id="player" position="0 2 5"
+      <a-entity id="player"
+                position="0 2 5"
                 geometry="primitive: box; width: 1; height: 2; depth: 1"
-                material="opacity: 0; transparent: true"
+                material="opacity:0; transparent:true"
                 dynamic-body="mass: 80; linearDamping: 0.02; angularDamping: 0.9"
-                player-controls="maxForce: 20000; maxSpeed: 500; steerSpeed: 150">
+                player-controls="maxForce:20000; maxSpeed:500; steerSpeed:150">
         <a-camera>
           <a-text id="speedText" value="Speed: 0" position="0 -0.4 -1.5" width="4" color="#FFF"></a-text>
         </a-camera>
@@ -38,15 +43,19 @@
       <a-box dynamic-body position="0 5 -5" width="1" height="1" depth="1" color="red"></a-box>
       <a-sphere dynamic-body position="2 7 -3" radius="1.25" color="blue"></a-sphere>
 
+      <!-- Lighting -->
+      <a-entity light="type: ambient; intensity: 1.5"></a-entity>
+      <a-entity light="type: directional; intensity: 2" position="0 20 10" rotation="-45 0 0"></a-entity>
+
     </a-scene>
 
     <script>
       // Player controls: accelerate the physics body forward/back, steer with A/D.
       AFRAME.registerComponent('player-controls', {
         schema: {
-          maxForce: {type: 'number', default: 20000}, // super high force for testing
+          maxForce: {type: 'number', default: 20000}, // very high for testing
           steerSpeed: {type: 'number', default: 150},
-          maxSpeed: {type: 'number', default: 500} // very fast
+          maxSpeed: {type: 'number', default: 500}
         },
 
         init: function () {
