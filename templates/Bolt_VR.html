@@ -2,30 +2,34 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Bolt City VR Pitch</title>
+    <title>Bolt City VR — Faster Camera + MTL</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.0.1/dist/aframe-physics-system.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+    <style>body{margin:0;font-family:Arial,Helvetica,sans-serif}</style>
   </head>
   <body>
     <a-scene physics="gravity: -9.8" vr-mode-ui="enabled: true">
 
       <!-- Assets -->
       <a-assets>
-        <a-asset-item id="cityObj" src="{{ url_for('static', filename='models/Bolt_City_Prototype_norender.obj') }}"></a-asset-item>
+        <a-asset-item id="cityObj" src="{{ url_for('static', filename='models/Bolt_City_Proto_2.obj') }}"></a-asset-item>
+        <a-asset-item id="cityMtl" src="{{ url_for('static', filename='models/Bolt_City_Proto_2.mtl') }}"></a-asset-item>
       </a-assets>
 
       <!-- Ground plane -->
-      <a-box static-body position="0 -0.5 0" width="50" height="1" depth="50" color="#7BC8A4"></a-box>
+      <a-box static-body position="0 -0.5 0" width="200" height="1" depth="200" color="#7BC8A4"></a-box>
 
-      <!-- City placeholder OBJ -->
-      <a-entity obj-model="obj: #cityObj" material="color: gray" static-body position="0 0 0" scale="1 1 1"></a-entity>
+      <!-- City placeholder OBJ with MTL -->
+      <a-entity obj-model="obj: #cityObj; mtl: #cityMtl" material="color: gray" static-body position="0 0 0" scale="1 1 1"></a-entity>
 
-      <!-- Player with camera + movement controls -->
-      <a-entity id="player" position="0 2 5" movement-controls="speed: 2000">
+      <!-- Player (camera + physics body) -->
+      <a-entity id="player" position="0 2 5"
+                geometry="primitive: box; width: 1; height: 2; depth: 1"
+                material="opacity: 0; transparent: true"
+                dynamic-body="mass: 80; linearDamping: 0.1; angularDamping: 0.9"
+                player-controls>
         <a-camera>
-          <!-- Speed display HUD -->
-          <a-text id="speedText" value="Use WASD or Arrow Keys to Move" position="0 -0.3 -1" width="4" color="#FFF"></a-text>
+          <a-text id="speedText" value="Speed: 0" position="0 -0.4 -1.5" width="4" color="#FFF"></a-text>
         </a-camera>
       </a-entity>
 
@@ -34,37 +38,87 @@
       <a-sphere dynamic-body position="2 7 -3" radius="1.25" color="blue"></a-sphere>
 
       <!-- Lighting -->
-      <a-entity light="type: ambient; intensity: 0.5"></a-entity>
+      <a-entity light="type: ambient; intensity: 0.6"></a-entity>
       <a-entity light="type: directional; intensity: 1" position="10 20 10" rotation="-45 0 0"></a-entity>
 
     </a-scene>
-  
 
-    <!-- Speed display script -->
     <script>
+      // Player controls: accelerate the physics body forward/back, steer with A/D.
+      AFRAME.registerComponent('player-controls', {
+        schema: {
+          maxForce: {type: 'number', default: 2500},
+          steerSpeed: {type: 'number', default: 80},
+          maxSpeed: {type: 'number', default: 80}
+        },
+
+        init: function () {
+          this.forward = 0;
+          this.steer = 0;
+          this.el.addEventListener('body-loaded', () => { this.body = this.el.body; });
+          window.addEventListener('keydown', e => this.handleKey(e, true));
+          window.addEventListener('keyup', e => this.handleKey(e, false));
+        },
+
+        handleKey: function (e, down) {
+          const k = e.key.toLowerCase();
+          if (k === 'w' || k === 'arrowup') this.forward = down ? 1 : 0;
+          if (k === 's' || k === 'arrowdown') this.forward = down ? -1 : 0;
+          if (k === 'a' || k === 'arrowleft') this.steer = down ? -1 : 0;
+          if (k === 'd' || k === 'arrowright') this.steer = down ? 1 : 0;
+        },
+
+        tick: function (time, delta) {
+          if (!this.body) return;
+          const dt = delta / 1000;
+          const vel = this.body.velocity;
+
+          // forward vector (camera looks -Z)
+          const forward = new THREE.Vector3(0, 0, -1);
+          this.el.object3D.getWorldDirection(forward);
+          const fVec = new CANNON.Vec3(forward.x, forward.y, forward.z);
+
+          const currentSpeed = vel.x * fVec.x + vel.y * fVec.y + vel.z * fVec.z;
+
+          if (this.forward !== 0) {
+            const forceMag = this.data.maxForce;
+            const speedCap = this.data.maxSpeed;
+            let factor = Math.max(0, 1 - Math.abs(currentSpeed) / speedCap);
+            const applied = fVec.scale(forceMag * this.forward * factor * dt);
+            this.body.applyForce(applied, this.body.position);
+          }
+
+          // Steering (rotate the body visually)
+          if (this.steer !== 0 && Math.abs(currentSpeed) > 0.5) {
+            const steerAmount = THREE.MathUtils.degToRad(this.data.steerSpeed) * this.steer * dt;
+            const q = new CANNON.Quaternion();
+            q.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), steerAmount);
+            this.body.quaternion = this.body.quaternion.mult(q);
+            this.el.object3D.quaternion.copy(new THREE.Quaternion(this.body.quaternion.x, this.body.quaternion.y, this.body.quaternion.z, this.body.quaternion.w));
+          } else {
+            this.el.object3D.quaternion.copy(new THREE.Quaternion(this.body.quaternion.x, this.body.quaternion.y, this.body.quaternion.z, this.body.quaternion.w));
+          }
+        }
+      });
+
+      // Speed display
       AFRAME.registerComponent('speed-display', {
         init: function () {
           this.player = document.querySelector('#player');
           this.textEl = document.querySelector('#speedText');
         },
         tick: function () {
-          if (!this.player.body) return; // wait for physics body
-          const velocity = this.player.body.velocity;
-          const speed = Math.sqrt(velocity.x ** 2 + velocity.y ** 2 + velocity.z ** 2);
+          if (!this.player || !this.player.body) return;
+          const v = this.player.body.velocity;
+          const speed = Math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
           this.textEl.setAttribute('value', 'Speed: ' + speed.toFixed(2) + ' m/s');
         }
       });
 
       document.querySelector('a-scene').setAttribute('speed-display', '');
     </script>
-
-    <nav class="bottom-menu">
-        <ul>
-            <li><a href="{{ url_for('chat') }}"><img src="{{ url_for('static', filename='images/Message_Icon.png') }}" width="100" height="100" alt="Chat"></a></li>
-            <li><a href="{{ url_for('todo') }}"><img src="{{ url_for('static', filename='images/to_do_list_icon.png') }}" alt="Tasks"></a></li>
-            <li><a href="{{ url_for('chatbot') }}"><img src="{{ url_for('static', filename='images/Bolt_AI_Icon.png') }}" alt="Chatbot"></a></li>
-            <li><a href="{{ url_for('sim') }}"><img src="{{ url_for('static', filename='images/Sim_icon.png') }}" alt="Sim"></a></li>
-            <li><a href="{{ url_for('vr') }}"><img src="{{ url_for('static', filename='images/VR_icon.png') }}" alt="VR City"></a></li>
+  </body>
+</html>
         </ul>
     </nav>
 
