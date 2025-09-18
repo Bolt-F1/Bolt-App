@@ -1,365 +1,107 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
+  <title>VR Scene with Physics</title>
+
+  <!-- A-Frame -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.0/aframe.min.js"></script>
-  <!-- Physics engine -->
+  <!-- Physics system -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe-physics-system/4.0.1/aframe-physics-system.min.js"></script>
   <!-- OBJ/MTL loader -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe-extras/6.1.1/aframe-extras.min.js"></script>
-  <title>VR Physics Scene with Natural Acceleration</title>
+  <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+
   <style>
-    .ui-overlay {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: white;
-      font-family: Arial;
-      z-index: 100;
-      background: rgba(0,0,0,0.7);
-      padding: 10px;
-      border-radius: 5px;
-    }
+    body { margin: 0; overflow: hidden; }
   </style>
-</head>
-<body>
 
-<a-scene
-  physics="driver: ammo; debug: false; debugDrawMode: 0; gravity: -9.8;"
-  vr-mode-ui="enabled: true"
-  background="color: #87CEEB"
-  stats
->
-  <!-- Assets preloading -->
-  <a-assets>
-    <a-asset-item id="cityObj" src="{{ url_for('static', filename='models/Bolt_City_Proto_2.obj') }}"></a-asset-item>
-    <a-asset-item id="cityMtl" src="{{ url_for('static', filename='models/Bolt_City_Proto_2.mtl') }}"></a-asset-item>
-    <img id="ground-texture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
-    <img id="wall-texture" src="https://cdn.aframe.io/a-painter/images/brick.jpg">
-  </a-assets>
-
-  <!-- Environment -->
-  <a-sky color="#87CEEB"></a-sky>
-
-  <!-- Physics ground plane -->
-  <a-plane
-    position="0 0 0"
-    rotation="-90 0 0"
-    width="100"
-    height="100"
-    src="#ground-texture"
-    repeat="20 20"
-    static-body
-    shadow="receive: true"
-  ></a-plane>
-
-  <!-- City Model -->
-  <a-entity
-    position="0 0 -25"
-    obj-model="obj: #cityObj; mtl: #cityMtl"
-    static-body="shape: mesh;"
-    scale="1 1 1"
-    shadow="cast: true; receive: true"
-  ></a-entity>
-
-  <!-- Boundary walls -->
-  <a-box position="25 3 0" width="1" height="6" depth="100" color="#8B4513" static-body shadow="receive: true"></a-box>
-  <a-box position="-25 3 0" width="1" height="6" depth="100" color="#8B4513" static-body shadow="receive: true"></a-box>
-  <a-box position="0 3 -40" width="50" height="6" depth="1" color="#8B4513" static-body shadow="receive: true"></a-box>
-  <a-box position="0 3 40" width="50" height="6" depth="1" color="#8B4513" static-body shadow="receive: true"></a-box>
-
-  <!-- Lighting -->
-  <a-light type="ambient" color="#404040" intensity="0.4"></a-light>
-  <a-light type="directional" position="10 15 5" color="#ffffff" intensity="0.6"
-           shadow="cast: true; type: pcf; shadowMapWidth: 2048; shadowMapHeight: 2048;"></a-light>
-
-  <!-- Player rig -->
-  <a-entity
-    id="player-rig"
-    position="0 2.5 5"
-    vr-natural-locomotion
-    physics-body="shape: capsule; height: 1.8; radius: 0.4; mass: 70; linearDamping: 0.4; angularDamping: 0.8;"
-    kinematic-body
-    player-height-fix
-  >
-    <!-- Head/HMD -->
-    <a-camera
-      id="head"
-      position="0 1.6 0"
-      look-controls="pointerLockEnabled: false"
-      wasd-controls="enabled: false"
-      camera-height-tracker
-    >
-      <!-- Comfort fade sphere -->
-      <a-entity
-        id="fade-sphere"
-        geometry="primitive: sphere; radius: 10"
-        material="color: black; opacity: 0; transparent: true; side: back"
-        visible="false"
-      ></a-entity>
-    </a-camera>
-
-    <!-- Controllers -->
-    <a-entity id="left-hand"
-      hand-controls="hand: left; handModelStyle: lowPoly; color: #15ACCF"
-      vive-controls="hand: left"
-      oculus-touch-controls="hand: left"
-      windows-motion-controls="hand: left"
-    ></a-entity>
-
-    <a-entity id="right-hand"
-      hand-controls="hand: right; handModelStyle: lowPoly; color: #15ACCF"
-      vive-controls="hand: right"
-      oculus-touch-controls="hand: right"
-      windows-motion-controls="hand: right"
-    ></a-entity>
-  </a-entity>
-
-  <!-- Teleport fallback -->
-  <a-entity id="teleport-markers"></a-entity>
-</a-scene>
-
-<script>
-/* -------- Natural locomotion -------- */
-AFRAME.registerComponent('vr-natural-locomotion', {
-  schema: {
-    speed: {default: 3.5},
-    maxSpeed: {default: 8},
-    acceleration: {default: 0.15},
-    deceleration: {default: 0.12},
-    rotationSensitivity: {default: 0.8},
-    comfortMode: {default: true},
-    snapTurn: {default: false},
-    snapAngle: {default: 30}
-  },
-  init: function() {
-    this.velocity = new THREE.Vector3();
-    this.targetVelocity = new THREE.Vector3();
-    this.currentSpeed = 0;
-    this.targetSpeed = 0;
-    this.rotationVelocity = 0;
-    this.keys = {};
-    this.isMoving = false;
-    this.setupKeyboardControls();
-    this.el.addEventListener('enter-vr', this.onEnterVR.bind(this));
-    this.el.addEventListener('exit-vr', this.onExitVR.bind(this));
-  },
-  setupKeyboardControls: function() {
-    window.addEventListener('keydown', e => { this.keys[e.code] = true; });
-    window.addEventListener('keyup', e => { this.keys[e.code] = false; });
-  },
-  onEnterVR: function() { console.log('Entered VR - Natural locomotion enabled'); },
-  onExitVR: function() { console.log('Exited VR - Desktop controls active'); },
-  tick: function(time, timeDelta) {
-    const dt = timeDelta / 1000;
-    const inputVector = this.getInputVector();
-    const rotationInput = this.getRotationInput();
-    this.updateMovement(inputVector, dt);
-    this.updateRotation(rotationInput, dt);
-    this.applyMovement(dt);
-    if (this.data.comfortMode && this.isMoving) this.updateComfortFeatures();
-  },
-  getInputVector: function() {
-    const inputVector = new THREE.Vector2();
-    const gamepads = navigator.getGamepads && navigator.getGamepads();
-    if (gamepads) {
-      for (let gp of gamepads) {
-        if (gp && gp.axes && gp.axes.length >= 4) {
-          const x = Math.abs(gp.axes[2]) > 0.1 ? gp.axes[2] : 0;
-          const y = Math.abs(gp.axes[3]) > 0.1 ? gp.axes[3] : 0;
-          if (Math.abs(x) > Math.abs(inputVector.x)) inputVector.x = x;
-          if (Math.abs(y) > Math.abs(inputVector.y)) inputVector.y = -y;
-        }
-      }
-    }
-    if (!this.el.is('vr-mode')) {
-      if (this.keys['KeyW'] || this.keys['ArrowUp']) inputVector.y = 1;
-      if (this.keys['KeyS'] || this.keys['ArrowDown']) inputVector.y = -1;
-      if (this.keys['KeyA'] || this.keys['ArrowLeft']) inputVector.x = -1;
-      if (this.keys['KeyD'] || this.keys['ArrowRight']) inputVector.x = 1;
-    }
-    return inputVector;
-  },
-  getRotationInput: function() {
-    let rotationInput = 0;
-    const gamepads = navigator.getGamepads && navigator.getGamepads();
-    if (gamepads) {
-      for (let gp of gamepads) {
-        if (gp && gp.axes && gp.axes.length >= 2) {
-          const rotInput = Math.abs(gp.axes[0]) > 0.3 ? gp.axes[0] : 0;
-          if (Math.abs(rotInput) > Math.abs(rotationInput)) rotationInput = rotInput;
-        }
-      }
-    }
-    return rotationInput;
-  },
-  updateMovement: function(inputVector, dt) {
-    const inputMagnitude = inputVector.length();
-    if (inputMagnitude > 0.1) {
-      this.isMoving = true;
-      this.targetSpeed = inputMagnitude * this.data.maxSpeed;
-      this.currentSpeed += (this.targetSpeed - this.currentSpeed) * this.data.acceleration;
-      const head = this.el.querySelector('#head');
-      const headRotation = head.getAttribute('rotation');
-      const direction = new THREE.Vector3(inputVector.x, 0, inputVector.y).normalize();
-      direction.applyAxisAngle(new THREE.Vector3(0,1,0), THREE.MathUtils.degToRad(headRotation.y));
-      this.targetVelocity.copy(direction.multiplyScalar(this.currentSpeed));
-    } else {
-      this.isMoving = false;
-      this.currentSpeed *= (1 - this.data.deceleration);
-      if (this.currentSpeed < 0.01) {
+  <script>
+    // Natural locomotion with acceleration
+    AFRAME.registerComponent('vr-natural-locomotion', {
+      schema: { speed: {default: 5}, maxSpeed: {default: 15}, acceleration: {default: 0.3} },
+      init: function() {
+        this.velocity = new THREE.Vector3();
         this.currentSpeed = 0;
-        this.targetVelocity.set(0,0,0);
-      }
-    }
-  },
-  updateRotation: function(rotationInput, dt) {
-    if (Math.abs(rotationInput) > 0.3) {
-      if (this.data.snapTurn) {
-        if (!this.snapTurnCooldown) {
-          const rotation = this.el.getAttribute('rotation');
-          rotation.y += rotationInput > 0 ? this.data.snapAngle : -this.data.snapAngle;
-          this.el.setAttribute('rotation', rotation);
-          this.snapTurnCooldown = true;
-          setTimeout(() => { this.snapTurnCooldown = false; }, 300);
-        }
-      } else {
-        const rotation = this.el.getAttribute('rotation');
-        rotation.y += rotationInput * this.data.rotationSensitivity * 90 * dt;
-        this.el.setAttribute('rotation', rotation);
-      }
-    }
-  },
-  applyMovement: function(dt) {
-    if (this.el.body && this.currentSpeed > 0) {
-      const body = this.el.body;
-      const currentVel = body.getLinearVelocity();
-      body.setLinearVelocity(
-        new Ammo.btVector3(this.targetVelocity.x, currentVel.y, this.targetVelocity.z)
-      );
-    }
-  },
-  updateComfortFeatures: function() {
-    const fadeElement = this.el.querySelector('#fade-sphere');
-    if (fadeElement && this.currentSpeed > 1) {
-      const opacity = Math.min(0.3, (this.currentSpeed - 1) * 0.1);
-      fadeElement.setAttribute('material', 'opacity', opacity);
-      fadeElement.setAttribute('visible', true);
-    } else if (fadeElement) {
-      fadeElement.setAttribute('visible', false);
-    }
-  }
-});
+        this.keys = {};
+        window.addEventListener('keydown', e => this.keys[e.code] = true);
+        window.addEventListener('keyup', e => this.keys[e.code] = false);
+      },
+      tick: function(time, dt) {
+        const delta = dt / 1000;
+        let input = new THREE.Vector3();
+        if (this.keys['KeyW'] || this.keys['ArrowUp']) input.z -= 1;
+        if (this.keys['KeyS'] || this.keys['ArrowDown']) input.z += 1;
+        if (this.keys['KeyA'] || this.keys['ArrowLeft']) input.x -= 1;
+        if (this.keys['KeyD'] || this.keys['ArrowRight']) input.x += 1;
 
-/* -------- Camera height tracker -------- */
-AFRAME.registerComponent('camera-height-tracker', {
-  init: function() {
-    this.playerRig = this.el.parentEl;
-    this.hasAdjusted = false;
-    this.el.addEventListener('camera-set-active', this.adjustHeight.bind(this));
-    document.addEventListener('enter-vr', this.adjustHeight.bind(this));
-  },
-  adjustHeight: function() {
-    if (this.hasAdjusted) return;
-    setTimeout(() => {
-      const cameraPos = this.el.getAttribute('position');
-      const rigPos = this.playerRig.getAttribute('position');
-      if (rigPos.y + cameraPos.y < 1.0) {
-        rigPos.y = 2.0;
-        this.playerRig.setAttribute('position', rigPos);
-        console.log('Adjusted player height to prevent underground spawning');
-      }
-      this.hasAdjusted = true;
-    }, 1000);
-  }
-});
-
-/* -------- Player height fix -------- */
-AFRAME.registerComponent('player-height-fix', {
-  schema: { minHeight: {default: 1.5}, teleportKey: {default: 'KeyT'} },
-  init: function() {
-    this.groundCheckRay = new THREE.Raycaster();
-    this.groundCheckRay.far = 10;
-    window.addEventListener('keydown', (event) => {
-      if (event.code === this.data.teleportKey) this.emergencyTeleport();
-    });
-    this.tick = AFRAME.utils.throttleTick(this.tick, 100, this);
-  },
-  tick: function() {
-    const position = this.el.getAttribute('position');
-    const camera = this.el.querySelector('a-camera');
-    if (!camera) return;
-    const cameraWorldPos = new THREE.Vector3();
-    camera.object3D.getWorldPosition(cameraWorldPos);
-    if (cameraWorldPos.y < 0.5) {
-      console.warn('Player underground, adjusting position');
-      this.emergencyTeleport();
-    }
-    this.groundCheckRay.set(
-      new THREE.Vector3(position.x, position.y + 5, position.z),
-      new THREE.Vector3(0, -1, 0)
-    );
-    const scene = this.el.sceneEl.object3D;
-    const intersects = this.groundCheckRay.intersectObjects(scene.children, true);
-    if (intersects.length > 0) {
-      const groundHeight = intersects[0].point.y;
-      if (position.y < groundHeight + this.data.minHeight) {
-        position.y = groundHeight + this.data.minHeight;
-        this.el.setAttribute('position', position);
-      }
-    }
-  },
-  emergencyTeleport: function() {
-    const safePositions = [
-      {x: 0, y: 3, z: 5}, {x: 5, y: 3, z: 0},
-      {x: -5, y: 3, z: 0}, {x: 0, y: 3, z: -5}
-    ];
-    const randomPos = safePositions[Math.floor(Math.random() * safePositions.length)];
-    this.el.setAttribute('position', randomPos);
-    if (this.el.body) {
-      this.el.body.setLinearVelocity(new Ammo.btVector3(0,0,0));
-      this.el.body.setAngularVelocity(new Ammo.btVector3(0,0,0));
-    }
-    console.log('Emergency teleport to:', randomPos);
-  }
-});
-
-/* -------- LOD Manager -------- */
-AFRAME.registerComponent('lod-manager', {
-  init: function() {
-    this.camera = document.querySelector('a-camera');
-    this.objects = document.querySelectorAll('[static-body], [dynamic-body]');
-  },
-  tick: function() {
-    const cameraPos = this.camera.getAttribute('position');
-    this.objects.forEach(obj => {
-      const objPos = obj.getAttribute('position');
-      const distance = this.calculateDistance(cameraPos, objPos);
-      if (distance > 50) {
-        obj.setAttribute('visible', false);
-        if (obj.hasAttribute('dynamic-body')) obj.removeAttribute('dynamic-body');
-      } else {
-        obj.setAttribute('visible', true);
-        if (!obj.hasAttribute('dynamic-body') && obj.hasAttribute('dynamic')) {
-          obj.setAttribute('dynamic-body', '');
+        if (input.length() > 0) {
+          input.normalize();
+          this.currentSpeed += (this.data.maxSpeed - this.currentSpeed) * this.data.acceleration;
+          input.multiplyScalar(this.currentSpeed);
+          this.el.body.setLinearVelocity(new CANNON.Vec3(input.x, this.el.body.velocity.y, input.z));
+        } else {
+          this.currentSpeed *= 0.9;
         }
       }
     });
-  },
-  calculateDistance: function(pos1, pos2) {
-    return Math.sqrt(
-      Math.pow(pos1.x - pos2.x, 2) +
-      Math.pow(pos1.y - pos2.y, 2) +
-      Math.pow(pos1.z - pos2.z, 2)
-    );
-  }
-});
 
-document.querySelector('a-scene').setAttribute('lod-manager', '');
-document.addEventListener('DOMContentLoaded', function() {
-  const scene = document.querySelector('a-scene');
-  scene.setAttribute('renderer', 'antialias: false; colorManagement: true; physicallyCorrectLights: false;');
-  console.log('VR Natural Locomotion scene initialized');
-});
-</script>
+    // Spawn high and prevent underground
+    AFRAME.registerComponent('spawn-fix', {
+      schema: { height: {default: 5} },
+      init: function() {
+        const pos = this.el.getAttribute('position');
+        pos.y = this.data.height;
+        this.el.setAttribute('position', pos);
+      }
+    });
+
+    // Modify OBJ materials after load
+    AFRAME.registerComponent('modify-materials', {
+      schema: { color: {default: 'red'} },
+      init: function() {
+        this.el.addEventListener('model-loaded', () => {
+          const obj = this.el.getObject3D('mesh');
+          if (!obj) return;
+          obj.traverse(node => {
+            if (node.isMesh) node.material.color.set(this.data.color);
+          });
+        });
+      }
+    });
+  </script>
+</head>
+
+<body>
+  <a-scene physics="driver: ammo; gravity: -9.8;" background="color: #87CEEB">
+
+    <!-- Assets -->
+    <a-assets>
+      <a-asset-item id="cityObj" src="{{ url_for('static', filename='models/Bolt_City_Proto_2.obj') }}"></a-asset-item>
+      <a-asset-item id="cityMtl" src="{{ url_for('static', filename='models/Bolt_City_Proto_2.mtl') }}"></a-asset-item>
+    </a-assets>
+
+    <!-- Lights -->
+    <a-entity light="type: ambient; intensity: 0.6"></a-entity>
+    <a-entity light="type: directional; intensity: 0.8" position="10 15 5" castShadow></a-entity>
+
+    <!-- Ground plane -->
+    <a-plane rotation="-90 0 0" width="100" height="100" color="#228B22" static-body></a-plane>
+
+    <!-- Large OBJ+MTL model -->
+    <a-entity 
+      obj-model="obj: #cityObj; mtl: #cityMtl" 
+      static-body="shape: mesh" 
+      scale="1 1 1" 
+      position="0 0 0" 
+      modify-materials="color: lightgray">
+    </a-entity>
+
+    <!-- Player rig -->
+    <a-entity id="player-rig" position="0 5 10" vr-natural-locomotion physics-body="shape: capsule; height: 1.8; radius: 0.4; mass: 70;" spawn-fix>
+      <a-camera position="0 1.6 0"></a-camera>
+    </a-entity>
+
+  </a-scene>
 </body>
 </html>
+
