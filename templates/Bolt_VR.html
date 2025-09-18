@@ -2,53 +2,12 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Optimized VR City Scene</title>
+  <title>VR City with Collisions</title>
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.2.3/dist/aframe-physics-system.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/aframe-extras@7.6.0/dist/aframe-extras.min.js"></script>
 
   <script>
-    // Optimized collision generation: skip tiny meshes
-    AFRAME.registerComponent('auto-collision', {
-      schema: { minSize: {default: 0.5} },
-      init: function() {
-        this.el.addEventListener('model-loaded', () => {
-          const obj = this.el.getObject3D('mesh');
-          if (!obj) return;
-          const sceneEl = this.el.sceneEl;
-
-          obj.traverse(node => {
-            if (node.isMesh) {
-              node.material.side = THREE.DoubleSide; // Fix dark interiors
-
-              // Compute bounding box
-              const box = new THREE.Box3().setFromObject(node);
-              const size = new THREE.Vector3();
-              box.getSize(size);
-
-              // Skip tiny meshes
-              if (size.x < this.data.minSize && size.y < this.data.minSize && size.z < this.data.minSize) return;
-
-              const center = new THREE.Vector3();
-              box.getCenter(center);
-
-              // Create collider
-              const collider = document.createElement('a-box');
-              collider.setAttribute('position', `${center.x} ${center.y} ${center.z}`);
-              collider.setAttribute('width', size.x);
-              collider.setAttribute('height', size.y);
-              collider.setAttribute('depth', size.z);
-              collider.setAttribute('visible','false');
-
-              sceneEl.appendChild(collider);
-              collider.setAttribute('static-body',''); // attach after appending
-            }
-          });
-        });
-      }
-    });
-
-    // Player movement with smooth acceleration
+    // Smooth VR/Desktop movement with acceleration
     AFRAME.registerComponent('vr-natural-locomotion', {
       schema: { speed: {default: 5}, maxSpeed: {default: 8}, acceleration: {default:0.2} },
       init: function() {
@@ -91,32 +50,39 @@
   <a-scene physics="driver: ammo; gravity: -9.8;" background="color: #87CEEB" stats>
 
     <a-assets>
+      <!-- Full visual model with MTL -->
       <a-asset-item id="cityObj" src="{{ url_for('static', filename='models/Bolt_City_Proto_2.obj') }}"></a-asset-item>
       <a-asset-item id="cityMtl" src="{{ url_for('static', filename='models/Bolt_City_Proto_2.mtl') }}"></a-asset-item>
+
+      <!-- Low-poly collision mesh -->
+      <a-asset-item id="cityCollider" src="{{ url_for('static', filename='models/Bolt_City_Proto_2_Collidable.obj') }}"></a-asset-item>
     </a-assets>
 
     <!-- Lighting -->
-    <a-entity light="type: ambient; intensity: 5; color: #ffffff"></a-entity>
+    <a-entity light="type: ambient; intensity: 1.2; color: #ffffff"></a-entity>
     <a-entity light="type: directional; intensity: 2; color: #ffffff" position="10 20 10" shadow="cast:true"></a-entity>
+    <a-entity light="type: directional; intensity: 1.5; color: #ffffff" position="-10 20 -10" shadow="cast:true"></a-entity>
 
     <!-- Ground -->
     <a-plane position="0 0 0" rotation="-90 0 0" width="100" height="100" color="#7CFC00" static-body></a-plane>
 
-    <!-- Visual City Model with optimized colliders -->
-    <a-entity 
-      obj-model="obj: #cityObj; mtl: #cityMtl"
-      position="0 0 0"
-      scale="0.1 0.1 0.1"
-      rotation="0 180 0"
-      auto-collision="minSize: 0.5">
+    <!-- Collision mesh (invisible) -->
+    <a-entity obj-model="obj: #cityCollider" visible="false" static-body></a-entity>
+
+    <!-- Visual city model (renders MTL) -->
+    <a-entity obj-model="obj: #cityObj; mtl: #cityMtl"
+              position="0 0 0"
+              scale="0.1 0.1 0.1"
+              rotation="0 180 0">
     </a-entity>
 
     <!-- Player -->
-    <a-entity id="player" position="0 3 5" vr-natural-locomotion physics-body="shape: capsule; mass: 70; linearDamping: 0.5; angularDamping: 0.9">
+    <a-entity id="player" position="0 3 5"
+              vr-natural-locomotion
+              dynamic-body="shape: capsule; mass: 70; linearDamping: 0.5; angularDamping: 0.9">
       <a-camera></a-camera>
     </a-entity>
 
   </a-scene>
 </body>
 </html>
-
