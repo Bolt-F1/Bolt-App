@@ -24,10 +24,31 @@
         this.targetVelocity = new THREE.Vector3();
         this.currentSpeed = 0;
         this.keys = {};
-        window.addEventListener('keydown', e => this.keys[e.code] = true);
-        window.addEventListener('keyup', e => this.keys[e.code] = false);
+        
+        // Bind event listeners to maintain context
+        this.onKeyDown = this.onKeyDown.bind(this);
+        this.onKeyUp = this.onKeyUp.bind(this);
+        
+        window.addEventListener('keydown', this.onKeyDown);
+        window.addEventListener('keyup', this.onKeyUp);
       },
+      
+      onKeyDown: function(e) {
+        this.keys[e.code] = true;
+      },
+      
+      onKeyUp: function(e) {
+        this.keys[e.code] = false;
+      },
+      
+      remove: function() {
+        window.removeEventListener('keydown', this.onKeyDown);
+        window.removeEventListener('keyup', this.onKeyUp);
+      },
+      
       tick: function (time, delta) {
+        if (!this.el.body) return; // Wait for physics body to initialize
+        
         let inputVector = new THREE.Vector2();
         if (this.keys['KeyW'] || this.keys['ArrowUp']) inputVector.y = 1;
         if (this.keys['KeyS'] || this.keys['ArrowDown']) inputVector.y = -1;
@@ -35,59 +56,115 @@
         if (this.keys['KeyD'] || this.keys['ArrowRight']) inputVector.x = 1;
 
         if (inputVector.length() > 0.1) {
-          const headRot = this.el.querySelector('a-camera').getAttribute('rotation');
-          const dir = new THREE.Vector3(inputVector.x, 0, inputVector.y).normalize();
-          dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(headRot.y));
-          this.targetVelocity.copy(dir.multiplyScalar(this.data.maxSpeed));
+          // Get camera element properly
+          const camera = this.el.querySelector('[camera]') || this.el.querySelector('a-camera');
+          if (camera) {
+            const headRot = camera.getAttribute('rotation') || {x: 0, y: 0, z: 0};
+            const dir = new THREE.Vector3(inputVector.x, 0, -inputVector.y).normalize(); // Fixed Z direction
+            dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(headRot.y));
+            this.targetVelocity.copy(dir.multiplyScalar(this.data.maxSpeed));
+          }
         } else {
           this.targetVelocity.set(0, 0, 0);
         }
 
-        if (this.el.body) {
-          const vel = this.el.body.getLinearVelocity();
-          this.el.body.setLinearVelocity(
-            this.targetVelocity.x,
-            vel.y,
-            this.targetVelocity.z
-          );
-        }
+        // Apply movement with proper physics
+        const vel = this.el.body.getLinearVelocity();
+        this.el.body.setLinearVelocity(
+          this.targetVelocity.x,
+          vel.y, // Keep existing Y velocity (gravity)
+          this.targetVelocity.z
+        );
       }
     });
   </script>
 </head>
 
 <body>
-  <a-scene physics="driver: ammo; debug: true;" background="color: #87CEEB">
+  <a-scene physics="driver: ammo; debug: false;" background="color: #87CEEB" vr-mode-ui="enabled: true">
 
     <a-assets>
-      <a-asset-item id="cityVisual" src="{{ url_for('static', filename='models/Bolt_City_V2.gltf') }}"></a-asset-item>
-      <a-asset-item id="cityCollide" src="{{ url_for('static', filename='models/Bolt_City_V2_Collidable_2.gltf') }}"></a-asset-item>
+      <!-- Placeholder city models - replace with your actual GLTF files -->
+      <!-- <a-asset-item id="cityVisual" src="path/to/your/Bolt_City_V2.gltf"></a-asset-item>
+      <a-asset-item id="cityCollide" src="path/to/your/Bolt_City_V2_Collidable_2.gltf"></a-asset-item> -->
     </a-assets>
 
     <!-- Environment -->
     <a-entity environment="preset: city; skyColor: #87CEEB; groundColor: #777"></a-entity>
 
-    <!-- Ground -->
-    <a-plane position="0 0 0" rotation="-90 0 0" width="200" height="200" color="#777"
-             ammo-body="type: static;"
-             ammo-shape="type: box"></a-plane>
+    <!-- Ground plane with proper physics -->
+    <a-plane position="0 0 0" 
+             rotation="-90 0 0" 
+             width="200" 
+             height="200" 
+             color="#777"
+             ammo-body="type: static; mass: 0;"
+             ammo-shape="type: box; halfExtents: 100 0.1 100"></a-plane>
 
-    <!-- Visual city -->
-    <a-entity gltf-model="#cityVisual" scale="1 1 1" position="0 0 0"></a-entity>
+    <!-- Visual city (uncomment when you have the models) -->
+    <!-- <a-entity gltf-model="#cityVisual" scale="1 1 1" position="0 0 0"></a-entity> -->
 
     <!-- Collidable city (invisible physics mesh) -->
-    <a-entity gltf-model="#cityCollide"
+    <!-- <a-entity gltf-model="#cityCollide"
               visible="false"
-              ammo-body="type: static;"
-              ammo-shape="type: mesh"></a-entity>
+              ammo-body="type: static; mass: 0;"
+              ammo-shape="type: mesh"></a-entity> -->
 
-    <!-- Player capsule -->
-    <a-entity id="player" position="0 3 10"
-              ammo-body="type: kinematic;"
-              ammo-shape="type: capsule; height: 1.8; radius: 0.4"
+    <!-- Some placeholder buildings for testing -->
+    <a-box position="5 2.5 -5" 
+           width="3" 
+           height="5" 
+           depth="3" 
+           color="#666"
+           ammo-body="type: static; mass: 0;"
+           ammo-shape="type: box"></a-box>
+           
+    <a-box position="-8 1.5 -10" 
+           width="2" 
+           height="3" 
+           depth="2" 
+           color="#555"
+           ammo-body="type: static; mass: 0;"
+           ammo-shape="type: box"></a-box>
+           
+    <a-cylinder position="10 3 5" 
+                radius="2" 
+                height="6" 
+                color="#777"
+                ammo-body="type: static; mass: 0;"
+                ammo-shape="type: cylinder"></a-cylinder>
+
+    <!-- Player rig -->
+    <a-entity id="player" 
+              position="0 1.8 10"
+              ammo-body="type: kinematic; mass: 1;"
+              ammo-shape="type: capsule; height: 1.8; radiusTop: 0.4; radiusBottom: 0.4"
               vr-natural-locomotion>
-      <a-camera position="0 1.6 0"></a-camera>
+      
+      <!-- Camera positioned for proper head height -->
+      <a-camera position="0 0 0" 
+                look-controls="pointerLockEnabled: true"
+                wasd-controls="enabled: false">
+        
+        <!-- VR controllers -->
+        <a-entity id="leftHand" 
+                  laser-controls="hand: left" 
+                  raycaster="objects: .clickable"
+                  visible="false"></a-entity>
+        <a-entity id="rightHand" 
+                  laser-controls="hand: right" 
+                  raycaster="objects: .clickable"
+                  visible="false"></a-entity>
+      </a-camera>
     </a-entity>
+
+    <!-- Lighting -->
+    <a-light type="ambient" color="#404040"></a-light>
+    <a-light type="directional" 
+             position="10 20 10" 
+             color="#ffffff" 
+             intensity="0.8"
+             shadow="cast: true; mapSize: 2048"></a-light>
 
   </a-scene>
 </body>
