@@ -516,7 +516,7 @@ def sim():
                 mass = float(request.form.get("mass"))
                 cross_section = float(request.form.get("cross_section"))
 
-                distances, speeds, time = simulate_co2_car(drag_co, lift_co, cross_section, mass)
+                distances, speeds, time = simulate_co2_car_energy(drag_co, lift_co, cross_section, mass)
 
                 buf = io.BytesIO()
                 plt.figure(figsize=(8,5))
