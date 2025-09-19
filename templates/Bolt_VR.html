@@ -2,24 +2,21 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>VR City V2</title>
+  <title>VR City V2 Collisions & Fast Locomotion</title>
 
-  <!-- Official A-Frame releases -->
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script src="https://aframe.io/releases/1.4.0/aframe-physics-system.min.js"></script>
-  <script src="https://aframe.io/releases/1.4.0/aframe-extras.min.js"></script>
+  <!-- Official A-Frame + Physics -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
 
-  <!-- VR Natural Locomotion Component (fast acceleration) -->
+  <!-- VR Natural Locomotion Component -->
   <script>
     AFRAME.registerComponent('vr-natural-locomotion', {
       schema: {
-        maxSpeed: {default: 12},          // faster max speed
-        acceleration: {default: 1},     // much faster acceleration
+        maxSpeed: {default: 12},
+        acceleration: {default: 0.5},
         deceleration: {default: 0.2},
         rotationSensitivity: {default: 0.8},
-        comfortMode: {default: true},
-        snapTurn: {default: false},
-        snapAngle: {default: 30}
+        comfortMode: {default: true}
       },
       init: function() {
         this.velocity = new THREE.Vector3();
@@ -50,7 +47,6 @@
           const targetSpeed = inputMag * this.data.maxSpeed;
           this.currentSpeed += (targetSpeed - this.currentSpeed) * this.data.acceleration;
 
-          // Apply movement relative to camera
           const headRot = this.el.querySelector('a-camera').getAttribute('rotation');
           const dir = new THREE.Vector3(inputVector.x, 0, inputVector.y).normalize();
           dir.applyAxisAngle(new THREE.Vector3(0,1,0), THREE.MathUtils.degToRad(headRot.y));
@@ -62,7 +58,6 @@
           this.targetVelocity.set(0,0,0);
         }
 
-        // Apply physics velocity
         if (this.el.body) {
           const vel = this.el.body.getLinearVelocity();
           this.el.body.setLinearVelocity(
@@ -81,29 +76,27 @@
 
     <a-assets>
       <a-asset-item id="cityVisual" src="{{ url_for('static', filename='models/Bolt_City_V2.gltf') }}"></a-asset-item>
-      <a-asset-item id="cityCollide" src="{{ url_for('static', filename='models/Bolt_City_V2_Collidable.gltf') }}"></a-asset-item>
+      <a-asset-item id="cityCollide" src="{{ url_for('static', filename='models/Bolt_City_V2_Collidable_2.gltf') }}"></a-asset-item>
     </a-assets>
 
     <!-- Lighting -->
-    <a-entity light="type: ambient; intensity: 1.2"></a-entity>
+    <a-entity light="type: ambient; intensity: 0.6"></a-entity>
     <a-entity light="type: directional; color: #ffffff; intensity: 0.8"
               position="10 15 5"
-              shadow="cast: true; type: pcf; shadowMapWidth: 2048; shadowMapHeight: 2048">
-    </a-entity>
+              shadow="cast: true; type: pcf; shadowMapWidth: 2048; shadowMapHeight: 2048"></a-entity>
 
     <!-- Ground -->
-    <a-plane position="0 0 0" rotation="-90 0 0" width="200" height="200" color="#777"
-             static-body shadow="receive: true"></a-plane>
+    <a-plane rotation="-90 0 0" width="200" height="200" color="#777" static-body shadow="receive: true"></a-plane>
 
     <!-- Visual city -->
     <a-entity gltf-model="#cityVisual" scale="1 1 1" position="0 0 0"></a-entity>
 
-    <!-- Collidable city (invisible, thickened if needed) -->
+    <!-- Collidable city (invisible) -->
     <a-entity gltf-model="#cityCollide" 
               static-body="shape: mesh;" 
               visible="false" 
-              scale="1 1 1" 
-              position="0 0 0"></a-entity>
+              position="0 0 0" 
+              scale="1 1 1"></a-entity>
 
     <!-- Player capsule -->
     <a-entity id="player" position="0 3 10"
@@ -115,5 +108,6 @@
   </a-scene>
 </body>
 </html>
+
 
 
