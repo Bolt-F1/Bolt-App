@@ -2,174 +2,84 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>VR City with Ammo Collisions & Reflections</title>
+  <title>A-Frame Physics Test</title>
 
-  <!-- Official A-Frame + Physics -->
+  <!-- A-Frame + Physics -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
 
-  <!-- Environment reflections -->
-  <script src="https://cdn.jsdelivr.net/gh/etiennepinchon/aframe-environment-component@1.3.1/dist/aframe-environment-component.min.js"></script>
-
-  <!-- Natural locomotion -->
   <script>
-    AFRAME.registerComponent('vr-natural-locomotion', {
-      schema: {
-        maxSpeed: {default: 12},
-        acceleration: {default: 0.5},
-        deceleration: {default: 0.2}
-      },
+    // Simple kinematic locomotion
+    AFRAME.registerComponent('vr-test-locomotion', {
+      schema: { speed: {default: 0.3}, jump: {default: 0.5} },
       init: function () {
-        this.velocity = new THREE.Vector3();
-        this.targetVelocity = new THREE.Vector3();
-        this.currentSpeed = 0;
         this.keys = {};
-        
-        // Bind event listeners to maintain context
-        this.onKeyDown = this.onKeyDown.bind(this);
-        this.onKeyUp = this.onKeyUp.bind(this);
-        
-        window.addEventListener('keydown', this.onKeyDown);
-        window.addEventListener('keyup', this.onKeyUp);
+        window.addEventListener('keydown', e => this.keys[e.code] = true);
+        window.addEventListener('keyup', e => this.keys[e.code] = false);
       },
-      
-      onKeyDown: function(e) {
-        this.keys[e.code] = true;
-      },
-      
-      onKeyUp: function(e) {
-        this.keys[e.code] = false;
-      },
-      
-      remove: function() {
-        window.removeEventListener('keydown', this.onKeyDown);
-        window.removeEventListener('keyup', this.onKeyUp);
-      },
-      
-      tick: function (time, delta) {
-        if (!this.el.body) return; // Wait for physics body to initialize
-        
-        let inputVector = new THREE.Vector2();
-        if (this.keys['KeyW'] || this.keys['ArrowUp']) inputVector.y = 1;
-        if (this.keys['KeyS'] || this.keys['ArrowDown']) inputVector.y = -1;
-        if (this.keys['KeyA'] || this.keys['ArrowLeft']) inputVector.x = -1;
-        if (this.keys['KeyD'] || this.keys['ArrowRight']) inputVector.x = 1;
+      tick: function () {
+        const pos = this.el.object3D.position;
+        const cam = this.el.querySelector('[camera]');
+        const rot = cam.getAttribute('rotation');
+        let dir = new THREE.Vector3();
 
-        if (inputVector.length() > 0.1) {
-          // Get camera element properly
-          const camera = this.el.querySelector('[camera]') || this.el.querySelector('a-camera');
-          if (camera) {
-            const headRot = camera.getAttribute('rotation') || {x: 0, y: 0, z: 0};
-            const dir = new THREE.Vector3(inputVector.x, 0, -inputVector.y).normalize(); // Fixed Z direction
-            dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(headRot.y));
-            this.targetVelocity.copy(dir.multiplyScalar(this.data.maxSpeed));
-          }
-        } else {
-          this.targetVelocity.set(0, 0, 0);
+        // WASD input
+        if (this.keys['KeyW']) dir.z -= 1;
+        if (this.keys['KeyS']) dir.z += 1;
+        if (this.keys['KeyA']) dir.x -= 1;
+        if (this.keys['KeyD']) dir.x += 1;
+
+        if (dir.lengthSq() > 0) {
+          dir.normalize();
+          dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(rot.y));
+          pos.addScaledVector(dir, this.data.speed);
+          this.el.body.needUpdate = true; // sync physics
         }
 
-        // Apply movement with proper physics
-        const vel = this.el.body.getLinearVelocity();
-        this.el.body.setLinearVelocity(
-          this.targetVelocity.x,
-          vel.y, // Keep existing Y velocity (gravity)
-          this.targetVelocity.z
-        );
+        // Jump (basic)
+        if (this.keys['Space']) {
+          pos.y += this.data.jump;
+          this.el.body.needUpdate = true;
+          this.keys['Space'] = false; // prevent holding
+        }
       }
     });
   </script>
 </head>
 
 <body>
-  <a-scene physics="driver: ammo; debug: false;" background="color: #87CEEB" vr-mode-ui="enabled: true">
+  <a-scene physics="driver: ammo; debug: true; gravity: 0 -9.8 0" background="color: #87CEEB">
+    
+    <!-- Ground -->
+    <a-plane position="0 0 0" rotation="-90 0 0" width="50" height="50" color="#777"
+             ammo-body="type: static;" 
+             ammo-shape="type: box; halfExtents: 25 0.1 25"></a-plane>
+    
+    <!-- Test Boxes -->
+    <a-box position="0 1 -5" width="2" height="2" depth="2" color="red"
+           ammo-body="type: static;"
+           ammo-shape="type: box; halfExtents: 1 1 1"></a-box>
 
-    <a-assets>
-      <!-- Placeholder city models - replace with your actual GLTF files -->
-      <!-- <a-asset-item id="cityVisual" src="path/to/your/Bolt_City_V2.gltf"></a-asset-item>
-      <a-asset-item id="cityCollide" src="path/to/your/Bolt_City_V2_Collidable_2.gltf"></a-asset-item> -->
-    </a-assets>
+    <a-box position="3 1 -5" width="2" height="2" depth="2" color="green"
+           ammo-body="type: static;"
+           ammo-shape="type: box; halfExtents: 1 1 1"></a-box>
 
-    <!-- Environment -->
-    <a-entity environment="preset: city; skyColor: #87CEEB; groundColor: #777"></a-entity>
+    <!-- Ramp -->
+    <a-box position="-3 0.5 -8" width="6" height="1" depth="8" rotation="0 0 25" color="blue"
+           ammo-body="type: static;"
+           ammo-shape="type: box; halfExtents: 3 0.5 4"></a-box>
 
-    <!-- Ground plane with proper physics -->
-    <a-plane position="0 0 0" 
-             rotation="-90 0 0" 
-             width="200" 
-             height="200" 
-             color="#777"
-             ammo-body="type: static; mass: 0;"
-             ammo-shape="type: box; halfExtents: 100 0.1 100"></a-plane>
-
-    <!-- Visual city (uncomment when you have the models) -->
-    <!-- <a-entity gltf-model="#cityVisual" scale="1 1 1" position="0 0 0"></a-entity> -->
-
-    <!-- Collidable city (invisible physics mesh) -->
-    <!-- <a-entity gltf-model="#cityCollide"
-              visible="false"
-              ammo-body="type: static; mass: 0;"
-              ammo-shape="type: mesh"></a-entity> -->
-
-    <!-- Some placeholder buildings for testing -->
-    <a-box position="5 2.5 -5" 
-           width="3" 
-           height="5" 
-           depth="3" 
-           color="#666"
-           ammo-body="type: static; mass: 0;"
-           ammo-shape="type: box"></a-box>
-           
-    <a-box position="-8 1.5 -10" 
-           width="2" 
-           height="3" 
-           depth="2" 
-           color="#555"
-           ammo-body="type: static; mass: 0;"
-           ammo-shape="type: box"></a-box>
-           
-    <a-cylinder position="10 3 5" 
-                radius="2" 
-                height="6" 
-                color="#777"
-                ammo-body="type: static; mass: 0;"
-                ammo-shape="type: cylinder"></a-cylinder>
-
-    <!-- Player rig -->
-    <a-entity id="player" 
-              position="0 1.8 10"
-              ammo-body="type: kinematic; mass: 1;"
-              ammo-shape="type: capsule; height: 1.8; radiusTop: 0.4; radiusBottom: 0.4"
-              vr-natural-locomotion>
-      
-      <!-- Camera positioned for proper head height -->
-      <a-camera position="0 0 0" 
+    <!-- Player -->
+    <a-entity id="player"
+              position="0 2 5"
+              ammo-body="type: kinematic;"
+              ammo-shape="type: capsule; radius: 0.4; height: 1.8"
+              vr-test-locomotion>
+      <a-camera position="0 0.7 0"
                 look-controls="pointerLockEnabled: true"
-                wasd-controls="enabled: false">
-        
-        <!-- VR controllers -->
-        <a-entity id="leftHand" 
-                  laser-controls="hand: left" 
-                  raycaster="objects: .clickable"
-                  visible="false"></a-entity>
-        <a-entity id="rightHand" 
-                  laser-controls="hand: right" 
-                  raycaster="objects: .clickable"
-                  visible="false"></a-entity>
-      </a-camera>
+                wasd-controls="enabled: false"></a-camera>
     </a-entity>
-
-    <!-- Lighting -->
-    <a-light type="ambient" color="#404040"></a-light>
-    <a-light type="directional" 
-             position="10 20 10" 
-             color="#ffffff" 
-             intensity="0.8"
-             shadow="cast: true; mapSize: 2048"></a-light>
-
   </a-scene>
 </body>
 </html>
-
-
-
 

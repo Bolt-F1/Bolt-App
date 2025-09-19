@@ -659,8 +659,8 @@ def sim():
 
     
 
-@app.route("/vr", methods=["GET", "POST"])
-def vr():
+@app.route("/reactiontime", methods=["GET", "POST"])
+def react():
     return render_template("Bolt_VR.html")
 
 @app.route("/health", methods=["GET"])

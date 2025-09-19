@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>F1 Reaction Test</title>
+  <style>
+   body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #111;
+    color: white;
+   }
+   .lights {
+    margin: 30px auto;
+   }
+   .light {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 10px;
+    background: darkred;
+   }
+   .green {
+    background: green !important;
+   }
+   #button {
+    margin-top: 40px;
+    padding: 30px 50px;
+    font-size: 30px;
+    background: #444;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 15px;
+   }
+   #result {
+    font-size: 28px;
+    margin-top: 20px;
+   }
+  </style>
+</head>
+<body>
+    <h1>F1 Reaction Test</h1>
+    <p style="font-size:20px">Wait until the lights turn green, react quickly and hit it quickly as possible.</p>
+ 
+    <div class="lights">
+        <div class="light" id="l1"></div>
+        <div class="light" id="l2"></div>
+        <div class="light" id="l3"></div>
+        <div class="light" id="l4"></div>
+        <div class="light" id="l5"></div>
+    </div>
+ 
+    <button id="button">Start</button>
+    <p id="result">--</p>
+ 
+    <script>
+        let startTime
+        let ready = false;
+        let waiting = false;
+        let timer;
+ 
+        const button = document.getElementById("button");
+        const result = document.getElementById("result");
+        const lights = ["l1","l2","l3","l4","l5"].map(id => document.getElementById(id));
+       
+        function resetLights(){
+            lights.forEach(light => light.classList.remove("green"));
+        }
+ 
+        function cancelAttempt(){
+            clearTimeout(timer);
+            resetLights();
+            ready = false;
+            waiting = false;
+        }
+           
+     button.onclick = function(){
+        if(waiting && !ready){
+            result.textContent = "False Start! Press Start to try again.";
+            cancelAttempt();
+            return;
+        }
+        if(!ready){
+            resetLights();
+            result.textContent = "Wait for green...";
+            waiting = true;
+            let delay = Math.random()*3000 + 2000;
+            timer = setTimeout(() => {
+                lights.forEach(light => light.classList.add("green"))
+                startTime = Date.now();
+                ready = true;
+                waiting = false;
+            }, delay);
+        } else {
+          let reaction = Date.now() - startTime;
+          result.textContent = "Your reaction time: " + reaction
+          ready = false;
+        }
+     }  
+    </script>
+
+
+    <nav class="bottom-menu">
+        <ul>
+            <li><a href="{{ url_for('chat') }}"><img src="{{ url_for('static', filename='images/Message_Icon.png') }}" width="100" height="100" alt="Chat"></a></li>
+            <li><a href="{{ url_for('todo') }}"><img src="{{ url_for('static', filename='images/to_do_list_icon.png') }}" alt="Tasks"></a></li>
+            <li><a href="{{ url_for('chatbot') }}"><img src="{{ url_for('static', filename='images/Bolt_AI_Icon.png') }}" alt="Chatbot"></a></li>
+            <li><a href="{{ url_for('sim') }}"><img src="{{ url_for('static', filename='images/Sim_icon.png') }}" alt="Sim"></a></li>
+            <li><a href="{{ url_for('react') }}"><img src="{{ url_for('static', filename='images/VR_icon.png') }}" alt="VR City"></a></li>
+        </ul>
+    </nav>
+</body>  
+</html>
