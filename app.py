@@ -22,12 +22,13 @@ app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
 # ------------------------ USERS ------------------------
-USERS = ["Ahoon", "Ayaan", "Ayush", "Vishak", "Nathan"]
+USERS = ["Ahoon", "Ayaan", "Ayush", "Vishak", "Nathan", "Tharun"]
 USER_COLORS = {
     "Ahoon": "tomato",
     "Ayaan": "orange",
     "Ayush": "sienna",
     "Vishak": "peru",
+    "Tharun": "yellow",
     "Nathan": "salmon"
 }
 
