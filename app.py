@@ -22,7 +22,7 @@ app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
 # ------------------------ USERS ------------------------
-USERS = ["Ahoon", "Ayaan", "Ayush", "Vishak", "Nathan", "Tharun"]
+USERS = ["Ahaan", "Ayaan", "Ayush", "Vishak", "Nathan", "Tharun"]
 USER_COLORS = {
     "Ahoon": "tomato",
     "Ayaan": "orange",
@@ -233,10 +233,12 @@ Keep the answer conversational.
 # ------------------------ TRACK TIME SIM ------------------------
 
 
+import math
+
 def simulate_co2_car(drag_coefficient, lift_coefficient, frontal_area, car_mass):
     # ----- track & car params -----
-    track_length = 20.0
-    cartridge_mass = 0.008      # total CO2 mass
+    track_length = 20.0        # meters
+    cartridge_mass = 0.008     # kg, total CO2 mass
     slope_angle_deg = 6.0
     axle_friction_force = 0.005
     nozzle_diameter = 0.002
@@ -247,14 +249,16 @@ def simulate_co2_car(drag_coefficient, lift_coefficient, frontal_area, car_mass)
     # ----- gas constants -----
     R_co2 = 188.9
     gamma = 1.3
-    T_initial = 293.15
-    P_initial = 5.8e6           # Pa, initial CO2 pressure
+    T_initial = 293.15         # K
+    P_initial = 5.8e6          # Pa
     Cd_nozzle = 0.9
-    system_efficiency = 0.0095  # thermodynamic efficiency
+    system_efficiency = 0.9    # realistic efficiency
 
     # ----- derived -----
     theta = math.radians(slope_angle_deg)
     nozzle_area = math.pi * (nozzle_diameter/2)**2
+    V_cartridge = 0.01         # m³, approximate cartridge volume
+    C_rr = 0.015
 
     # ----- initial state -----
     position = 0.0
@@ -262,26 +266,14 @@ def simulate_co2_car(drag_coefficient, lift_coefficient, frontal_area, car_mass)
     time = 0.0
     remaining_co2 = cartridge_mass
     total_mass = car_mass + remaining_co2
-    liquid_mass = 0.9 * cartridge_mass  # assume 90% liquid at start
+    liquid_mass = 0.9 * cartridge_mass  # 90% liquid initially
 
     speeds = []
     positions = []
 
-    C_rr = 0.015  
-
-
-    choked_factor = math.sqrt(gamma/(R_co2*T_initial)) * (2/(gamma+1))**((gamma+1)/(2*(gamma-1)))
-   
-    v_exit = math.sqrt(gamma*R_co2*T_initial)
- 
-    mdot0 = Cd_nozzle * nozzle_area * P_initial * choked_factor
-    thrust0 = system_efficiency * mdot0 * v_exit
-
-
-    normal0 = total_mass * g * math.cos(theta)
-    slope_force0 = total_mass * g * math.sin(theta)
-    rolling_resistance0 = C_rr * normal0
-    total_resistance0 = rolling_resistance0 + axle_friction_force + slope_force0
+    # ----- precompute choked factor -----
+    choked_factor = math.sqrt(gamma / (R_co2 * T_initial)) * (2 / (gamma + 1))**((gamma + 1)/(2*(gamma - 1)))
+    exit_velocity = math.sqrt((2 * gamma / (gamma + 1)) * R_co2 * T_initial)
 
     # ----- simulation loop: thrust active -----
     while position < track_length and remaining_co2 > 0.0001:
@@ -290,38 +282,33 @@ def simulate_co2_car(drag_coefficient, lift_coefficient, frontal_area, car_mass)
 
         # ----- pressure model -----
         if liquid_mass > 0:
-            current_pressure = P_initial   # constant while liquid remains
+            current_pressure = P_initial
             mdot = Cd_nozzle * nozzle_area * current_pressure * choked_factor
             liquid_mass -= mdot * dt
             if liquid_mass < 0:
                 liquid_mass = 0.0
         else:
-            # ideal gas depletion (linear with remaining mass)
-            frac = remaining_co2 / (0.1 * cartridge_mass)
-            current_pressure = max(101325, P_initial * frac)
+            # ideal gas law
+            current_pressure = max(101325, remaining_co2 * R_co2 * T_initial / V_cartridge)
             mdot = Cd_nozzle * nozzle_area * current_pressure * choked_factor
-
-
-        exit_velocity = math.sqrt(gamma * R_co2 * T_initial * (2/(gamma+1)))
 
         thrust_force = system_efficiency * mdot * exit_velocity
 
-  
         remaining_co2 -= mdot * dt
         if remaining_co2 < 0:
             remaining_co2 = 0.0
 
         total_mass = car_mass + remaining_co2
 
-      
+        # ----- resistances -----
         drag_force = 0.5 * air_density * velocity**2 * drag_coefficient * frontal_area
-        downforce = -0.5 * air_density * velocity**2 * lift_coefficient * frontal_area
-        normal_force = total_mass * g * math.cos(theta) + downforce
+        lift_force = 0.5 * air_density * velocity**2 * lift_coefficient * frontal_area
+        normal_force = total_mass * g * math.cos(theta) - lift_force
         rolling_resistance = C_rr * normal_force
         slope_force = total_mass * g * math.sin(theta)
         total_resistance = drag_force + rolling_resistance + axle_friction_force + slope_force
 
-    
+        # ----- dynamics -----
         net_force = thrust_force - total_resistance
         acceleration = net_force / total_mass
 
@@ -340,8 +327,8 @@ def simulate_co2_car(drag_coefficient, lift_coefficient, frontal_area, car_mass)
         speeds.append(velocity)
 
         drag_force = 0.5 * air_density * velocity**2 * drag_coefficient * frontal_area
-        downforce = -0.5 * air_density * velocity**2 * lift_coefficient * frontal_area
-        normal_force = total_mass * g * math.cos(theta) + downforce
+        lift_force = 0.5 * air_density * velocity**2 * lift_coefficient * frontal_area
+        normal_force = total_mass * g * math.cos(theta) - lift_force
         rolling_resistance = C_rr * normal_force
         slope_force = total_mass * g * math.sin(theta)
         total_resistance = drag_force + rolling_resistance + axle_friction_force + slope_force
@@ -357,39 +344,6 @@ def simulate_co2_car(drag_coefficient, lift_coefficient, frontal_area, car_mass)
 
     return positions, speeds, time
 
-
-
-# ------------------------ CONFIG ------------------------
-UPLOAD_FOLDER = "uploads"
-MODEL_PATH = "models/drag_rf_model.pkl"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs("models", exist_ok=True)
-
-# ------------------------ OBJ LOADER & FEATURES ------------------------
-def load_obj_file(file_path):
-    mesh = trimesh.load(file_path, force='mesh')
-    if not isinstance(mesh, trimesh.Trimesh):
-        raise ValueError("File could not be loaded as a mesh")
-    return mesh
-
-def extract_features(mesh):
-    volume = mesh.volume
-    area = mesh.area
-    bbox = mesh.bounds
-    dx, dy, dz = bbox[1] - bbox[0]
-    aspect_xy = dx / dy if dy != 0 else 0
-    aspect_xz = dx / dz if dz != 0 else 0
-    slenderness = max(dx, dy, dz) / min(dx, dy, dz) if min(dx, dy, dz) != 0 else 0
-    convex_vol = mesh.convex_hull.volume
-    diag = np.linalg.norm(bbox[1] - bbox[0])
-    num_vertices = len(mesh.vertices)
-    num_faces = len(mesh.faces)
-    z_levels = np.linspace(bbox[0][2], bbox[1][2], num=3)
-    cross_sections = [mesh.section(plane_origin=[0,0,z], plane_normal=[0,0,1]).area if mesh.section(plane_origin=[0,0,z], plane_normal=[0,0,1]) else 0 for z in z_levels]
-    avg_cross_section = np.mean(cross_sections)
-    frontal_cross_section = dx * dy
-    features = np.array([volume, area, dx, dy, dz, aspect_xy, aspect_xz, avg_cross_section, convex_vol, diag, slenderness, num_vertices, num_faces])
-    return features, frontal_cross_section
 
 # ------------------------ POSTGRES ML DATA ------------------------
 def save_training_data(features, drag, lift):
@@ -661,7 +615,7 @@ def sim():
 
 @app.route("/reactiontime", methods=["GET", "POST"])
 def react():
-    return render_template("Bolt_VR.html")
+    return render_template("reaction time.html")
 
 @app.route("/health", methods=["GET"])
 def health():
