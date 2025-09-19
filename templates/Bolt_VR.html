@@ -2,20 +2,20 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>VR City V2 with Collisions & Natural Locomotion</title>
+  <title>VR City V2</title>
 
   <!-- Official A-Frame releases -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://aframe.io/releases/1.4.0/aframe-physics-system.min.js"></script>
   <script src="https://aframe.io/releases/1.4.0/aframe-extras.min.js"></script>
 
-  <!-- VR Natural Locomotion Component -->
+  <!-- VR Natural Locomotion Component (fast acceleration) -->
   <script>
     AFRAME.registerComponent('vr-natural-locomotion', {
       schema: {
-        maxSpeed: {default: 8},
-        acceleration: {default: 0.15},
-        deceleration: {default: 0.12},
+        maxSpeed: {default: 12},          // faster max speed
+        acceleration: {default: 1},     // much faster acceleration
+        deceleration: {default: 0.2},
         rotationSensitivity: {default: 0.8},
         comfortMode: {default: true},
         snapTurn: {default: false},
@@ -85,7 +85,7 @@
     </a-assets>
 
     <!-- Lighting -->
-    <a-entity light="type: ambient; intensity: 0.6"></a-entity>
+    <a-entity light="type: ambient; intensity: 1.2"></a-entity>
     <a-entity light="type: directional; color: #ffffff; intensity: 0.8"
               position="10 15 5"
               shadow="cast: true; type: pcf; shadowMapWidth: 2048; shadowMapHeight: 2048">
@@ -98,10 +98,14 @@
     <!-- Visual city -->
     <a-entity gltf-model="#cityVisual" scale="1 1 1" position="0 0 0"></a-entity>
 
-    <!-- Collidable mesh (invisible) -->
-    <a-entity gltf-model="#cityCollide" static-body="shape: mesh;" visible="false" scale="1 1 1" position="0 0 0"></a-entity>
+    <!-- Collidable city (invisible, thickened if needed) -->
+    <a-entity gltf-model="#cityCollide" 
+              static-body="shape: mesh;" 
+              visible="false" 
+              scale="1 1 1" 
+              position="0 0 0"></a-entity>
 
-    <!-- Player -->
+    <!-- Player capsule -->
     <a-entity id="player" position="0 3 10"
               kinematic-body="shape: capsule; height: 1.8; radius: 0.4; mass: 70"
               vr-natural-locomotion>
@@ -111,4 +115,5 @@
   </a-scene>
 </body>
 </html>
+
 
