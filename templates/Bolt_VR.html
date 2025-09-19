@@ -2,18 +2,17 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>VR City V2 with Collisions</title>
+  <title>VR City V2 with Collisions & Natural Locomotion</title>
 
   <!-- Official A-Frame releases -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://aframe.io/releases/1.4.0/aframe-physics-system.min.js"></script>
   <script src="https://aframe.io/releases/1.4.0/aframe-extras.min.js"></script>
 
-  <!-- VR Natural Locomotion (exact same script as before) -->
+  <!-- VR Natural Locomotion Component -->
   <script>
     AFRAME.registerComponent('vr-natural-locomotion', {
       schema: {
-        speed: {default: 3.5},
         maxSpeed: {default: 8},
         acceleration: {default: 0.15},
         deceleration: {default: 0.12},
@@ -32,10 +31,11 @@
         window.addEventListener('keydown', e => this.keys[e.code] = true);
         window.addEventListener('keyup', e => this.keys[e.code] = false);
       },
-      tick: function(time, timeDelta) {
-        const dt = timeDelta / 1000;
+      tick: function(time, delta) {
+        const dt = delta / 1000;
         let inputVector = new THREE.Vector2();
 
+        // Desktop input
         if (!this.el.is('vr-mode')) {
           if (this.keys['KeyW'] || this.keys['ArrowUp']) inputVector.y = 1;
           if (this.keys['KeyS'] || this.keys['ArrowDown']) inputVector.y = -1;
@@ -44,11 +44,13 @@
         }
 
         const inputMag = inputVector.length();
+
         if (inputMag > 0.1) {
           this.isMoving = true;
-          this.targetSpeed = inputMag * this.data.maxSpeed;
-          this.currentSpeed += (this.targetSpeed - this.currentSpeed) * this.data.acceleration;
+          const targetSpeed = inputMag * this.data.maxSpeed;
+          this.currentSpeed += (targetSpeed - this.currentSpeed) * this.data.acceleration;
 
+          // Apply movement relative to camera
           const headRot = this.el.querySelector('a-camera').getAttribute('rotation');
           const dir = new THREE.Vector3(inputVector.x, 0, inputVector.y).normalize();
           dir.applyAxisAngle(new THREE.Vector3(0,1,0), THREE.MathUtils.degToRad(headRot.y));
@@ -60,7 +62,8 @@
           this.targetVelocity.set(0,0,0);
         }
 
-        if (this.el.body && this.currentSpeed > 0) {
+        // Apply physics velocity
+        if (this.el.body) {
           const vel = this.el.body.getLinearVelocity();
           this.el.body.setLinearVelocity(
             this.targetVelocity.x,
@@ -75,32 +78,36 @@
 
 <body>
   <a-scene physics="driver: ammo; gravity: -9.8" background="color: #87CEEB" stats>
+
     <a-assets>
       <a-asset-item id="cityVisual" src="{{ url_for('static', filename='models/Bolt_City_V2.gltf') }}"></a-asset-item>
       <a-asset-item id="cityCollide" src="{{ url_for('static', filename='models/Bolt_City_V2_Collidable.gltf') }}"></a-asset-item>
     </a-assets>
 
-    <!-- Lights -->
+    <!-- Lighting -->
     <a-entity light="type: ambient; intensity: 0.6"></a-entity>
-    <a-entity light="type: directional; color: #ffffff; intensity: 0.8" position="10 15 5" 
-              shadow="cast: true; type: pcf; shadowMapWidth: 2048; shadowMapHeight: 2048"></a-entity>
+    <a-entity light="type: directional; color: #ffffff; intensity: 0.8"
+              position="10 15 5"
+              shadow="cast: true; type: pcf; shadowMapWidth: 2048; shadowMapHeight: 2048">
+    </a-entity>
 
-    <!-- Ground plane -->
-    <a-plane position="0 0 0" rotation="-90 0 0" width="200" height="200" color="#777" static-body shadow="receive: true"></a-plane>
+    <!-- Ground -->
+    <a-plane position="0 0 0" rotation="-90 0 0" width="200" height="200" color="#777"
+             static-body shadow="receive: true"></a-plane>
 
     <!-- Visual city -->
     <a-entity gltf-model="#cityVisual" scale="1 1 1" position="0 0 0"></a-entity>
 
-    <!-- Collision city -->
-    <a-entity gltf-model="#cityCollide" scale="1 1 1" position="0 0 0" static-body="shape: mesh;"></a-entity>
+    <!-- Collidable mesh (invisible) -->
+    <a-entity gltf-model="#cityCollide" static-body="shape: mesh;" visible="false" scale="1 1 1" position="0 0 0"></a-entity>
 
-    <!-- Player rig -->
+    <!-- Player -->
     <a-entity id="player" position="0 3 10"
               kinematic-body="shape: capsule; height: 1.8; radius: 0.4; mass: 70"
-              vr-natural-locomotion
-    >
+              vr-natural-locomotion>
       <a-camera position="0 1.6 0"></a-camera>
     </a-entity>
+
   </a-scene>
 </body>
 </html>
