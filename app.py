@@ -233,12 +233,10 @@ Keep the answer conversational.
 # ------------------------ TRACK TIME SIM ------------------------
 
 
-import math
-
-def simulate_co2_car(drag_coefficient, lift_coefficient, frontal_area, car_mass):
+def simulate_co2_car_energy(drag_coefficient, lift_coefficient, frontal_area, car_mass):
     # ----- track & car params -----
     track_length = 20.0        # meters
-    cartridge_mass = 0.008     # kg, total CO2 mass
+    cartridge_mass = 0.008     # kg CO2
     slope_angle_deg = 6.0
     axle_friction_force = 0.005
     nozzle_diameter = 0.002
@@ -257,92 +255,76 @@ def simulate_co2_car(drag_coefficient, lift_coefficient, frontal_area, car_mass)
     # ----- derived -----
     theta = math.radians(slope_angle_deg)
     nozzle_area = math.pi * (nozzle_diameter/2)**2
-    V_cartridge = 0.01         # m³, approximate cartridge volume
+    V_cartridge = 0.01         # m³
     C_rr = 0.015
 
     # ----- initial state -----
     position = 0.0
-    velocity = 0.0
-    time = 0.0
     remaining_co2 = cartridge_mass
     total_mass = car_mass + remaining_co2
-    liquid_mass = 0.9 * cartridge_mass  # 90% liquid initially
+    liquid_mass = 0.9 * cartridge_mass
+    energy_kin = 0.0           # initial kinetic energy
 
     speeds = []
     positions = []
 
-    # ----- precompute choked factor -----
+    # ----- nozzle properties -----
     choked_factor = math.sqrt(gamma / (R_co2 * T_initial)) * (2 / (gamma + 1))**((gamma + 1)/(2*(gamma - 1)))
     exit_velocity = math.sqrt((2 * gamma / (gamma + 1)) * R_co2 * T_initial)
 
-    # ----- simulation loop: thrust active -----
-    while position < track_length and remaining_co2 > 0.0001:
+    # ----- simulation loop -----
+    while position < track_length and (energy_kin > 0 or remaining_co2 > 0):
+        # velocity from kinetic energy
+        velocity = math.sqrt(2 * energy_kin / total_mass) if energy_kin > 0 else 0.0
+
         positions.append(position)
         speeds.append(velocity)
 
-        # ----- pressure model -----
+        # ===== Thrust =====
         if liquid_mass > 0:
             current_pressure = P_initial
             mdot = Cd_nozzle * nozzle_area * current_pressure * choked_factor
             liquid_mass -= mdot * dt
-            if liquid_mass < 0:
-                liquid_mass = 0.0
-        else:
-            # ideal gas law
+            if liquid_mass < 0: 
+                liquid_mass = 0
+        elif remaining_co2 > 0:
             current_pressure = max(101325, remaining_co2 * R_co2 * T_initial / V_cartridge)
             mdot = Cd_nozzle * nozzle_area * current_pressure * choked_factor
+        else:
+            mdot = 0.0
 
         thrust_force = system_efficiency * mdot * exit_velocity
+        thrust_power = thrust_force * velocity  # thrust energy input per second
 
         remaining_co2 -= mdot * dt
-        if remaining_co2 < 0:
+        if remaining_co2 < 0: 
             remaining_co2 = 0.0
 
         total_mass = car_mass + remaining_co2
 
-        # ----- resistances -----
-        drag_force = 0.5 * air_density * velocity**2 * drag_coefficient * frontal_area
+        # ===== Resistive powers =====
+        drag_power = 0.5 * air_density * velocity**3 * drag_coefficient * frontal_area
         lift_force = 0.5 * air_density * velocity**2 * lift_coefficient * frontal_area
         normal_force = total_mass * g * math.cos(theta) - lift_force
-        rolling_resistance = C_rr * normal_force
-        slope_force = total_mass * g * math.sin(theta)
-        total_resistance = drag_force + rolling_resistance + axle_friction_force + slope_force
+        rolling_power = C_rr * normal_force * velocity
+        slope_power = (total_mass * g * math.sin(theta)) * velocity
+        axle_power = axle_friction_force * velocity
 
-        # ----- dynamics -----
-        net_force = thrust_force - total_resistance
-        acceleration = net_force / total_mass
+        loss_power = drag_power + rolling_power + slope_power + axle_power
 
-        # integrate
-        velocity += acceleration * dt
-        if velocity < 0:
-            velocity = 0
+        # ===== Energy balance =====
+        dE = (thrust_power - loss_power) * dt
+        energy_kin += dE
+        if energy_kin < 0:
+            energy_kin = 0
+
+        # ===== Position update =====
         position += velocity * dt
-        time += dt
-        if time > 30:
+        if position > track_length:
             break
 
-    # ----- coasting loop -----
-    while position < track_length and velocity > 0.01:
-        positions.append(position)
-        speeds.append(velocity)
+    return positions, speeds, energy_kin
 
-        drag_force = 0.5 * air_density * velocity**2 * drag_coefficient * frontal_area
-        lift_force = 0.5 * air_density * velocity**2 * lift_coefficient * frontal_area
-        normal_force = total_mass * g * math.cos(theta) - lift_force
-        rolling_resistance = C_rr * normal_force
-        slope_force = total_mass * g * math.sin(theta)
-        total_resistance = drag_force + rolling_resistance + axle_friction_force + slope_force
-
-        deceleration = total_resistance / total_mass
-        velocity -= deceleration * dt
-        if velocity < 0:
-            velocity = 0
-        position += velocity * dt
-        time += dt
-        if time > 60:
-            break
-
-    return positions, speeds, time
 
 
 # ------------------------ POSTGRES ML DATA ------------------------
