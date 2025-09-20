@@ -263,7 +263,9 @@ def simulate_co2_car_energy(drag_coefficient, lift_coefficient, frontal_area, ca
     remaining_co2 = cartridge_mass
     total_mass = car_mass + remaining_co2
     liquid_mass = 0.9 * cartridge_mass
-    energy_kin = 0.0           # initial kinetic energy
+    energy_kin = 0.0 
+    
+    time = 0          # initial kinetic energy
 
     speeds = []
     positions = []
@@ -315,6 +317,7 @@ def simulate_co2_car_energy(drag_coefficient, lift_coefficient, frontal_area, ca
         # ===== Energy balance =====
         dE = (thrust_power - loss_power) * dt
         energy_kin += dE
+        time += dt
         if energy_kin < 0:
             energy_kin = 0
 
@@ -323,7 +326,10 @@ def simulate_co2_car_energy(drag_coefficient, lift_coefficient, frontal_area, ca
         if position > track_length:
             break
 
-    return positions, speeds, energy_kin
+        
+        
+
+    return positions, speeds, time
 
 
 
