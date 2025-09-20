@@ -603,7 +603,7 @@ def sim():
 
 @app.route("/reactiontime", methods=["GET", "POST"])
 def react():
-    return render_template("React_Time.html")
+    return render_template("React_Test.html")
 
 @app.route("/health", methods=["GET"])
 def health():
