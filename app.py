@@ -543,9 +543,12 @@ def chatbot():
 
 @app.route("/sim", methods=["GET", "POST"])
 def sim():
+
+    img_speeds = None
+    img_forces = None
     
     time = None
-    img_base64 = None
+    
     drag = None
     lift = None
     frontal_area = None
@@ -645,7 +648,7 @@ def sim():
     return render_template(
         "sim.html",
         time=time,
-        graph_speed=img_speed,
+        graph_speed=img_speeds,
         graph_forces=img_forces,
         drag=round(drag,3) if drag is not None else None,
         lift=round(lift,3) if lift is not None else None,
