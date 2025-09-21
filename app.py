@@ -232,10 +232,7 @@ Keep the answer conversational.
 
 # ------------------------ TRACK TIME SIM ------------------------
 
-
-import math
-
-def simulate_co2_car_force(dragaero, lift_coefficient, frontal_area, car_mass,
+def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass,
                            show_diagnostics=False):
 
     # ----- track & car params -----
@@ -565,7 +562,7 @@ def sim():
                 mass = float(request.form.get("mass"))
                 cross_section = float(request.form.get("cross_section"))
 
-                distances, speeds, time, diag = simulate_co2_car_energy(drag_co, lift_co, cross_section, mass, show_diagnostics=True)
+                distances, speeds, time, diag = simulate_track_time(drag_co, lift_co, cross_section, mass, show_diagnostics=True)
 
                 buf = io.BytesIO()
                 plt.figure(figsize=(8,5))
