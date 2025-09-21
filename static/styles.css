@@ -92,24 +92,25 @@ body {
 
 /* Task card */
 .task-card {
-  background-color: #FFE345 ;  /* dark background */
-  border: 2px solid #FFD700; /* golden border */
+  background-color: #FFE345;    /* yellow card */
+  border: 2px solid #FFD700;    /* golden border */
   border-radius: 8px;
   padding: 1rem;
-  color: #FFD700;
+  color: black;                 
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
 }
 
 /* Completed tasks */
 .task-card.completed {
-  background-color: #222;
+  background-color: #222;       /* dark background */
+  color: #fff;                  
   text-decoration: line-through;
   opacity: 0.8;
 }
+
 
 /* Task header */
 .task-header {

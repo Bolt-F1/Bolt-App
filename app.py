@@ -233,12 +233,16 @@ Keep the answer conversational.
 # ------------------------ TRACK TIME SIM ------------------------
 
 
-def simulate_co2_car_energy(drag_coefficient, lift_coefficient, frontal_area, car_mass):
+import math
+
+def simulate_co2_car_force(dragaero, lift_coefficient, frontal_area, car_mass,
+                           show_diagnostics=False):
+
     # ----- track & car params -----
     track_length = 20.0        # meters
     cartridge_mass = 0.008     # kg CO2
     slope_angle_deg = 6.0
-    axle_friction_force = 0.005
+    axle_friction_force = 0.005  # N, small axle friction
     nozzle_diameter = 0.002
     dt = 0.001
     air_density = 1.225
@@ -248,88 +252,124 @@ def simulate_co2_car_energy(drag_coefficient, lift_coefficient, frontal_area, ca
     R_co2 = 188.9
     gamma = 1.3
     T_initial = 293.15         # K
-    P_initial = 5.8e6          # Pa
+    P_initial = 5.8e6          # Pa (initial cartridge pressure)
     Cd_nozzle = 0.9
-    system_efficiency = 0.9    # realistic efficiency
+    system_efficiency = 0.9    # efficiency of converting gas momentum into useful thrust (0..1)
 
     # ----- derived -----
     theta = math.radians(slope_angle_deg)
-    nozzle_area = math.pi * (nozzle_diameter/2)**2
-    V_cartridge = 0.01         # m³
-    C_rr = 0.015
+    nozzle_area = math.pi * (nozzle_diameter / 2.0)**2
+    V_cartridge = 0.01         # m³ (approx cartridge internal gas volume)
+    C_rr = 0.015               # rolling resistance coefficient
 
     # ----- initial state -----
     position = 0.0
+    velocity = 0.0
+    time = 0.0
     remaining_co2 = cartridge_mass
     total_mass = car_mass + remaining_co2
     liquid_mass = 0.9 * cartridge_mass
-    energy_kin = 0.0 
-    
-    time = 0          # initial kinetic energy
-
     speeds = []
     positions = []
 
-    # ----- nozzle properties -----
-    choked_factor = math.sqrt(gamma / (R_co2 * T_initial)) * (2 / (gamma + 1))**((gamma + 1)/(2*(gamma - 1)))
+    # diagnostic traces (optional)
+    thrust_trace = []
+    drag_trace = []
+    rolling_trace = []
+    slope_trace = []
+    mdot_trace = []
+    pressure_trace = []
+
+    # ----- nozzle properties (choked flow factor) -----
+    choked_factor = math.sqrt(gamma / (R_co2 * T_initial)) * (2 / (gamma + 1))**((gamma + 1) / (2 * (gamma - 1)))
+    # theoretical choked exit *speed* (for reference)
     exit_velocity = math.sqrt((2 * gamma / (gamma + 1)) * R_co2 * T_initial)
 
-    # ----- simulation loop -----
-    while position < track_length and (energy_kin > 0 or remaining_co2 > 0):
-        # velocity from kinetic energy
-        velocity = math.sqrt(2 * energy_kin / total_mass) if energy_kin > 0 else 0.0
-
+    # ----- main loop -----
+    # loop while on track and (still moving or still producing gas)
+    while position < track_length and (velocity > 1e-6 or remaining_co2 > 1e-6):
         positions.append(position)
         speeds.append(velocity)
 
-        # ===== Thrust =====
+        # --- pressure & mass flow ---
         if liquid_mass > 0:
             current_pressure = P_initial
             mdot = Cd_nozzle * nozzle_area * current_pressure * choked_factor
+            # consume liquid
             liquid_mass -= mdot * dt
-            if liquid_mass < 0: 
-                liquid_mass = 0
+            if liquid_mass < 0:
+                liquid_mass = 0.0
         elif remaining_co2 > 0:
-            current_pressure = max(101325, remaining_co2 * R_co2 * T_initial / V_cartridge)
+            # ideal gas in cartridge (simple model)
+            current_pressure = max(101325.0, remaining_co2 * R_co2 * T_initial / V_cartridge)
             mdot = Cd_nozzle * nozzle_area * current_pressure * choked_factor
         else:
+            current_pressure = 101325.0
             mdot = 0.0
 
+        # --- thrust (momentum flux) ---
+        # ideal thrust = mdot * v_exit. Apply system_efficiency only here.
         thrust_force = system_efficiency * mdot * exit_velocity
-        thrust_power = thrust_force * velocity  # thrust energy input per second
 
+        # consume mass from cartridge
         remaining_co2 -= mdot * dt
-        if remaining_co2 < 0: 
+        if remaining_co2 < 0:
             remaining_co2 = 0.0
 
         total_mass = car_mass + remaining_co2
 
-        # ===== Resistive powers =====
-        drag_power = 0.5 * air_density * velocity**3 * drag_coefficient * frontal_area
+        # --- resistances (all independent of efficiency) ---
+        drag_force = 0.5 * air_density * velocity**2 * dragaero * frontal_area
         lift_force = 0.5 * air_density * velocity**2 * lift_coefficient * frontal_area
+        # lift_coefficient > 0 => lift up (reduces normal), <0 => downforce (increases normal)
         normal_force = total_mass * g * math.cos(theta) - lift_force
-        rolling_power = C_rr * normal_force * velocity
-        slope_power = (total_mass * g * math.sin(theta)) * velocity
-        axle_power = axle_friction_force * velocity
+        # clamp normal_force to prevent negative rolling resistance
+        if normal_force < 0:
+            normal_force = 0.0
+        rolling_force = C_rr * normal_force
+        slope_force = total_mass * g * math.sin(theta)
+        axle_force = axle_friction_force
 
-        loss_power = drag_power + rolling_power + slope_power + axle_power
+        resist_force = drag_force + rolling_force + slope_force + axle_force
 
-        # ===== Energy balance =====
-        dE = (thrust_power - loss_power) * dt
-        energy_kin += dE
-        time += dt
-        if energy_kin < 0:
-            energy_kin = 0
+        # --- dynamics: integrate forces to get acceleration ---
+        net_force = thrust_force - resist_force
+        acceleration = net_force / total_mass
+        velocity += acceleration * dt
+        # numerical safety: prevent tiny negative velocities
+        if velocity < 0:
+            velocity = 0.0
 
-        # ===== Position update =====
+        # --- integrate position & time ---
         position += velocity * dt
-        if position > track_length:
+        time += dt
+
+        # --- store diagnostics ---
+        thrust_trace.append(thrust_force)
+        drag_trace.append(drag_force)
+        rolling_trace.append(rolling_force)
+        slope_trace.append(slope_force)
+        mdot_trace.append(mdot)
+        pressure_trace.append(current_pressure)
+
+        # safety stop
+        if time > 60.0:
             break
 
-        
-        
+    diagnostics = {
+        "thrust": thrust_trace,
+        "drag": drag_trace,
+        "rolling": rolling_trace,
+        "slope": slope_trace,
+        "mdot": mdot_trace,
+        "pressure": pressure_trace
+    }
 
-    return positions, speeds, time
+    if show_diagnostics:
+        return positions, speeds, time, diagnostics
+    else:
+        return positions, speeds, time
+
 
 
 
@@ -522,7 +562,7 @@ def sim():
                 mass = float(request.form.get("mass"))
                 cross_section = float(request.form.get("cross_section"))
 
-                distances, speeds, time = simulate_co2_car_energy(drag_co, lift_co, cross_section, mass)
+                distances, speeds, time, diag = simulate_co2_car_energy(drag_co, lift_co, cross_section, mass, show_diagnostics=True)
 
                 buf = io.BytesIO()
                 plt.figure(figsize=(8,5))
@@ -534,7 +574,21 @@ def sim():
                 plt.savefig(buf, format="png")
                 buf.seek(0)
                 plt.close()
-                img_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+                img_speeds = base64.b64encode(buf.getvalue()).decode("utf-8")
+
+                buf2 = io.BytesIO()
+                plt.figure(figsize=(8,5))
+                plt.plot(distances, diag["drag"], label="Drag Force (N)", color="red")
+                plt.plot(distances, diag["rolling"], label="Rolling Resistance (N)", color="blue")
+                plt.xlabel("Distance (m)")
+                plt.ylabel("Force (N)")
+                plt.legend()
+                plt.tight_layout()
+                plt.savefig(buf2, format="png")
+                buf2.seek(0)
+                plt.close()
+                img_forces = base64.b64encode(buf2.getvalue()).decode("utf-8")
+
             except Exception as e:
                 message = f"Simulation error: {str(e)}"
 
@@ -591,7 +645,8 @@ def sim():
     return render_template(
         "sim.html",
         time=time,
-        graph=img_base64,
+        graph_speed=img_speed,
+        graph_forces=img_forces,
         drag=round(drag,3) if drag is not None else None,
         lift=round(lift,3) if lift is not None else None,
         frontal_area=round(frontal_area,3) if frontal_area is not None else None,
@@ -610,7 +665,7 @@ def health():
     return "OK", 200
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # fallback to 5000 for local dev
+    port = int(os.environ.get("PORT", 5000))  
     app.run(host="0.0.0.0", port=port, debug=True)
 
 
