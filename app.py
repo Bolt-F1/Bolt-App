@@ -232,9 +232,9 @@ Keep the answer conversational.
 
 # ------------------------ TRACK TIME SIM ------------------------
 
-def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass,
-                           show_diagnostics=False):
+import math
 
+def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass, show_diagnostics=False):
     # ----- track & car params -----
     track_length = 20.0        # meters
     cartridge_mass = 0.008     # kg CO2
@@ -246,18 +246,18 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass,
     g = 9.81
 
     # ----- gas constants -----
-    R_co2 = 188.9
+    R_co2 = 188.9          # specific gas constant, J/(kg·K)
     gamma = 1.3
-    T_initial = 293.15         # K
-    P_initial = 5.8e6          # Pa (initial cartridge pressure)
+    T_initial = 293.15     # K
+    P_initial = 5.8e6      # Pa
     Cd_nozzle = 0.9
-    system_efficiency = 0.9    # efficiency of converting gas momentum into useful thrust (0..1)
+    system_efficiency = 0.0095
 
     # ----- derived -----
-    theta = math.radians(slope_angle_deg)
+
     nozzle_area = math.pi * (nozzle_diameter / 2.0)**2
-    V_cartridge = 0.01         # m³ (approx cartridge internal gas volume)
-    C_rr = 0.015               # rolling resistance coefficient
+    V_cartridge = 0.01
+    C_rr = 0.105
 
     # ----- initial state -----
     position = 0.0
@@ -266,10 +266,10 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass,
     remaining_co2 = cartridge_mass
     total_mass = car_mass + remaining_co2
     liquid_mass = 0.9 * cartridge_mass
+
     speeds = []
     positions = []
 
-    # diagnostic traces (optional)
     thrust_trace = []
     drag_trace = []
     rolling_trace = []
@@ -277,13 +277,10 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass,
     mdot_trace = []
     pressure_trace = []
 
-    # ----- nozzle properties (choked flow factor) -----
+    # choked flow factor
     choked_factor = math.sqrt(gamma / (R_co2 * T_initial)) * (2 / (gamma + 1))**((gamma + 1) / (2 * (gamma - 1)))
-    # theoretical choked exit *speed* (for reference)
     exit_velocity = math.sqrt((2 * gamma / (gamma + 1)) * R_co2 * T_initial)
 
-    # ----- main loop -----
-    # loop while on track and (still moving or still producing gas)
     while position < track_length and (velocity > 1e-6 or remaining_co2 > 1e-6):
         positions.append(position)
         speeds.append(velocity)
@@ -291,57 +288,48 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass,
         # --- pressure & mass flow ---
         if liquid_mass > 0:
             current_pressure = P_initial
+            # mass flow from liquid vaporization
             mdot = Cd_nozzle * nozzle_area * current_pressure * choked_factor
-            # consume liquid
             liquid_mass -= mdot * dt
             if liquid_mass < 0:
                 liquid_mass = 0.0
         elif remaining_co2 > 0:
-            # ideal gas in cartridge (simple model)
+            # ideal gas mass flow
             current_pressure = max(101325.0, remaining_co2 * R_co2 * T_initial / V_cartridge)
             mdot = Cd_nozzle * nozzle_area * current_pressure * choked_factor
         else:
             current_pressure = 101325.0
             mdot = 0.0
 
-        # --- thrust (momentum flux) ---
-        # ideal thrust = mdot * v_exit. Apply system_efficiency only here.
+        # --- thrust ---
         thrust_force = system_efficiency * mdot * exit_velocity
 
-        # consume mass from cartridge
+        # --- update remaining mass ---
         remaining_co2 -= mdot * dt
         if remaining_co2 < 0:
             remaining_co2 = 0.0
-
         total_mass = car_mass + remaining_co2
 
-        # --- resistances (all independent of efficiency) ---
+        # --- resistances ---
         drag_force = 0.5 * air_density * velocity**2 * dragaero * frontal_area
         lift_force = 0.5 * air_density * velocity**2 * lift_coefficient * frontal_area
-        # lift_coefficient > 0 => lift up (reduces normal), <0 => downforce (increases normal)
-        normal_force = total_mass * g * math.cos(theta) - lift_force
-        # clamp normal_force to prevent negative rolling resistance
-        if normal_force < 0:
-            normal_force = 0.0
+        normal_force = max(0.0, total_mass * g * math.cos(theta) - lift_force)
         rolling_force = C_rr * normal_force
         slope_force = total_mass * g * math.sin(theta)
-        axle_force = axle_friction_force
+        resist_force = drag_force + rolling_force + slope_force + axle_friction_force
 
-        resist_force = drag_force + rolling_force + slope_force + axle_force
-
-        # --- dynamics: integrate forces to get acceleration ---
+        # --- dynamics ---
         net_force = thrust_force - resist_force
         acceleration = net_force / total_mass
         velocity += acceleration * dt
-        # numerical safety: prevent tiny negative velocities
-        if velocity < 0:
+        # numerical safety
+        if velocity < 1e-12:
             velocity = 0.0
 
-        # --- integrate position & time ---
         position += velocity * dt
         time += dt
 
-        # --- store diagnostics ---
+        # --- diagnostics ---
         thrust_trace.append(thrust_force)
         drag_trace.append(drag_force)
         rolling_trace.append(rolling_force)
@@ -349,7 +337,6 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass,
         mdot_trace.append(mdot)
         pressure_trace.append(current_pressure)
 
-        # safety stop
         if time > 60.0:
             break
 
@@ -366,6 +353,7 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass,
         return positions, speeds, time, diagnostics
     else:
         return positions, speeds, time
+
 
 
 
