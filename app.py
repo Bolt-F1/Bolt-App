@@ -238,7 +238,7 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass, show
     # ----- track & car params -----
     track_length = 20.0        # meters
     cartridge_mass = 0.008     # kg CO2
-    slope_angle_deg = 6.0
+    slope_angle_deg = 0.0
     axle_friction_force = 0.005  # N, small axle friction
     nozzle_diameter = 0.002
     dt = 0.001
@@ -266,6 +266,7 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass, show
     remaining_co2 = cartridge_mass
     total_mass = car_mass + remaining_co2
     liquid_mass = 0.9 * cartridge_mass
+    theta = math.radians(slope_angle_deg)
 
     speeds = []
     positions = []
