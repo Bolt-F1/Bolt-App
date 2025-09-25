@@ -17,6 +17,7 @@ import requests
 from PDF_summary import Rules_and_Regs_sum
 import math
 from huggingface_hub import InferenceClient
+import dropbox
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -110,9 +111,23 @@ def init_db():
         lift DOUBLE PRECISION
     )
     """)
+
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS ar_sim_results (
+        id SERIAL PRIMARY KEY,
+        car_name TEXT,
+        drag_co DOUBLE PRECISION,
+        lift_co DOUBLE PRECISION,
+        filepath TEXT
+    )
+    """)
     
     conn.commit()
     conn.close()
+
+
+
 
 init_db()
 
@@ -502,25 +517,25 @@ def chatbot():
     c = conn.cursor()
 
     if request.method == "POST":
-        # Get JSON from the AJAX request
+        
         data = request.get_json()
         query = data.get("chatbot_query")
         
         if query:
-            # Get answer from your summary-based function
+            
             answer = ask_question_with_summary(query)
 
-            # Save Q&A to the database
+            
             c.execute(
                 "INSERT INTO chatbot (query, answer) VALUES (%s, %s)",
                 (query, answer)
             )
             conn.commit()
 
-            # Return JSON for AJAX
+            
             return jsonify({"answer": answer})
 
-    # For GET requests, fetch all previous conversation
+
     c.execute("SELECT id, query, answer FROM chatbot ORDER BY id")
     chatbot_convo = [{"query": q, "answer": a} for _, q, a in c.fetchall()]
     conn.close()
@@ -642,6 +657,102 @@ def sim():
         message=message,
         cross_sections=cross_sections
     )
+
+
+
+ACCESS_TOKEN = os.environ.get("DROPBOX_SIM_TOKEN")  
+DROPBOX_FOLDER = "/ANSYS_GLB_Files"
+dbx = dropbox.Dropbox(ACCESS_TOKEN)
+
+os.makedirs("uploads", exist_ok=True)
+
+@app.route("/ansys/upload", methods=["POST"])
+def upload_file():
+
+    if "file" in request.files:
+        glb_file = request.files["file"]
+        filename = glb_file.filename
+        local_path = os.path.join("uploads", filename)
+        
+        glb_file.save(local_path)
+
+       
+        dropbox_path = f"{DROPBOX_FOLDER}/{filename}"
+        with open(local_path, "rb") as f:
+            dbx.files_upload(f.read(), dropbox_path, mode=dropbox.files.WriteMode.overwrite)
+
+        print(f"Uploaded {filename} to Dropbox at {dropbox_path}")
+    
+    if request.is_json:
+        data = request.get_json()
+        car_name = data.get("car_name")
+        drag = data.get("drag")
+        lift = data.get("lift")
+        
+        
+    conn = get_pg_conn()
+    c = conn.cursor()
+
+    c.execute(
+                "INSERT INTO ar_sim_results (car_name, drag_co, lift_co, filepath) VALUES (%s, %s, %s, %s)",
+                (car_name, drag, lift, dropbox_path)
+            )
+            conn.commit()
+    
+    return "OK", 200
+
+
+@app.route("/ansys/ar", methods=["GET", "POST"])
+def AR_sim():
+
+    conn = get_pg_conn()
+    c = conn.cursor()
+
+    if request.method == "POST":
+        table_ids = request.form.getlist('options')
+        if len(table_ids) > 3:
+            return render_template("ar_sim.html", error='Please select 3 values or less')
+
+        
+        
+        file_paths = []
+        for i in table_ids:
+            c.execute("SELECT filepath FROM ar_sim_results WHERE id = %s;", (i,))
+            result = c.fetchone()
+            if result:
+                file_paths.append(result[0])
+        
+        
+        urls = []
+        for fpath in file_paths:
+            try:
+                shared_link_metadata = dbx.sharing_create_shared_link_with_settings(fpath)
+            except dropbox.exceptions.ApiError:
+                links = dbx.sharing_list_shared_links(fpath).links
+                if links:
+                    shared_link_metadata = links[0]
+                else:
+                    raise
+
+            
+            url = shared_link_metadata.url.replace("?dl=0", "?dl=1")
+            urls.append(url)
+
+        
+        return render_template("AR_sim_viewer.html", urls=urls)
+
+    c.execute("SELECT id, car_name, drag_co, lift_co, filepath FROM ar_sim_results ORDER BY id")
+    ar_sim_selections = c.fetchall()
+    c.close()
+    conn.close()
+
+
+    return render_template("AR_sim_settings.html", ar_sim_selections=ar_sim_selections)
+
+
+            
+
+
 
     
 

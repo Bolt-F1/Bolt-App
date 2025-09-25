@@ -464,6 +464,100 @@ h1, h2, h4 {
 }
 
 
+/* Form container */
+.ar_sim_settings {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 25px;
+    background-color: #f8f9fa;  /* light neutral background */
+    border-radius: 12px;
+    max-width: 1000px;
+    margin: 0 auto;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+/* Card-style checkbox using task-card colors */
+.ar_sim_settings .box {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 220px;
+    height: 150px;
+    padding: 1rem;
+    background-color: #FFE345;       /* yellow card */
+    border: 2px solid #FFD700;       /* golden border */
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    box-sizing: border-box;
+    color: black;
+    gap: 0.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Hide native checkbox */
+.ar_sim_settings .box input {
+    display: none;
+}
+
+/* Highlight card when selected */
+.ar_sim_settings .box input:checked + span,
+.ar_sim_settings .box input:checked ~ span {
+    border-color: #FFA500;  /* slightly darker accent when selected */
+}
+
+/* Hover effect */
+.ar_sim_settings .box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    border-color: #FFC107;
+}
+
+/* Car name styling */
+.ar_sim_settings_car_name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: black;
+}
+
+/* Drag and lift coefficient styling */
+.ar_sim_settings_drag_co,
+.ar_sim_settings_lift_co {
+    font-size: 0.95rem;
+    color: #333;
+}
+
+/* Submit button styling */
+.ar_sim_settings button[type="submit"] {
+    padding: 12px 28px;
+    background-color: #FFD700;  /* golden button */
+    color: black;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 15px;
+}
+
+.ar_sim_settings button[type="submit"]:hover {
+    background-color: #FFC107;  /* darker golden hover */
+    transform: translateY(-2px);
+}
+
+/* Responsive for smaller screens */
+@media (max-width: 750px) {
+    .ar_sim_settings .box {
+        width: 100%;
+    }
+}
+
+
+
+
 
 
 
