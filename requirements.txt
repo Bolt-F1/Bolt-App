@@ -3,9 +3,12 @@ numpy
 pandas
 matplotlib
 scikit-learn
-joblib
 trimesh
 psycopg2-binary
 requests
-huggingface-hub
+dropbox
+huggingface_hub
+joblib
 gunicorn
+
+

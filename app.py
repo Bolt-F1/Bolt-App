@@ -694,10 +694,10 @@ def upload_file():
     c = conn.cursor()
 
     c.execute(
-                "INSERT INTO ar_sim_results (car_name, drag_co, lift_co, filepath) VALUES (%s, %s, %s, %s)",
-                (car_name, drag, lift, dropbox_path)
-            )
-            conn.commit()
+        "INSERT INTO ar_sim_results (car_name, drag_co, lift_co, filepath) VALUES (%s, %s, %s, %s)",
+        (car_name, drag, lift, dropbox_path)
+    )
+    conn.commit()
     
     return "OK", 200
 
