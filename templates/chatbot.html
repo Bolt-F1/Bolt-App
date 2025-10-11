@@ -1,54 +1,73 @@
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <html>
-    <head>
-        <title>Bolt Chatbot</title>
-        <h2>Welcome to the Chatbot.</h2>
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    </head>
+<head>
+    <title>Bolt Chatbot</title>
+    <h2>Welcome to the Chatbot.</h2>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
 
-    <body>
-        <div class="chatbot_body">
-            <div class="chatbot_output" id="chatbot_output">
-                {% for i in chatbot_convo %}
-                    <p class="chatbot_query"><b>Q:</b> {{ i['query'] }}</p>
-                    <p class="chatbot_answer"><b>A:</b> {{ i['answer'] }}</p>
-                {% endfor %}
-            </div>
-
-            <div class="chatbot_input_box">
-                <form id="chatbot_form" class="chatbot_input_form">
-                    <input type="text" name="chatbot_query" placeholder="Ask any question..." required>
-                    <button type="submit" style="background-color: black; color: wheat; outline: wheat;">Send</button>
-                </form>
-            </div>
+<body>
+    <div class="chatbot_body">
+        <div class="chatbot_output" id="chatbot_output">
+            {% for i in chatbot_convo %}
+                <p class="chatbot_query"><b>Q:</b> {{ i['query'] }}</p>
+                <p class="chatbot_answer"><b>A:</b> {{ i['answer'] }}</p>
+            {% endfor %}
         </div>
 
-        <nav class="bottom-menu">
-            <ul>
-                <li><a href="{{ url_for('chat') }}"><img src="{{ url_for('static', filename='images/Message_Icon.png') }}" width="100" height="100" alt="Chat"></a></li>
-                <li><a href="{{ url_for('todo') }}"><img src="{{ url_for('static', filename='images/to_do_list_icon.png') }}" alt="Tasks"></a></li>
-                <li><a href="{{ url_for('chatbot') }}"><img src="{{ url_for('static', filename='images/Bolt_AI_Icon.png') }}" alt="Chatbot"></a></li>
-                <li><a href="{{ url_for('sim') }}"><img src="{{ url_for('static', filename='images/Sim_icon.png') }}" alt="Sim"></a></li>
-                <li><a href="{{ url_for('react') }}"><img src="{{ url_for('static', filename='images/Reaction_Time_Icon.png') }}" alt="VR City"></a></li>
-                <li><a href="{{ url_for('AR_sim') }}"><img src="{{ url_for('static', filename='images/AR_icon.png') }}" alt="AR Sim"></a></li>
-            </ul>
-        </nav>
+        <div class="chatbot_input_box">
+            <form id="chatbot_form" class="chatbot_input_form">
+                <input type="text" name="chatbot_query" placeholder="Ask any question..." required>
+                <button type="submit" id="sendBtn" style="background-color: black; color: wheat; outline: wheat;">Send</button>
+            </form>
+            <p id="loading_msg" style="display:none; color: orange;">Chatbot is processing, please wait...</p>
+        </div>
+    </div>
 
-        <!-- AJAX for submitting without reload -->
-        <script>
-        document.getElementById("chatbot_form").addEventListener("submit", async function(e) {
-            e.preventDefault(); // Prevent page reload
+    <nav class="bottom-menu">
+        <ul>
+            <li><a href="{{ url_for('chat') }}"><img src="{{ url_for('static', filename='images/Message_Icon.png') }}" width="100" height="100" alt="Chat"></a></li>
+            <li><a href="{{ url_for('todo') }}"><img src="{{ url_for('static', filename='images/to_do_list_icon.png') }}" alt="Tasks"></a></li>
+            <li><a href="{{ url_for('chatbot') }}"><img src="{{ url_for('static', filename='images/Bolt_AI_Icon.png') }}" alt="Chatbot"></a></li>
+            <li><a href="{{ url_for('sim') }}"><img src="{{ url_for('static', filename='images/Sim_icon.png') }}" alt="Sim"></a></li>
+            <li><a href="{{ url_for('react') }}"><img src="{{ url_for('static', filename='images/Reaction_Time_Icon.png') }}" alt="VR City"></a></li>
+            <li><a href="{{ url_for('AR_sim') }}"><img src="{{ url_for('static', filename='images/AR_icon.png') }}" alt="AR Sim"></a></li>
+        </ul>
+    </nav>
 
-            const form = e.target;
-            const query = form.chatbot_query.value;
+    <!-- AJAX with loading lock -->
+    <script>
+    const form = document.getElementById("chatbot_form");
+    const sendBtn = document.getElementById("sendBtn");
+    const loadingMsg = document.getElementById("loading_msg");
+    let isProcessing = false;  // lock
 
-            // Send POST request to Flask
+    form.addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        if (isProcessing) {
+            alert("Chatbot is busy. Please wait for the current answer.");
+            return;
+        }
+
+        isProcessing = true;
+        sendBtn.disabled = true;
+        loadingMsg.style.display = "block";
+
+        const query = form.chatbot_query.value;
+
+        try {
             const response = await fetch("/chatbot", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ chatbot_query: query })
             });
+
+            if (!response.ok) {
+                alert("Server is busy. Try again later.");
+                return;
+            }
 
             const data = await response.json();
 
@@ -64,10 +83,19 @@
             outputDiv.appendChild(qElem);
             outputDiv.appendChild(aElem);
 
-            // Clear input
+        } catch (err) {
+            alert("Error communicating with server.");
+            console.error(err);
+        } finally {
+            // Unlock
+            isProcessing = false;
+            sendBtn.disabled = false;
+            loadingMsg.style.display = "none";
             form.chatbot_query.value = "";
             form.chatbot_query.focus();
-        });
-        </script>
-    </body>
+        }
+    });
+    </script>
+</body>
 </html>
+

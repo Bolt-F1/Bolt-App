@@ -1,48 +1,30 @@
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <html>
-
-<script>
-    // Auto-refresh messages every 2 seconds
-    function refreshMessages() {
-        fetch(window.location.href)
-            .then(response => response.text())
-            .then(html => {
-                // Parse HTML and update messages div
-                let parser = new DOMParser();
-                let doc = parser.parseFromString(html, "text/html");
-                let newMessages = doc.querySelector(".messages").innerHTML;
-                document.querySelector(".messages").innerHTML = newMessages;
-            });
-    }
-
-    setInterval(refreshMessages, 2000); // 2000 ms = 2 seconds
-
-</script>
-
 <head>
     <title>Simple Chat</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
+
 <body>
     <div class="chat-container">
         <h1>Welcome, {{ username }}</h1>
 
-
-        <div class="messages">
+        <div class="messages" id="messages">
             {% for msg in messages %}
             <div class="message {% if msg.sender == username %}user{% else %}other{% endif %}">
-            <strong style="color: {{ user_colors[msg.sender] }}">{{ msg.sender }}</strong>: {{ msg.body }}
-            <span class="time">{{ msg.time }}</span>
+                <strong style="color: {{ user_colors[msg.sender] }}">{{ msg.sender }}</strong>: {{ msg.body }}
+                <span class="time">{{ msg.time }}</span>
             </div>
             {% endfor %}
         </div>
-        
 
-        <form method="POST" class="message-form">
+        <form id="message_form" class="message-form">
             <input type="text" name="message" placeholder="Type a message..." required>
-            <button type="submit" style="background-color: black; color: wheat; outline: wheat;">Send</button>
+            <button type="submit" id="sendBtn" style="background-color: black; color: wheat; outline: wheat;">Send</button>
         </form>
+
+        <p id="loading_msg" style="display:none; color: orange;">Message is sending, please wait...</p>
     </div>
 
     <nav class="bottom-menu">
@@ -56,12 +38,85 @@
         </ul>
     </nav>
 
+    <!-- AJAX with lock and auto-scroll -->
+    <script>
+        const form = document.getElementById("message_form");
+        const sendBtn = document.getElementById("sendBtn");
+        const messagesDiv = document.getElementById("messages");
+        const loadingMsg = document.getElementById("loading_msg");
+        let isProcessing = false;
 
+        form.addEventListener("submit", async function(e) {
+            e.preventDefault();
 
-    
+            if (isProcessing) {
+                alert("Please wait until the previous message is processed.");
+                return;
+            }
 
+            const messageInput = form.message;
+            const message = messageInput.value;
+
+            isProcessing = true;
+            sendBtn.disabled = true;
+            loadingMsg.style.display = "block";
+
+            try {
+                const response = await fetch(window.location.href, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: message })
+                });
+
+                if (!response.ok) {
+                    alert("Server is busy. Try again later.");
+                    return;
+                }
+
+                // Optionally parse JSON if your server returns it
+                // const data = await response.json();
+
+                // Append message to the chat immediately
+                const newMsg = document.createElement("div");
+                newMsg.className = "message user";
+                newMsg.innerHTML = `<strong style="color: {{ user_colors[username] }}">{{ username }}</strong>: ${message} <span class="time">now</span>`;
+                messagesDiv.appendChild(newMsg);
+
+                // Clear input
+                messageInput.value = "";
+                messageInput.focus();
+
+                // Scroll to latest message
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            } catch (err) {
+                console.error(err);
+                alert("Error sending message.");
+            } finally {
+                isProcessing = false;
+                sendBtn.disabled = false;
+                loadingMsg.style.display = "none";
+            }
+        });
+
+        // Auto-refresh messages every 2 seconds
+        async function refreshMessages() {
+            try {
+                const response = await fetch(window.location.href);
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+                const newMessages = doc.querySelector(".messages").innerHTML;
+                messagesDiv.innerHTML = newMessages;
+
+                // Scroll to latest message
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            } catch (err) {
+                console.error("Error refreshing messages:", err);
+            }
+        }
+
+        setInterval(refreshMessages, 2000);
+    </script>
 </body>
 </html>
-
-
-

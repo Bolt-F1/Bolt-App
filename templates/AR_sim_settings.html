@@ -3,103 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title> AR sim results Selection</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
 </head>
 <body>
 
-    <style>
-        /* General form styling */
-        form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 12px;
-            max-width: 900px;
-            margin: 0 auto;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        
-        /* Card-style checkbox labels */
-        .box {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            width: 220px;
-            height: 140px;
-            padding: 15px;
-            background-color: #ffffff;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-            position: relative;
-            box-sizing: border-box;
-        }
-        
-        /* Highlight card when checkbox is checked */
-        .box input:checked + span,
-        .box input:checked ~ span {
-            border-color: #4CAF50;
-        }
-        
-        /* Hide the actual checkbox */
-        .box input {
-            display: none;
-        }
-        
-        /* Hover effect for card */
-        .box:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-            border-color: #4CAF50;
-        }
-        
-        /* Styling car name */
-        .ar_sim_settings_car_name {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-        }
-        
-        /* Styling drag and lift coefficients */
-        .ar_sim_settings_drag_co,
-        .ar_sim_settings_lift_co {
-            font-size: 0.95rem;
-            color: #666;
-        }
-        
-        /* Submit button */
-        form button[type="submit"] {
-            padding: 12px 25px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.2s;
-            margin-top: 10px;
-        }
-        
-        form button[type="submit"]:hover {
-            background-color: #45a049;
-            transform: translateY(-2px);
-        }
-        
-        /* Responsive layout */
-        @media (max-width: 750px) {
-            .box {
-                width: 100%;
-            }
-        }
-        </style>
-        
+    
 
-    <form method="POST">
+    <form method="POST" class="ar_sim_settings">
         {% for car in ar_sim_selections %}
             <label class="box">
                 <input type="checkbox" name="options" value="{{ car.id }}">

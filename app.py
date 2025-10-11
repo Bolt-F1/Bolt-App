@@ -664,43 +664,54 @@ ACCESS_TOKEN = os.environ.get("DROPBOX_SIM_TOKEN")
 DROPBOX_FOLDER = "/ANSYS_GLB_Files"
 dbx = dropbox.Dropbox(ACCESS_TOKEN)
 
+last_dropbox_paths = {}
+
 os.makedirs("uploads", exist_ok=True)
 
 @app.route("/ansys/upload", methods=["POST"])
-def upload_file():
-
+def upload():
+    # --- GLB file upload ---
     if "file" in request.files:
         glb_file = request.files["file"]
         filename = glb_file.filename
         local_path = os.path.join("uploads", filename)
-        
         glb_file.save(local_path)
 
-       
         dropbox_path = f"{DROPBOX_FOLDER}/{filename}"
         with open(local_path, "rb") as f:
             dbx.files_upload(f.read(), dropbox_path, mode=dropbox.files.WriteMode.overwrite)
 
+        # Save path by car name (use filename without extension)
+        car_name = os.path.splitext(filename)[0]
+        last_dropbox_paths[car_name] = dropbox_path
+
         print(f"Uploaded {filename} to Dropbox at {dropbox_path}")
-    
+        return "GLB uploaded", 200
+
+    # --- JSON drag/lift data upload ---
     if request.is_json:
         data = request.get_json()
         car_name = data.get("car_name")
         drag = data.get("drag")
         lift = data.get("lift")
-        
-        
-    conn = get_pg_conn()
-    c = conn.cursor()
 
-    c.execute(
-        "INSERT INTO ar_sim_results (car_name, drag_co, lift_co, filepath) VALUES (%s, %s, %s, %s)",
-        (car_name, drag, lift, dropbox_path)
-    )
-    conn.commit()
-    
-    return "OK", 200
+        # Get Dropbox path if GLB was uploaded
+        dropbox_path = last_dropbox_paths.get(car_name, None)
 
+        # Insert into Postgres
+        conn = get_pg_conn()
+        c = conn.cursor()
+        c.execute(
+            "INSERT INTO ar_sim_results (car_name, drag_co, lift_co, filepath) VALUES (%s, %s, %s, %s)",
+            (car_name, drag, lift, dropbox_path)
+        )
+        conn.commit()
+        conn.close()
+
+        print(f"Stored results for {car_name}: Drag={drag}, Lift={lift}, File={dropbox_path}")
+        return "Data stored", 200
+
+    return "Invalid request", 400
 
 @app.route("/ansys/ar", methods=["GET", "POST"])
 def AR_sim():
