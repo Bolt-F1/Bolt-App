@@ -1,154 +1,163 @@
 /* ----------------- General Body ----------------- */
 body {
-  font-family: 'Trebuchet MS', sans-serif;
-  font-size: 120%;
-  background-color: #000;
+  font-family: 'Segoe UI', 'Trebuchet MS', sans-serif;
+  font-size: 1rem;
+  background-color: #0a0a0a;
   color: #FFD700;
-  padding: 2%;
-  padding-bottom: 15%;
+  padding: 2% 2% 15%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  line-height: 1.6;
   margin: 0;
+}
+
+/* ----------------- Headings ----------------- */
+h1, h2, h4 {
+  color: #FFD700;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  letter-spacing: 0.5px;
 }
 
 /* ----------------- Chat Container ----------------- */
 .chat-container {
   width: 95%;
-  max-width: 90%;
+  max-width: 900px;
   margin: 5% auto;
   display: flex;
   flex-direction: column;
-  gap: 4%;
+  gap: 1.5rem;
 }
 
 /* ----------------- Messages ----------------- */
 .messages {
   height: 60%;
   overflow-y: auto;
-  padding: 3%;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 3%;
-  background-color: #111;
-  border-radius: 5%;
-  border: 0.3% solid #333;
+  gap: 1rem;
+  background: linear-gradient(145deg, #111, #1a1a1a);
+  border-radius: 20px;
+  border: 1px solid #333;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
 }
 
 /* ----------------- Chat Bubbles ----------------- */
 .message {
-  max-width: 75%;
-  padding: 3% 5%;
-  border-radius: 10%;
-  font-size: 95%;
-  line-height: 140%;
+  max-width: 70%;
+  padding: 0.8rem 1rem;
+  border-radius: 20px;
+  font-size: 0.95rem;
   word-wrap: break-word;
   display: inline-block;
   clear: both;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  transition: all 0.2s ease;
 }
 
-/* User message */
 .message.user {
-  background-color: #FFD700;
-  color: #000;
+  background: linear-gradient(145deg, #FFD700, #FFC700);
+  color: #0a0a0a;
   align-self: flex-end;
-  border-bottom-right-radius: 2%;
-  border-bottom-left-radius: 10%;
-  border-top-left-radius: 10%;
-  border-top-right-radius: 10%;
+  border-bottom-right-radius: 6px;
+  border-bottom-left-radius: 20px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
 }
 
-/* Other message */
 .message.other {
-  background-color: #333;
+  background: linear-gradient(145deg, #222, #333);
   color: #FFD700;
   align-self: flex-start;
-  border-bottom-left-radius: 2%;
-  border-bottom-right-radius: 10%;
-  border-top-left-radius: 10%;
-  border-top-right-radius: 10%;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 20px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
 }
 
-/* Timestamps */
 .message .time {
-  font-size: 60%;
+  font-size: 0.65rem;
   color: #aaa;
-  margin-top: 2%;
+  margin-top: 0.3rem;
   display: block;
   text-align: right;
   font-family: 'Courier New', monospace;
 }
 
-
-/* Task list container */
+/* ----------------- Task List ----------------- */
 .task-list {
   width: 95%;
   max-width: 900px;
-  margin: 2% auto;
+  margin: 2rem auto;
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-/* Task card */
 .task-card {
-  background-color: #FFE345;    /* yellow card */
-  border: 2px solid #FFD700;    /* golden border */
-  border-radius: 8px;
-  padding: 1rem;
-  color: black;                 
+  background: #1a1a1a;
+  border: 1px solid #FFD700;
+  border-radius: 15px;
+  padding: 1rem 1.2rem;
+  color: #FFD700;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+  transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
 }
 
-/* Completed tasks */
+.task-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0,0,0,0.5);
+  background: linear-gradient(145deg, #1a1a1a, #222);
+}
+
 .task-card.completed {
-  background-color: #222;       /* dark background */
-  color: #fff;                  
+  background: #111;
+  color: #888;
   text-decoration: line-through;
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
-
-/* Task header */
 .task-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: bold;
+  font-weight: 700;
 }
 
-/* Task body */
 .task-body {
   font-size: 0.95rem;
-  line-height: 1.3;
+  line-height: 1.4;
 }
 
-/* Task meta info */
 .task-meta {
   font-size: 0.85rem;
   display: flex;
   justify-content: space-between;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
-/* Complete button */
 .btn-complete {
   margin-top: 0.5rem;
   align-self: flex-end;
   padding: 0.5rem 1rem;
   background-color: #FFD700;
-  color: #000;
+  color: #0a0a0a;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 700;
+  transition: all 0.2s ease;
 }
 
 .btn-complete:hover {
   background-color: #FFC700;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255,215,0,0.4);
 }
 
 /* ----------------- Bottom Menu ----------------- */
@@ -159,19 +168,19 @@ body {
   transform: translateX(-50%);
   width: 95%;
   max-width: 500px;
-  background-color: #FFC700;
-  padding: 0.3rem 0;
+  background: #FFC700;
+  padding: 0.5rem 0;
   z-index: 9999;
   display: flex;
   justify-content: center;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  box-shadow: 0 -2px 5px rgba(0,0,0,0.3);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
 }
 
 .bottom-menu ul {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -182,21 +191,15 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   cursor: pointer;
-}
-
-.bottom-menu li a img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  display: block;
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .bottom-menu li a img:hover {
   transform: scale(1.2);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
 /* ----------------- Chatbot Page ----------------- */
@@ -207,10 +210,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  background-color: #111;
+  background: #111;
   padding: 2%;
-  border-radius: 8px;
-  border: 0.3% solid #FFD700;
+  border-radius: 15px;
+  border: 1px solid #FFD700;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
 }
 
 .chatbot_output {
@@ -220,26 +224,26 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  background-color: #222;
-  border-radius: 6px;
-  border: 0.2% solid #FFD700;
+  background: #222;
+  border-radius: 12px;
+  border: 1px solid #FFD700;
 }
 
 .chatbot_query {
-  background-color: #FFD700;
-  color: #000;
+  background: linear-gradient(145deg, #FFD700, #FFC700);
+  color: #0a0a0a;
   padding: 1% 2%;
-  border-radius: 6px;
+  border-radius: 12px;
   align-self: flex-start;
   max-width: 80%;
   word-wrap: break-word;
 }
 
 .chatbot_answer {
-  background-color: #333;
+  background: linear-gradient(145deg, #222, #333);
   color: #FFD700;
   padding: 1% 2%;
-  border-radius: 6px;
+  border-radius: 12px;
   align-self: flex-start;
   max-width: 80%;
   word-wrap: break-word;
@@ -261,63 +265,61 @@ body {
   flex: 1;
   padding: 1%;
   font-size: 1rem;
-  border-radius: 4px;
-  border: 0.2% solid #FFD700;
-  background-color: #222;
+  border-radius: 8px;
+  border: 2px solid #FFD700;
+  background: #222;
   color: #FFD700;
+  outline: none;
 }
 
 .chatbot_input_form button {
   padding: 1% 3%;
   background-color: #FFD700;
-  color: #000;
+  color: #0a0a0a;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
+  transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
 }
 
 .chatbot_input_form button:hover {
   background-color: #FFC700;
   transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255,215,0,0.4);
 }
 
 /* ----------------- Login Page ----------------- */
 body.login-body {
-  font-family: 'Trebuchet MS', sans-serif;
-  background-color: #000;
-  color: #FFD700;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100vh;
+  background: #0a0a0a;
+  color: #FFD700;
   margin: 0;
 }
 
-/* Login box styling (professional) */
 .login {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  background-color: #111;
+  background: #111;
   padding: 2.5rem;
-  border-radius: 12px;
+  border-radius: 15px;
   border: 2px solid #FFD700;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 20px rgba(255,215,0,0.25);
   width: 95%;
   max-width: 400px;
-  margin: 1rem auto;
 }
 
-/* Login input fields */
 .login input[type="text"],
 .login input[type="password"] {
   padding: 0.8rem 1rem;
   font-size: 1rem;
-  border-radius: 6px;
+  border-radius: 10px;
   border: 2px solid #FFD700;
-  background-color: #222;
+  background: #222;
   color: #FFD700;
   outline: none;
   transition: border 0.2s, box-shadow 0.2s;
@@ -325,30 +327,28 @@ body.login-body {
 
 .login input:focus {
   border-color: #FFC700;
-  box-shadow: 0 0 5px #FFC700;
+  box-shadow: 0 0 8px #FFC700;
 }
 
-/* Login button */
 .login button {
   padding: 0.8rem 1rem;
   font-size: 1rem;
-  border-radius: 6px;
+  border-radius: 10px;
   border: 2px solid #FFD700;
-  background-color: #111;
+  background: #111;
   color: #FFD700;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 700;
   transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
 .login button:hover {
   background-color: #FFD700;
-  color: #000;
+  color: #0a0a0a;
   transform: scale(1.05);
-  box-shadow: 0 0 10px #FFD700;
+  box-shadow: 0 0 12px rgba(255,215,0,0.5);
 }
 
-/* Optional small link */
 .login .form-link {
   text-align: center;
   font-size: 0.9rem;
@@ -366,193 +366,85 @@ body.login-body {
   text-decoration: underline;
 }
 
-/* ----------------- Professional Styling for All Forms ----------------- */
-form, .message-form, .chatbot_input_form {
+/* ----------------- AR Simulation Settings ----------------- */
+.ar_sim_settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 25px;
+  background: #111;
+  border-radius: 15px;
+  max-width: 1000px;
+  margin: 2rem auto;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.ar_sim_settings .box {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  background-color: #111;
-  padding: 2rem;
-  border-radius: 12px;
+  justify-content: space-between;
+  width: 220px;
+  height: 150px;
+  padding: 1rem;
+  background: linear-gradient(145deg, #FFE345, #FFD700);
   border: 2px solid #FFD700;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-  width: 95%;
-  max-width: 400px;
-  margin: 1rem auto;
-}
-
-/* Input fields for all forms */
-form input[type="text"],
-form input[type="password"],
-form input[type="email"],
-form textarea,
-form select,
-.message-form input[type="text"],
-.chatbot_input_form input[type="text"] {
-  padding: 0.8rem 1rem;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: 2px solid #FFD700;
-  background-color: #222;
-  color: #FFD700;
-  outline: none;
-  transition: border 0.2s, box-shadow 0.2s;
-}
-
-form input:focus,
-form textarea:focus,
-form select:focus,
-.message-form input:focus,
-.chatbot_input_form input:focus {
-  border-color: #FFC700;
-  box-shadow: 0 0 5px #FFC700;
-}
-
-/* Buttons for all forms */
-form button,
-.message-form button,
-.chatbot_input_form button {
-  padding: 0.8rem 1rem;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: 2px solid #FFD700;
-  background-color: #111;
-  color: #FFD700;
+  border-radius: 15px;
   cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  color: #111;
+  gap: 0.5rem;
 }
 
-form button:hover,
-.message-form button:hover,
-.chatbot_input_form button:hover {
-  background-color: #FFD700;
-  color: #000;
-  transform: scale(1.05);
-  box-shadow: 0 0 10px #FFD700;
-}
-
-/* Optional small links for all forms */
-form .form-link,
-.message-form .form-link,
-.chatbot_input_form .form-link {
-  text-align: center;
-  font-size: 0.9rem;
-  color: #FFD700;
-}
-
-form .form-link a,
-.message-form .form-link a,
-.chatbot_input_form .form-link a {
-  color: #FFC700;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-form .form-link a:hover,
-.message-form .form-link a:hover,
-.chatbot_input_form .form-link a:hover {
-  color: #FFD700;
-  text-decoration: underline;
-}
-
-/* ----------------- Headings ----------------- */
-h1, h2, h4 {
-  color: #FFD700;
-  margin-bottom: 1rem;
-  font-weight: bold;
-}
-
-
-/* Form container */
-.ar_sim_settings {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding: 25px;
-    background-color: #f8f9fa;  /* light neutral background */
-    border-radius: 12px;
-    max-width: 1000px;
-    margin: 0 auto;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-}
-
-/* Card-style checkbox using task-card colors */
-.ar_sim_settings .box {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 220px;
-    height: 150px;
-    padding: 1rem;
-    background-color: #FFE345;       /* yellow card */
-    border: 2px solid #FFD700;       /* golden border */
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    box-sizing: border-box;
-    color: black;
-    gap: 0.5rem;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-}
-
-/* Hide native checkbox */
 .ar_sim_settings .box input {
-    display: none;
+  display: none;
 }
 
-/* Highlight card when selected */
-.ar_sim_settings .box input:checked + span,
-.ar_sim_settings .box input:checked ~ span {
-    border-color: #FFA500;  /* slightly darker accent when selected */
+.ar_sim_settings .box input:checked + span {
+  border-color: #FFA500;
 }
 
-/* Hover effect */
 .ar_sim_settings .box:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-    border-color: #FFC107;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  border-color: #FFC107;
 }
 
-/* Car name styling */
 .ar_sim_settings_car_name {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: black;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #111;
 }
 
-/* Drag and lift coefficient styling */
 .ar_sim_settings_drag_co,
 .ar_sim_settings_lift_co {
-    font-size: 0.95rem;
-    color: #333;
+  font-size: 0.95rem;
+  color: #222;
 }
 
-/* Submit button styling */
 .ar_sim_settings button[type="submit"] {
-    padding: 12px 28px;
-    background-color: #FFD700;  /* golden button */
-    color: black;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-top: 15px;
+  padding: 12px 28px;
+  background: linear-gradient(145deg, #FFD700, #FFC700);
+  color: #0a0a0a;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 15px;
 }
 
 .ar_sim_settings button[type="submit"]:hover {
-    background-color: #FFC107;  /* darker golden hover */
-    transform: translateY(-2px);
+  background: linear-gradient(145deg, #FFC700, #FFA500);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(255,215,0,0.5);
 }
 
-/* Responsive for smaller screens */
 @media (max-width: 750px) {
-    .ar_sim_settings .box {
-        width: 100%;
-    }
+  .ar_sim_settings .box {
+    width: 100%;
+  }
 }
 
 
