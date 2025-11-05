@@ -122,6 +122,17 @@ def init_db():
         filepath TEXT
     )
     """)
+
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS project_timeline (
+        id SERIAL PRIMARY KEY,
+        task_id INTEGER REFERENCES todolist(id) ON DELETE CASCADE,
+        milestone TEXT,
+        date DATE,
+        status TEXT DEFAULT 'Pending'
+    )
+    """)
     
     conn.commit()
     conn.close()
