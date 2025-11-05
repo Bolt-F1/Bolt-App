@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Timeline</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='timeline.css') }}">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+<div class="timeline-page">
+    <h1>Project Timeline</h1>
+    <div id="timeline-readonly"></div>
+</div>
+
+<script>
+fetch("/timeline/data")
+.then(res => res.json())
+.then(data => {
+    const events = data.events;
+    const progressDate = new Date(data.progress_date);
+
+    const container = d3.select("#timeline-readonly");
+    const width = Math.min(window.innerWidth*0.95, 1000);
+    const height = 120;
+
+    const svg = container.append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    const parseDate = d3.timeParse("%Y-%m-%d");
+    const dates = events.map(d => parseDate(d.due_date));
+
+    const x = d3.scaleTime()
+        .domain([d3.min(dates), d3.max(dates)])
+        .range([50, width-50]);
+
+    // Timeline base line
+    svg.append("line")
+        .attr("x1", x(d3.min(dates)))
+        .attr("x2", x(d3.max(dates)))
+        .attr("y1", height/2)
+        .attr("y2", height/2)
+        .attr("stroke", "#FFD700")
+        .attr("stroke-width", 4)
+        .attr("rx", 5)
+        .attr("ry", 5);
+
+    // Events circles
+    svg.selectAll("circle")
+        .data(events)
+        .enter()
+        .append("circle")
+        .attr("cx", d => x(parseDate(d.due_date)))
+        .attr("cy", height/2)
+        .attr("r", 12)
+        .attr("fill", "#FFD700")
+        .attr("stroke", "#111")
+        .attr("stroke-width", 2);
+
+    // Tooltip
+    const tooltip = d3.select("body").append("div")
+        .attr("class", "timeline-tooltip")
+        .style("position", "absolute")
+        .style("display", "none");
+
+    svg.selectAll("circle")
+        .on("mouseover", (event,d) => {
+            tooltip.style("display", "block")
+                .html(`<strong>${d.title}</strong><br>${d.description || ""}`);
+        })
+        .on("mousemove", event => {
+            tooltip.style("left", (event.pageX+10) + "px")
+                   .style("top", (event.pageY-20) + "px");
+        })
+        .on("mouseout", () => tooltip.style("display","none"));
+
+    // Progress line
+    svg.append("line")
+        .attr("x1", x(progressDate))
+        .attr("x2", x(progressDate))
+        .attr("y1", height/2 - 20)
+        .attr("y2", height/2 + 20)
+        .attr("stroke", "red")
+        .attr("stroke-width", 4);
+});
+</script>
+</body>
+</html>

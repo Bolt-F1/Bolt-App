@@ -12,6 +12,89 @@
         <h1>The Bolt To-Do List</h1>
     </header>
 
+    <div id="timeline-container"></div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+fetch("/timeline/data")
+.then(res => res.json())
+.then(data => {
+    const events = data.events;
+    const progressDate = new Date(data.progress_date);
+
+    const container = d3.select("#timeline-container");
+    const width = 1000;
+    const height = 120;
+    
+    const svg = container.append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    const parseDate = d3.timeParse("%Y-%m-%d");
+    const dates = events.map(d => parseDate(d.due_date));
+
+    const x = d3.scaleTime()
+        .domain([d3.min(dates), d3.max(dates)])
+        .range([50, width-50]);
+
+    // Timeline line
+    svg.append("line")
+        .attr("x1", x(d3.min(dates)))
+        .attr("x2", x(d3.max(dates)))
+        .attr("y1", height/2)
+        .attr("y2", height/2)
+        .attr("stroke", "#FFD700")
+        .attr("stroke-width", 4);
+
+    // Events as circles
+    svg.selectAll("circle")
+        .data(events)
+        .enter()
+        .append("circle")
+        .attr("cx", d => x(parseDate(d.due_date)))
+        .attr("cy", height/2)
+        .attr("r", 12)
+        .attr("fill", "#FFD700")
+        .attr("stroke", "#111")
+        .attr("stroke-width", 2)
+        .on("mouseover", (event,d) => {
+            d3.select("#tooltip")
+              .style("left", event.pageX + "px")
+              .style("top", event.pageY - 30 + "px")
+              .style("display", "block")
+              .html(`<strong>${d.title}</strong><br>${d.description || ""}`);
+        })
+        .on("mouseout", () => d3.select("#tooltip").style("display", "none"));
+
+    // Progress line
+    let progress = svg.append("line")
+        .attr("x1", x(progressDate))
+        .attr("x2", x(progressDate))
+        .attr("y1", height/2 - 20)
+        .attr("y2", height/2 + 20)
+        .attr("stroke", "red")
+        .attr("stroke-width", 4)
+        .call(d3.drag()
+            .on("drag", (event) => {
+                let newX = Math.max(50, Math.min(width-50, event.x));
+                progress.attr("x1", newX).attr("x2", newX);
+            })
+            .on("end", (event) => {
+                let newDate = x.invert(event.x);
+                fetch("/timeline/update_progress", {
+                    method: "POST",
+                    headers: {"Content-Type":"application/json"},
+                    body: JSON.stringify({progress_date: d3.timeFormat("%Y-%m-%d")(newDate)})
+                });
+            })
+        );
+
+});
+</script>
+
+<div id="tooltip" style="position:absolute; display:none; background:#111; color:#FFD700; padding:5px; border-radius:5px; pointer-events:none;"></div>
+
+
     <main class="main-container">
 
         <!-- Create Task Panel -->

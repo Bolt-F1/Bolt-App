@@ -125,12 +125,18 @@ def init_db():
 
 
     c.execute("""
-    CREATE TABLE IF NOT EXISTS project_timeline (
-        id SERIAL PRIMARY KEY,
-        task_id INTEGER REFERENCES todolist(id) ON DELETE CASCADE,
-        milestone TEXT,
-        date DATE,
-        status TEXT DEFAULT 'Pending'
+    CREATE TABLE IF NOT EXISTS timeline_events (
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    due_date DATE NOT NULL,
+    created_by TEXT,
+    completed BOOLEAN DEFAULT FALSE
+    );
+
+    CREATE TABLE IF NOT EXISTS timeline_progress (
+    id SERIAL PRIMARY KEY,
+    progress_date DATE DEFAULT CURRENT_DATE
     )
     """)
     
@@ -773,7 +779,46 @@ def AR_sim():
 
 
             
+@app.route("/timeline/data")
+def timeline_data():
+    conn = get_pg_conn()
+    c = conn.cursor(cursor_factory=RealDictCursor)
+    
+    # Events
+    c.execute("SELECT * FROM timeline_events ORDER BY due_date ASC")
+    events = c.fetchall()
+    
+    # Current progress
+    c.execute("SELECT progress_date FROM timeline_progress ORDER BY id DESC LIMIT 1")
+    row = c.fetchone()
+    progress_date = row["progress_date"] if row else None
+    
+    conn.close()
+    return jsonify({"events": events, "progress_date": progress_date})
 
+
+@app.route("/timeline/update_progress", methods=["POST"])
+def timeline_update_progress():
+    data = request.get_json()
+    new_date = data.get("progress_date")  # YYYY-MM-DD
+    
+    if not new_date:
+        return jsonify({"error": "No date provided"}), 400
+    
+    conn = get_pg_conn()
+    c = conn.cursor()
+    
+    # Replace or insert single row
+    c.execute("""
+        INSERT INTO timeline_progress (progress_date) 
+        VALUES (%s)
+        ON CONFLICT (id) DO UPDATE SET progress_date = EXCLUDED.progress_date
+        """, (new_date,))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({"status": "ok"})
 
 
     
