@@ -1,0 +1,556 @@
+/****Add FPD CSS Here - Loaded via FPD_promise_loader***/
+
+/**********FPD Common CSS START *************************/
+
+div[id^="fancy-product-designer-"].fpd-container{
+    border-radius: 5px 5px 0 0;
+}
+
+.fpd-btn{
+     border-radius: 5px !important;
+}
+
+.fpd-element-toolbar-smart .fpd-color-palette>.fpd-item{
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+}
+
+.fpd-modal-overlay>.fpd-modal-wrapper {
+    top:15%;
+    padding:25px;
+    border-radius: 5px;
+}
+
+.fpd-modal-wrapper>.fpd-modal-close{
+    top:5px;
+}
+
+/***On file drop on image upload area************/
+form.fpd-upload-form.fpd-hover{
+    opacity: 0.5;
+}
+
+/*****Hide fpd-price in recent images grid****************/
+.fpd-module[data-module="images"] [data-context="upload"] .fpd-photo-grid .fpd-price {
+    display: none;
+}
+
+/*** Hiding Text-Layers Font Size, Color, Name options, Title Also ****/
+.fpd-text-layer-meta,
+.fpd-text-layer-item .fpd-title{
+    display:none;
+}
+
+/*** FPD toolbar alignment subpanel*****************/
+
+.fpd-sub-panel > .fpd-panel-position.fpd-active {
+   display: flex !important;
+   overflow-x: auto !important;
+}
+
+.fpd-panel-position > div {
+    text-align: center;
+    margin: 5px 10px !important;
+    cursor: pointer;
+}
+
+.fpd-panel-position .icon{
+    margin-bottom: 12px;
+}
+
+.fpd-panel-position .icon > span{
+    font-size: 1.5em;
+} 
+
+.fpd-panel-position .name{
+        font-size: 12px;
+         text-align: center;
+         font-family: 'Open Sans';
+         white-space: nowrap;
+}
+
+/*********************************************/
+
+/**** FPD toolbar Curved Text Sub Panel *********/
+
+#curved-text-btns {
+    display: flex;
+    justify-content: center;
+}
+
+#curved-text-btns .btn {
+    border: 1px solid white;
+    padding: 5px;
+    border-radius: 5px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+#curved-text-btns .btn img {
+    filter: invert(100%) sepia(100%) saturate(9%) hue-rotate(214deg) brightness(103%) contrast(100%);
+}
+
+#curved-text-btns .btn.active{
+    border: 1px solid orange;
+}
+
+/**********************************************/
+
+
+
+/***** Text fonts list *****************/
+
+.fpd-panel-font-family input[type="text"] {
+    display: none;
+}
+
+.fpd-fonts-list {
+    display: flex;
+}
+
+.fpd-panel-font-family.fpd-panel-content {
+
+	position: absolute;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+
+}
+
+.fpd-fonts-list .fpd-item {
+
+    border: 1px solid white;
+    margin-right: 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+	padding:5px;
+
+}
+
+.fpd-fonts-list .fpd-item:hover {
+    color: #f6861f;
+	background:initial;
+}
+
+/**********************************/
+
+
+/*** FPD Modules css *************/
+
+.fpd-grid>.fpd-category.fpd-item{
+	width: calc(33% - 1px)!important;
+}
+
+.fpd-grid>.fpd-category.fpd-item>span {
+	text-transform:none;
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+	padding:2px;
+}
+
+.fpd-topbar .fpd-navigation>div>span[class*="fpd-icon"] {
+    color: orange;
+	font-size:20px;
+}
+	
+.fpd-topbar .fpd-navigation>div>.fpd-label{
+font-weight: bold;
+text-transform:inherit;
+}
+
+/***********Upload Photo from device, Web etc tab****/
+
+.fpd-module-tabs {
+    display: flex;
+    overflow-x: auto;
+}
+
+.fpd-module-tabs>div{
+	display: flex;
+    padding: 10px 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+.fpd-module-tabs span {
+    margin-right: 5px;
+
+}
+
+.fpd-module-tabs>div {
+    font-size: 1.1em;
+}
+/********************************/
+
+/**************************************/
+
+
+/***mCustomScrollbar css********/
+
+/*Default color on rest*/
+.mCSB_scrollTools .mCSB_dragger .mCSB_dragger_bar{
+background-color:#446084 !important;
+}
+
+/*Color on hover*/
+.mCSB_scrollTools .mCSB_dragger:hover .mCSB_dragger_bar{
+background-color:#446084 !important;
+}
+
+/*Color on drag*/
+.mCSB_scrollTools .mCSB_dragger:active .mCSB_dragger_bar,.mCSB_scrollTools .mCSB_dragger.mCSB_dragger_onDrag .mCSB_dragger_bar {
+background-color:#446084 !important;
+}
+
+/*Grey rail color*/
+.mCSB_scrollTools .mCSB_draggerRail {
+background-color:#ffffff00 !important;
+}
+
+/********************************/
+
+.fpd-bottom-tools{
+  display: flex;
+    margin-bottom: 10px;
+    text-align: center;
+    overflow-x: auto;
+    max-width: 1080px;
+    margin-left: auto;
+    margin-right: auto;
+    white-space: nowrap;  
+}
+
+.fpd-container .fpd-grid,
+.fpd-manage-layers-panel .fpd-list{
+    overflow-y: scroll;
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overscroll-behavior: contain;
+    overflow-x: hidden !important;
+}
+
+/*** Prevent overscroll when scrolling in fpd-list *******/
+.fpd-list{
+    overscroll-behavior: contain;
+}
+
+
+/*****Change loader color******/
+.fpd-loader>.fpd-loader-circle {
+    border: 3px solid #44608491 !important;
+    border-left: 4px solid #f6861f !important;
+}
+
+
+/****Css for fpd image loading overlay on image*********/
+
+[data-context=upload] .fpd-grid .fpd-loading picture {
+    -webkit-filter: blur(8px);
+    filter: blur(8px);
+}
+
+
+[data-context=upload] .fpd-grid .fpd-loading-bar {
+    background: #446084ba;
+}
+
+[data-context=upload] .fpd-grid .fpd-loading-bar>.fpd-loading-progress {
+    background: #f6861f;
+}
+
+
+
+/***Setting views thumbnail size for desktop****/
+
+.fpd-container.fpd-views-outside~.fpd-views-selection>div {
+    width: 90px;
+    height: 90px;
+}
+
+/***Decrease views margin***/
+.fpd-views-selection  {
+      margin: 7px 0 0 !important;
+}
+
+/**Setting thumbnail color for active view****/
+.fpd-shadow-1.fpd-item.fpd-view-active {
+    border: 1px solid #446084;
+}
+
+/**Decrease padding in image,text,design modules****/
+
+.fpd-topbar .fpd-navigation>div {
+    padding: 0 10px;
+}
+
+
+/********************Remove distance between fpd content and mainbar**********/
+.fpd-topbar[class*="fpd-off-canvas-"] .fpd-mainbar > .fpd-content {
+    top:42px !important;
+}
+
+/********set height of off-canvas close x button********/
+.fpd-topbar[class*="fpd-off-canvas-"] .fpd-mainbar > .fpd-close-off-canvas {
+	top:125px !important;
+}
+
+/****Hide fpd actions container - zoom,layers etc*****/
+
+.fpd-actions-container {
+display:none !important;
+}
+
+/******Padding for resize text*******/
+
+[data-panel="transform"],
+[data-panel="edit-text"]{
+    padding-left: 7px !important;
+    padding-right: 7px !important;
+}
+
+
+/******Setting fpd-no-margin from 0 to 12 px as we are adding custom icons like copy/delete after the last icon in toolbar*****/
+
+.fpd-element-toolbar-smart .fpd-no-margin{
+    /**margin-right: 12px !important;**/
+}
+
+
+/********Hide edit text icon*******/
+
+span.fpd-icon-text-input {
+    display:none !important;
+    
+}
+
+/****Upload from and upload options text****/
+
+.uploadoptions{
+	    padding: 1px !important;
+}
+
+/****Hide Pixabay Logo******/
+.fpd-pixabay-logo {
+	display:none !important
+}
+
+
+/*****FPD Designs Back button text***/
+.fpd-back.fpd-btn:after {
+content: "BACK"
+}
+
+/*FPD Container Background Color from Black to Blue*/
+.fpd-container .fpd-primary-bg-color {
+background-color: #446084 !important;
+}
+
+.fpd-navigation>div.fpd-active {
+background: #ffffff !important;
+}
+
+/*Login via Fb Message*/
+.fpd-head .fpd-facebook-login:after {
+content: "to Add Images via your Fb Profile"
+}
+
+
+
+/*************** Hide Position, text height and spacing options  ***************/
+[data-defaulttext="Position"],
+[data-defaulttext="Line Height"],
+[data-defaulttext="Letter Spacing"]{
+display: none !important;
+}
+
+
+
+/*******Hide search bar in designs ************/
+.fpd-input-back-search>.fpd-input-search {
+	display:none !important;
+}
+
+
+/*******Add Border to back button in design ************/
+
+.fpd-input-back-search>.fpd-back {
+    
+    border-right:1px solid rgba(0,0,0,.1)!important;
+}
+
+
+/*************** Make design thumbnails larger  ***************/
+.fpd-grid-columns-2 .fpd-grid>.fpd-item {
+     height: 150px !important;
+}
+
+/*** Design thumbnails in 3 Grid column ****************/
+.fpd-grid-columns-3 .fpd-module[data-module="designs"] .fpd-item:not(.fpd-category) picture {
+    left: 3px !important;
+    right: 3px !important;
+    border: 1px solid #f1f3f6;
+    border-radius: 5px;
+}
+
+/*************** Resolve Close Button Vanishing on Mobile Issue  ***************/
+.fpd-close-off-canvas{z-index: 10000 !important;}
+
+.fpd-container[class*=fpd-off-canvas-left] .fpd-mainbar.fpd-show>.fpd-close-off-canvas {
+    
+        left: 299px !important;
+}
+
+/*************** change color of action bar  ***************/
+
+.fpd-element-toolbar-smart.fpd-theme-dark {
+background: #272727f5 !important;
+}
+
+
+
+/*************** Change text area to white   ***************/
+.fpd-element-toolbar-smart.fpd-theme-dark textarea {
+    
+    background:rgb(255,255,255) !important;
+color: rgb(0,0,0) !important;
+    
+}
+
+/*************** Reduct font dropdown box width  ***************/
+.fpd-tool-font-family.fpd-tooltip.tooltipstered { 
+ width: 120px !important;   
+}
+
+/****Reducing toolbar height - add image,text area*****/
+.fpd-topbar .fpd-navigation {
+height:42px;
+}
+
+/**Reducing line height for add image,text etc icons to fit in toolbar height of 50px****/
+.fpd-topbar .fpd-navigation>div>span {
+    line-height: 42px;
+}
+
+/***reducing top padding for add image,text etc icons for mobile as per fpd mobile screen breakpoint****/
+@media only screen and (max-width: 568px) {
+.fpd-topbar .fpd-navigation>div>span {
+padding-top:5px;
+display:initial;
+}
+}
+
+
+/***** Image Upload area styling******************************/
+[data-context=upload] .fpd-upload-zone {
+    border: none;
+    color: #ffffff;
+    margin: 10px 5%;
+    width: 90%;
+    height: 53px;
+    position: relative;
+    cursor: pointer;
+    border-radius: 5px;
+    background: #446084;
+    box-shadow: 2px 3px 3px grey;
+}
+
+.fpd-upload-zone>div>span {
+    opacity: 1;
+}
+
+/******************* FPD Common CSS END ******************************/
+
+@media only screen and (min-width: 49em) {
+
+/** FPD non mobile css **********************/
+.fpdfooter::-webkit-scrollbar , .fpd-bottom-tools::-webkit-scrollbar {
+  height: 13px !important;
+}
+
+.fpd-grid::-webkit-scrollbar {
+    width: 13px !important;
+}
+
+/* Track */
+.fpdfooter::-webkit-scrollbar-track , .fpd-bottom-tools::-webkit-scrollbar-track,.fpd-grid::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+ 
+/* Handle */
+.fpdfooter::-webkit-scrollbar-thumb , .fpd-bottom-tools::-webkit-scrollbar-thumb ,.fpd-grid::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+
+/* Handle on hover */
+.fpdfooter::-webkit-scrollbar-thumb:hover , .fpd-bottom-tools::-webkit-scrollbar-thumb:hover , .fpd-grid::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+
+}
+
+}
+
+
+@media only screen and (max-width: 48em) {
+	
+/************FPD Mobile CSS START ***********************/	
+	
+
+	/***Changing views selection thumbnail size to squre*****/
+ .fpd-container.fpd-device-smartphone~.fpd-views-selection>div {
+    width: 48px;
+    height: 48px;
+}	
+
+/***Size of +Image,+Design,+Text font****/
+
+.fpd-topbar .fpd-navigation .fpd-label {
+    font-size: 13px!important;	
+}
+/*Make scroller always visible in Dialog/Off canvas box in FPD*/
+.mCS-autoHide>.mCustomScrollBox~.mCSB_scrollTools {
+/*opacity:1 !important;*/
+}
+
+.mCS-autoHide:hover>.mCustomScrollBox~.mCSB_scrollTools {
+/*opacity:1 !important;*/
+}
+
+/*Make scroller always expanded in Dialog/Off canvas box in FPD*/
+.mCSB_scrollTools .mCSB_draggerRail {
+
+/*width:8px !important;*/
+
+}	
+	
+	
+/*Max height of textbox on mobile*/
+
+	[data-control="text"] {
+		min-height:10px !important;
+		max-height:100px !important;
+	}
+	
+/*************** auto with of action bar  *****
+.fpd-element-toolbar-smart {
+	min-width:50% !important;
+    
+}	**********/
+
+.fpd-element-toolbar-smart {
+    padding: 15px!important;
+}
+
+	/*************** Increase Padding Around close button in action bar  ***************/
+
+	.fpd-close-panel {
+	padding:10px 17px !important;	
+	}	
+	
+	
+/****************************** FPD Mobile CSS END ******************************/	
+	
+}
+
