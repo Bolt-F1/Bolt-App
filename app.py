@@ -145,7 +145,7 @@ def init_db():
         id SERIAL PRIMARY KEY,
         user TEXT REFERENCES finance_users(username),
         name TEXT NOT NULL,
-        type TEXT NOT NULL,         
+        type TEXT NOT NULL,         -- e.g., "Checking", "Savings", "Credit Card"
         balance NUMERIC DEFAULT 0
     );
 
@@ -161,6 +161,8 @@ def init_db():
         type TEXT CHECK (type IN ('credit', 'debit'))
     );
 
+
+    """)
     
     conn.commit()
     conn.close()
