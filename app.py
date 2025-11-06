@@ -25,7 +25,7 @@ app.secret_key = "supersecretkey"
 # ------------------------ USERS ------------------------
 USERS = ["Ahaan", "Ayaan", "Ayush", "Vishak", "Nathan", "Tharun"]
 USER_COLORS = {
-    "Ahoon": "tomato",
+    "Ahaan": "tomato",
     "Ayaan": "orange",
     "Ayush": "sienna",
     "Vishak": "peru",
@@ -137,7 +137,30 @@ def init_db():
     CREATE TABLE IF NOT EXISTS timeline_progress (
     id SERIAL PRIMARY KEY,
     progress_date DATE DEFAULT CURRENT_DATE
-    )
+    );
+
+
+
+    CREATE TABLE IF NOT EXISTS finance_budgets (
+        id SERIAL PRIMARY KEY,
+        user TEXT REFERENCES finance_users(username),
+        name TEXT NOT NULL,
+        type TEXT NOT NULL,         -- e.g., "Checking", "Savings", "Credit Card"
+        balance NUMERIC DEFAULT 0
+    );
+
+
+    CREATE TABLE IF NOT EXISTS finance_transactions (
+        id SERIAL PRIMARY KEY,
+        user TEXT REFERENCES finance_users(username),
+        budget_id INT REFERENCES finance_budgets(id),
+        date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        description TEXT,
+        amount NUMERIC,
+        category TEXT,
+        type TEXT CHECK (type IN ('credit','debit'))
+    );
+
     """)
     
     conn.commit()
@@ -160,7 +183,7 @@ def clear_if_new_week():
 
     if not row or int(row['value']) != current_week:
         # Delete old messages
-        c.execute("DELETE FROM messages")
+        c.execute("DELETE FROM messages WHERE time < NOW() - INTERVAL '30 days'")
 
         # Update meta table
         c.execute(
@@ -819,6 +842,70 @@ def timeline_update_progress():
     conn.close()
     
     return jsonify({"status": "ok"})
+
+
+
+@app.route("/finance", methods=["GET", "POST"])
+def finance():
+    username = session.get("username")
+    if not username:
+        return redirect("/")
+    
+    conn = get_pg_conn()
+    c = conn.cursor()
+    
+    # Initialize budgets if empty
+    c.execute("SELECT * FROM finance_budgets WHERE user=%s", (username,))
+    budgets = c.fetchall()
+    if not budgets:
+        for name in ["Checking","Savings","Credit Card"]:
+            c.execute("INSERT INTO finance_budgets (user,name,balance) VALUES (%s,%s,%s)",
+                      (username,name,0))
+        conn.commit()
+        c.execute("SELECT * FROM finance_budgets WHERE user=%s", (username,))
+        budgets = c.fetchall()
+    
+    # Get transactions
+    c.execute("SELECT * FROM finance_transactions WHERE user=%s ORDER BY date DESC", (username,))
+    transactions = c.fetchall()
+    conn.close()
+    
+    return render_template("finance.html", budgets=budgets, transactions=transactions, username=username)
+
+# Update budget
+@app.route("/finance/update_budget", methods=["POST"])
+def update_budget():
+    data = request.get_json()
+    budget_name = data.get("budget")
+    balance = data.get("balance")
+    username = session.get("username")
+    if not username:
+        return jsonify({"status":"error","message":"Not logged in"})
+    
+    conn = get_pg_conn()
+    c = conn.cursor()
+    c.execute("UPDATE finance_budgets SET balance=%s WHERE user=%s AND name=%s",
+              (balance, username, budget_name))
+    conn.commit()
+    conn.close()
+    return jsonify({"status":"ok"})
+
+# Timeline page (read-only)
+@app.route("/finance/timeline")
+def finance_timeline():
+    username = session.get("username")
+    if not username:
+        return redirect("/")
+    
+    conn = get_pg_conn()
+    c = conn.cursor(cursor_factory=RealDictCursor)
+    c.execute("SELECT * FROM finance_budgets WHERE user=%s", (username,))
+    budgets = c.fetchall()
+    c.execute("SELECT * FROM finance_transactions WHERE user=%s ORDER BY date ASC", (username,))
+    transactions = c.fetchall()
+    conn.close()
+    
+    return render_template("timeline.html", budgets=budgets, transactions=transactions)
 
 
     
