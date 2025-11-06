@@ -145,23 +145,22 @@ def init_db():
         id SERIAL PRIMARY KEY,
         user TEXT REFERENCES finance_users(username),
         name TEXT NOT NULL,
-        type TEXT NOT NULL,         -- e.g., "Checking", "Savings", "Credit Card"
+        type TEXT NOT NULL,         
         balance NUMERIC DEFAULT 0
     );
 
 
     CREATE TABLE IF NOT EXISTS finance_transactions (
         id SERIAL PRIMARY KEY,
-        user TEXT REFERENCES finance_users(username),
-        budget_id INT REFERENCES finance_budgets(id),
+        username TEXT REFERENCES finance_users(username) ON DELETE CASCADE,
+        budget_id INT REFERENCES finance_budgets(id) ON DELETE CASCADE,
         date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         description TEXT,
-        amount NUMERIC,
+        amount NUMERIC(12,2) CHECK (amount >= 0),
         category TEXT,
-        type TEXT CHECK (type IN ('credit','debit'))
+        type TEXT CHECK (type IN ('credit', 'debit'))
     );
 
-    """)
     
     conn.commit()
     conn.close()

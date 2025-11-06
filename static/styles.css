@@ -444,6 +444,178 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
   box-shadow: 0 4px 15px rgba(255,215,0,0.4);
 }
 
+
+
+/* ----------------- General Body ----------------- */
+body.finance-body {
+  font-family: 'Segoe UI', 'Trebuchet MS', sans-serif;
+  font-size: 1rem;
+  background-color: #0a0a0a;
+  color: #FFD700;
+  padding: 2%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.6;
+}
+
+
+/* ----------------- Finance Container ----------------- */
+.finance-container {
+  width: 95%;
+  max-width: 1200px;
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ----------------- Budget Cards ----------------- */
+.budget-card {
+  background: linear-gradient(145deg, #111, #1a1a1a);
+  border: 1px solid #FFD700;
+  border-radius: 15px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.budget-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 35px rgba(0,0,0,0.7);
+}
+
+/* ----------------- Budget Header ----------------- */
+.budget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+/* ----------------- Budget Value ----------------- */
+.budget-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #FFD700;
+}
+
+/* ----------------- Transaction Table ----------------- */
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #111;
+  border: 1px solid #FFD700;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+.transactions-table th, .transactions-table td {
+  padding: 0.8rem 1rem;
+  text-align: left;
+}
+
+.transactions-table th {
+  background: #222;
+  color: #FFD700;
+  font-weight: 700;
+}
+
+.transactions-table tr:nth-child(even) {
+  background: #1a1a1a;
+}
+
+.transactions-table tr:hover {
+  background: linear-gradient(90deg, #222, #333);
+}
+
+/* ----------------- Transaction Form ----------------- */
+.transaction-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.transaction-form input, 
+.transaction-form select {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 2px solid #FFD700;
+  background: #222;
+  color: #FFD700;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.transaction-form input:focus,
+.transaction-form select:focus {
+  border-color: #FFC700;
+  box-shadow: 0 0 8px #FFC700;
+}
+
+/* ----------------- Buttons ----------------- */
+.btn {
+  padding: 0.6rem 1.5rem;
+  background: #FFD700;
+  color: #0a0a0a;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  background: #FFC700;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255,215,0,0.4);
+}
+
+/* ----------------- Summary Cards ----------------- */
+.summary-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.summary-card {
+  flex: 1 1 200px;
+  background: linear-gradient(145deg, #111, #1a1a1a);
+  border: 1px solid #FFD700;
+  border-radius: 15px;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.summary-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+
+
+/* ----------------- Responsive ----------------- */
+@media (max-width: 750px) {
+  .budget-card, .summary-card {
+      flex: 1 1 100%;
+  }
+  
+  .transaction-form {
+      flex-direction: column;
+  }
+  
+
+
 /* ===================================================
  ANIMATIONS
 =================================================== */
