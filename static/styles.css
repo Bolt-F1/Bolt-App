@@ -436,7 +436,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
   transition: all 0.2s ease;
 }
 .bottom-menu li a img {
-  width: 500%;
+  width: 2000%;
   height: auto;
 }
 .bottom-menu li a img:hover {

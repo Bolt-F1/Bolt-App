@@ -42,7 +42,17 @@ def get_pg_conn():
 def init_db():
     conn = get_pg_conn()
     c = conn.cursor()
-    
+
+    # ---------- create users table FIRST (so FK references work) ----------
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS finance_users (
+        id SERIAL PRIMARY KEY,
+        user TEXT UNIQUE NOT NULL,
+        full_name TEXT,
+        email TEXT
+    )
+    """)
+
     # Messages table
     c.execute("""
     CREATE TABLE IF NOT EXISTS messages (
@@ -52,7 +62,7 @@ def init_db():
         time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
-    
+
     # Todo list
     c.execute("""
     CREATE TABLE IF NOT EXISTS todolist (
@@ -65,14 +75,14 @@ def init_db():
     )
     """)
 
-    # Create table
+    # Meta table
     c.execute("""
     CREATE TABLE IF NOT EXISTS meta (
         key TEXT PRIMARY KEY,
         value TEXT
     )
     """)
-    
+
     # Doc summary
     c.execute("""
     CREATE TABLE IF NOT EXISTS doc_summary (
@@ -80,7 +90,7 @@ def init_db():
         summary TEXT
     )
     """)
-    
+
     # Chatbot table
     c.execute("""
     CREATE TABLE IF NOT EXISTS chatbot (
@@ -89,8 +99,8 @@ def init_db():
         answer TEXT
     )
     """)
-    
-    # ML features table
+
+    # ML features
     c.execute("""
     CREATE TABLE IF NOT EXISTS ml_features (
         id SERIAL PRIMARY KEY,
@@ -112,7 +122,6 @@ def init_db():
     )
     """)
 
-
     c.execute("""
     CREATE TABLE IF NOT EXISTS ar_sim_results (
         id SERIAL PRIMARY KEY,
@@ -123,49 +132,52 @@ def init_db():
     )
     """)
 
-
+    # Timeline tables
     c.execute("""
     CREATE TABLE IF NOT EXISTS timeline_events (
-    id SERIAL PRIMARY KEY,
-    title TEXT NOT NULL,
-    description TEXT,
-    due_date DATE NOT NULL,
-    created_by TEXT,
-    completed BOOLEAN DEFAULT FALSE
-    );
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT,
+        due_date DATE NOT NULL,
+        created_by TEXT,
+        completed BOOLEAN DEFAULT FALSE
+    )
+    """)
 
+    c.execute("""
     CREATE TABLE IF NOT EXISTS timeline_progress (
-    id SERIAL PRIMARY KEY,
-    progress_date DATE DEFAULT CURRENT_DATE
-    );
+        id SERIAL PRIMARY KEY,
+        progress_date DATE DEFAULT CURRENT_DATE
+    )
+    """)
 
-
-
+    
+    c.execute("""
     CREATE TABLE IF NOT EXISTS finance_budgets (
         id SERIAL PRIMARY KEY,
-        user_2 TEXT REFERENCES finance_users(username),
+        user TEXT NOT NULL REFERENCES finance_users(username),
         name TEXT NOT NULL,
         type TEXT NOT NULL,         -- e.g., "Checking", "Savings", "Credit Card"
         balance NUMERIC DEFAULT 0
-    );
+    )
+    """)
 
-
+    c.execute("""
     CREATE TABLE IF NOT EXISTS finance_transactions (
         id SERIAL PRIMARY KEY,
-        username TEXT REFERENCES finance_users(username) ON DELETE CASCADE,
+        user TEXT NOT NULL REFERENCES finance_users(username) ON DELETE CASCADE,
         budget_id INT REFERENCES finance_budgets(id) ON DELETE CASCADE,
         date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         description TEXT,
         amount NUMERIC(12,2) CHECK (amount >= 0),
         category TEXT,
         type TEXT CHECK (type IN ('credit', 'debit'))
-    );
-
-
+    )
     """)
-    
+
     conn.commit()
     conn.close()
+
 
 
 
@@ -856,18 +868,18 @@ def finance():
     c = conn.cursor()
     
     # Initialize budgets if empty
-    c.execute("SELECT * FROM finance_budgets WHERE user_2=%s", (username,))
+    c.execute("SELECT * FROM finance_budgets WHERE user=%s", (username,))
     budgets = c.fetchall()
     if not budgets:
         for name in ["Checking","Savings","Credit Card"]:
-            c.execute("INSERT INTO finance_budgets (user_2,name,balance) VALUES (%s,%s,%s)",
+            c.execute("INSERT INTO finance_budgets (user,name,balance) VALUES (%s,%s,%s)",
                       (username,name,0))
         conn.commit()
-        c.execute("SELECT * FROM finance_budgets WHERE user_2=%s", (username,))
+        c.execute("SELECT * FROM finance_budgets WHERE user=%s", (username,))
         budgets = c.fetchall()
     
     # Get transactions
-    c.execute("SELECT * FROM finance_transactions WHERE user_2=%s ORDER BY date DESC", (username,))
+    c.execute("SELECT * FROM finance_transactions WHERE user=%s ORDER BY date DESC", (username,))
     transactions = c.fetchall()
     conn.close()
     
@@ -885,7 +897,7 @@ def update_budget():
     
     conn = get_pg_conn()
     c = conn.cursor()
-    c.execute("UPDATE finance_budgets SET balance=%s WHERE username=%s AND name=%s",
+    c.execute("UPDATE finance_budgets SET balance=%s WHERE user=%s AND name=%s",
               (balance, username, budget_name))
     conn.commit()
     conn.close()
@@ -900,9 +912,9 @@ def finance_timeline():
     
     conn = get_pg_conn()
     c = conn.cursor(cursor_factory=RealDictCursor)
-    c.execute("SELECT * FROM finance_budgets WHERE user_2=%s", (username,))
+    c.execute("SELECT * FROM finance_budgets WHERE user=%s", (username,))
     budgets = c.fetchall()
-    c.execute("SELECT * FROM finance_transactions WHERE username=%s ORDER BY date ASC", (username,))
+    c.execute("SELECT * FROM finance_transactions WHERE user=%s ORDER BY date ASC", (username,))
     transactions = c.fetchall()
     conn.close()
     
