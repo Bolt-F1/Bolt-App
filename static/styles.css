@@ -430,13 +430,13 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 15%;
+  width: 100%;
   height: auto;
   max-width: 50px;
   transition: all 0.2s ease;
 }
 .bottom-menu li a img {
-  width: 2000%;
+  width: 100%;
   height: auto;
 }
 .bottom-menu li a img:hover {

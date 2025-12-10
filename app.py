@@ -47,7 +47,7 @@ def init_db():
     c.execute("""
     CREATE TABLE IF NOT EXISTS finance_users (
         id SERIAL PRIMARY KEY,
-        user TEXT UNIQUE NOT NULL,
+        username TEXT UNIQUE NOT NULL,
         full_name TEXT,
         email TEXT
     )
@@ -155,7 +155,7 @@ def init_db():
     c.execute("""
     CREATE TABLE IF NOT EXISTS finance_budgets (
         id SERIAL PRIMARY KEY,
-        user TEXT NOT NULL REFERENCES finance_users(username),
+        username TEXT NOT NULL REFERENCES finance_users(username),
         name TEXT NOT NULL,
         type TEXT NOT NULL,         -- e.g., "Checking", "Savings", "Credit Card"
         balance NUMERIC DEFAULT 0
@@ -165,7 +165,7 @@ def init_db():
     c.execute("""
     CREATE TABLE IF NOT EXISTS finance_transactions (
         id SERIAL PRIMARY KEY,
-        user TEXT NOT NULL REFERENCES finance_users(username) ON DELETE CASCADE,
+        username TEXT NOT NULL REFERENCES finance_users(username) ON DELETE CASCADE,
         budget_id INT REFERENCES finance_budgets(id) ON DELETE CASCADE,
         date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         description TEXT,
@@ -874,18 +874,18 @@ def finance():
     c = conn.cursor()
     
     # Initialize budgets if empty
-    c.execute("SELECT * FROM finance_budgets WHERE user=%s", (username,))
+    c.execute("SELECT * FROM finance_budgets WHERE username=%s", (username,))
     budgets = c.fetchall()
     if not budgets:
         for name in ["Checking","Savings","Credit Card"]:
-            c.execute("INSERT INTO finance_budgets (user,name,balance) VALUES (%s,%s,%s)",
+            c.execute("INSERT INTO finance_budgets (username,name,balance) VALUES (%s,%s,%s)",
                       (username,name,0))
         conn.commit()
-        c.execute("SELECT * FROM finance_budgets WHERE user=%s", (username,))
+        c.execute("SELECT * FROM finance_budgets WHERE username=%s", (username,))
         budgets = c.fetchall()
     
     # Get transactions
-    c.execute("SELECT * FROM finance_transactions WHERE user=%s ORDER BY date DESC", (username,))
+    c.execute("SELECT * FROM finance_transactions WHERE username=%s ORDER BY date DESC", (username,))
     transactions = c.fetchall()
     conn.close()
     
@@ -918,9 +918,9 @@ def finance_timeline():
     
     conn = get_pg_conn()
     c = conn.cursor(cursor_factory=RealDictCursor)
-    c.execute("SELECT * FROM finance_budgets WHERE user=%s", (username,))
+    c.execute("SELECT * FROM finance_budgets WHERE username=%s", (username,))
     budgets = c.fetchall()
-    c.execute("SELECT * FROM finance_transactions WHERE user=%s ORDER BY date ASC", (username,))
+    c.execute("SELECT * FROM finance_transactions WHERE username=%s ORDER BY date ASC", (username,))
     transactions = c.fetchall()
     conn.close()
     
