@@ -319,9 +319,10 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass, show
     T_initial = 293.15     # K
     P_initial = 5.8e6      # Pa
     Cd_nozzle = 0.9
-    system_efficiency = 0.0095
+    system_efficiency = 0.18
+    delivered_energy = 0.0
 
-    # ----- derived -----
+   
 
     nozzle_area = math.pi * (nozzle_diameter / 2.0)**2
     V_cartridge = 0.01
@@ -356,7 +357,8 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass, show
 
         # --- pressure & mass flow ---
         if liquid_mass > 0:
-            current_pressure = P_initial
+            current_pressure = P_initial * (remaining_co2 / cartridge_mass)
+            current_pressure = max(current_pressure, 101325.0)
             # mass flow from liquid vaporization
             mdot = Cd_nozzle * nozzle_area * current_pressure * choked_factor
             liquid_mass -= mdot * dt
@@ -364,7 +366,9 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass, show
                 liquid_mass = 0.0
         elif remaining_co2 > 0:
             # ideal gas mass flow
-            current_pressure = max(101325.0, remaining_co2 * R_co2 * T_initial / V_cartridge)
+            current_pressure = remaining_co2 * R_co2 * T_initial / V_cartridge
+            if current_pressure < 101325:
+                current_pressure = 101325
             mdot = Cd_nozzle * nozzle_area * current_pressure * choked_factor
         else:
             current_pressure = 101325.0
@@ -372,6 +376,8 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass, show
 
         # --- thrust ---
         thrust_force = system_efficiency * mdot * exit_velocity
+
+        delivered_energy += thrust_force * velocity * dt
 
         # --- update remaining mass ---
         remaining_co2 -= mdot * dt
@@ -382,7 +388,7 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass, show
         # --- resistances ---
         drag_force = 0.5 * air_density * velocity**2 * dragaero * frontal_area
         lift_force = 0.5 * air_density * velocity**2 * lift_coefficient * frontal_area
-        normal_force = max(0.0, total_mass * g * math.cos(theta) - lift_force)
+        normal_force = total_mass * g * math.cos(theta) - lift_force
         rolling_force = C_rr * normal_force
         slope_force = total_mass * g * math.sin(theta)
         resist_force = drag_force + rolling_force + slope_force + axle_friction_force
@@ -390,12 +396,12 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass, show
         # --- dynamics ---
         net_force = thrust_force - resist_force
         acceleration = net_force / total_mass
+        position += velocity * dt
         velocity += acceleration * dt
         # numerical safety
         if velocity < 1e-12:
             velocity = 0.0
 
-        position += velocity * dt
         time += dt
 
         # --- diagnostics ---
