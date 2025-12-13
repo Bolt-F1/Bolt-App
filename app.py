@@ -336,6 +336,9 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass, show
     total_mass = car_mass + remaining_co2
     liquid_mass = 0.9 * cartridge_mass
     theta = math.radians(slope_angle_deg)
+    TARGET_ENERGY = 333.0  # J
+r 
+    energy_scale = None
 
     speeds = []
     positions = []
@@ -375,9 +378,17 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass, show
             mdot = 0.0
 
         # --- thrust ---
-        thrust_force = system_efficiency * mdot * exit_velocity
+        raw_thrust = mdot * exit_velocity
+        raw_energy += raw_thrust * velocity * dt
 
+        # determine scale factor once
+        if energy_scale is None and raw_energy > 0:
+            energy_scale = TARGET_ENERGY / raw_energy
+
+        thrust_force = energy_scale * raw_thrust if energy_scale else raw_thrust
         delivered_energy += thrust_force * velocity * dt
+
+
 
         # --- update remaining mass ---
         remaining_co2 -= mdot * dt
