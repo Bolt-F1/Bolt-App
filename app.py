@@ -337,7 +337,7 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass, show
     liquid_mass = 0.9 * cartridge_mass
     theta = math.radians(slope_angle_deg)
     TARGET_ENERGY = 333.0  # J
-r 
+ 
     energy_scale = None
 
     speeds = []
