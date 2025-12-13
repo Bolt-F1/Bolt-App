@@ -339,6 +339,7 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass, show
     TARGET_ENERGY = 333.0  # J
  
     energy_scale = None
+    raw_energy = 0
 
     speeds = []
     positions = []
