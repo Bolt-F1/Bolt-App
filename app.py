@@ -915,7 +915,7 @@ def update_budget():
     
     conn = get_pg_conn()
     c = conn.cursor()
-    c.execute("UPDATE finance_budgets SET balance=%s WHERE user=%s AND name=%s",
+    c.execute("UPDATE finance_budgets SET balance=%s WHERE username=%s AND name=%s",
               (balance, username, budget_name))
     conn.commit()
     conn.close()
