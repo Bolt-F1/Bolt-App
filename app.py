@@ -906,9 +906,19 @@ def finance():
 # Update budget
 @app.route("/finance/update_budget", methods=["POST"])
 def update_budget():
-    data = request.get_json()
+    data = request.get_json(silent=True) or request.form
     budget_name = data.get("budget")
     balance = data.get("balance")
+
+    # Convert balance to float
+    try:
+        balance = float(balance)
+    except (TypeError, ValueError):
+        return jsonify({"status":"error","message":"Invalid balance"})
+        username = session.get("username")
+        if not username:
+            return jsonify({"status":"error","message":"Not logged in"})
+            
     username = session.get("username")
     if not username:
         return jsonify({"status":"error","message":"Not logged in"})
