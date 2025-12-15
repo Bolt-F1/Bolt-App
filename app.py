@@ -910,26 +910,25 @@ def update_budget():
     budget_name = data.get("budget")
     balance = data.get("balance")
 
-    # Convert balance to float
     try:
         balance = float(balance)
     except (TypeError, ValueError):
-        return jsonify({"status":"error","message":"Invalid balance"})
-        username = session.get("username")
-        if not username:
-            return jsonify({"status":"error","message":"Not logged in"})
-            
+        return jsonify({"status": "error", "message": "Invalid balance"})
+
     username = session.get("username")
     if not username:
-        return jsonify({"status":"error","message":"Not logged in"})
-    
+        return jsonify({"status": "error", "message": "Not logged in"})
+
     conn = get_pg_conn()
     c = conn.cursor()
-    c.execute("UPDATE finance_budgets SET balance=%s WHERE username=%s AND name=%s",
-              (balance, username, budget_name))
+    c.execute(
+        "UPDATE finance_budgets SET balance=%s WHERE username=%s AND name=%s",
+        (balance, username, budget_name)
+    )
     conn.commit()
     conn.close()
-    return jsonify({"status":"ok"})
+    return jsonify({"status": "ok"})
+
 
 # Timeline page (read-only)
 @app.route("/finance/timeline")
