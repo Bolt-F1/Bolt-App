@@ -43,16 +43,6 @@ def init_db():
     conn = get_pg_conn()
     c = conn.cursor()
 
-    # ---------- create users table FIRST (so FK references work) ----------
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS finance_users (
-        id SERIAL PRIMARY KEY,
-        username TEXT UNIQUE NOT NULL,
-        full_name TEXT,
-        email TEXT
-    )
-    """)
-
     # Messages table
     c.execute("""
     CREATE TABLE IF NOT EXISTS messages (
@@ -132,46 +122,11 @@ def init_db():
     )
     """)
 
-    # Timeline tables
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS timeline_events (
-        id SERIAL PRIMARY KEY,
-        title TEXT NOT NULL,
-        description TEXT,
-        due_date DATE NOT NULL,
-        created_by TEXT,
-        completed BOOLEAN DEFAULT FALSE
-    )
-    """)
 
     c.execute("""
     CREATE TABLE IF NOT EXISTS timeline_progress (
         id SERIAL PRIMARY KEY,
         progress_date DATE DEFAULT CURRENT_DATE
-    )
-    """)
-
-    
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS finance_budgets (
-        id SERIAL PRIMARY KEY,
-        username TEXT NOT NULL REFERENCES finance_users(username),
-        name TEXT NOT NULL,
-        type TEXT NOT NULL,         -- e.g., "Checking", "Savings", "Credit Card"
-        balance NUMERIC DEFAULT 0
-    )
-    """)
-
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS finance_transactions (
-        id SERIAL PRIMARY KEY,
-        username TEXT NOT NULL REFERENCES finance_users(username) ON DELETE CASCADE,
-        budget_id INT REFERENCES finance_budgets(id) ON DELETE CASCADE,
-        date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        description TEXT,
-        amount NUMERIC(12,2) CHECK (amount >= 0),
-        category TEXT,
-        type TEXT CHECK (type IN ('credit', 'debit'))
     )
     """)
 
@@ -446,6 +401,8 @@ def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass, show
 
 
 # ------------------------ POSTGRES ML DATA ------------------------
+
+
 def save_training_data(features, drag, lift):
     conn = get_pg_conn()
     c = conn.cursor()
@@ -479,6 +436,10 @@ def predict_coeffs(obj_file_path):
     drag, lift = rf.predict(features)[0]
     return float(drag), float(lift), frontal_cross_section
 
+
+
+
+
 # ------------------------ ROUTES ------------------------
 @app.route("/", methods=["GET", "POST"])
 def login():
@@ -494,6 +455,10 @@ def login():
         else:
             return render_template("select_user.html", users=USERS)
     return render_template("select_user.html", users=USERS)
+
+
+
+
 
 @app.route("/chat", methods=["GET", "POST"])
 def chat():
@@ -515,6 +480,8 @@ def chat():
     messages = c.fetchall()
     conn.close()
     return render_template("chat.html", messages=messages, username=username, user_colors=USER_COLORS)
+
+
 
 @app.route("/todo", methods=["GET", "POST"])
 def todo():
@@ -611,6 +578,9 @@ def chatbot():
     chatbot_convo = [{"query": q, "answer": a} for _, q, a in c.fetchall()]
     conn.close()
     return render_template("chatbot.html", chatbot_convo=chatbot_convo)
+
+
+    
 
 
 @app.route("/sim", methods=["GET", "POST"])
@@ -784,6 +754,9 @@ def upload():
 
     return "Invalid request", 400
 
+
+
+
 @app.route("/ansys/ar", methods=["GET", "POST"])
 def AR_sim():
 
@@ -794,8 +767,6 @@ def AR_sim():
         table_ids = request.form.getlist('options')
         if len(table_ids) > 3:
             return render_template("ar_sim.html", error='Please select 3 values or less')
-
-        
         
         file_paths = []
         for i in table_ids:
@@ -830,124 +801,6 @@ def AR_sim():
 
 
     return render_template("AR_sim_settings.html", ar_sim_selections=ar_sim_selections)
-
-
-            
-@app.route("/timeline/data")
-def timeline_data():
-    conn = get_pg_conn()
-    c = conn.cursor(cursor_factory=RealDictCursor)
-    
-    # Events
-    c.execute("SELECT * FROM timeline_events ORDER BY due_date ASC")
-    events = c.fetchall()
-    
-    # Current progress
-    c.execute("SELECT progress_date FROM timeline_progress ORDER BY id DESC LIMIT 1")
-    row = c.fetchone()
-    progress_date = row["progress_date"] if row else None
-    
-    conn.close()
-    return jsonify({"events": events, "progress_date": progress_date})
-
-
-@app.route("/timeline/update_progress", methods=["POST"])
-def timeline_update_progress():
-    data = request.get_json()
-    new_date = data.get("progress_date")  # YYYY-MM-DD
-    
-    if not new_date:
-        return jsonify({"error": "No date provided"}), 400
-    
-    conn = get_pg_conn()
-    c = conn.cursor()
-    
-    # Replace or insert single row
-    c.execute("""
-        INSERT INTO timeline_progress (progress_date) 
-        VALUES (%s)
-        ON CONFLICT (id) DO UPDATE SET progress_date = EXCLUDED.progress_date
-        """, (new_date,))
-    
-    conn.commit()
-    conn.close()
-    
-    return jsonify({"status": "ok"})
-
-
-
-@app.route("/finance", methods=["GET", "POST"])
-def finance():
-    username = session.get("username")
-    if not username:
-        return redirect("/")
-    
-    conn = get_pg_conn()
-    c = conn.cursor()
-    
-    # Initialize budgets if empty
-    c.execute("SELECT * FROM finance_budgets WHERE username=%s", (username,))
-    budgets = c.fetchall()
-    if not budgets:
-        for name in ["Checking","Savings","Credit Card"]:
-            c.execute("INSERT INTO finance_budgets (username,name,balance) VALUES (%s,%s,%s)",
-                      (username,name,0))
-        conn.commit()
-        c.execute("SELECT * FROM finance_budgets WHERE username=%s", (username,))
-        budgets = c.fetchall()
-    
-    # Get transactions
-    c.execute("SELECT * FROM finance_transactions WHERE username=%s ORDER BY date DESC", (username,))
-    transactions = c.fetchall()
-    conn.close()
-    
-    return render_template("finance.html", budgets=budgets, transactions=transactions, username=username)
-
-# Update budget
-@app.route("/finance/update_budget", methods=["POST"])
-def update_budget():
-    data = request.get_json(silent=True) or request.form
-    budget_name = data.get("budget")
-    balance = data.get("balance")
-
-    try:
-        balance = float(balance)
-    except (TypeError, ValueError):
-        return jsonify({"status": "error", "message": "Invalid balance"})
-
-    username = session.get("username")
-    if not username:
-        return jsonify({"status": "error", "message": "Not logged in"})
-
-    conn = get_pg_conn()
-    c = conn.cursor()
-    c.execute(
-        "UPDATE finance_budgets SET balance=%s WHERE username=%s AND name=%s",
-        (balance, username, budget_name)
-    )
-    conn.commit()
-    conn.close()
-    return jsonify({"status": "ok"})
-
-
-# Timeline page (read-only)
-@app.route("/finance/timeline")
-def finance_timeline():
-    username = session.get("username")
-    if not username:
-        return redirect("/")
-    
-    conn = get_pg_conn()
-    c = conn.cursor(cursor_factory=RealDictCursor)
-    c.execute("SELECT * FROM finance_budgets WHERE username=%s", (username,))
-    budgets = c.fetchall()
-    c.execute("SELECT * FROM finance_transactions WHERE username=%s ORDER BY date ASC", (username,))
-    transactions = c.fetchall()
-    conn.close()
-    
-    return render_template("timeline.html", budgets=budgets, transactions=transactions)
-
-
     
 
 @app.route("/reactiontime", methods=["GET", "POST"])
