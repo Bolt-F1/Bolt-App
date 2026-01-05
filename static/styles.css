@@ -290,7 +290,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
   flex-direction: column;
   gap: 2rem;
   padding: 1.5rem;
-  background: #f9f9f9;       /* light card background */
+  background: #FFC107;       /* light card background */
   border-radius: 16px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
   transition: box-shadow 0.3s ease;
@@ -327,7 +327,7 @@ form.track_time_calc_form,
   flex-direction: column;
   gap: 1rem;
   padding: 1.5rem;
-  background: #ffffff;
+  background: #FFC107;
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.1);
   transition: box-shadow 0.3s ease;
