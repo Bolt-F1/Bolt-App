@@ -281,20 +281,101 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
 /* ===================================================
  SIMULATION PAGE
 =================================================== */
+/* ---------- Simulation Container ---------- */
 .sim-container {
   width: 95%;
   max-width: 900px;
   margin: 2rem auto;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: #f9f9f9;       /* light card background */
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.3s ease;
 }
-.sim-graph {
-  border-radius: 12px;
+
+.sim-container:hover {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* ---------- Graph / Images ---------- */
+.sim-graph, 
+.track_time_calc_results img, 
+.ml_sim_results img {
+  border-radius: 14px;
   overflow: hidden;
-  border: 1px solid #FFD700;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  border: 2px solid #FFD700;    /* golden border */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
+.sim-graph:hover,
+.track_time_calc_results img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 35px rgba(0,0,0,0.35);
+}
+
+/* ---------- Simulation Forms ---------- */
+form.track_time_calc_form,
+.ml_sim form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+form.track_time_calc_form:hover,
+.ml_sim form:hover {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+form input[type="number"],
+form input[type="text"],
+form input[type="file"] {
+  padding: 0.6rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+form button {
+  padding: 0.75rem 1rem;
+  background: #FFD700;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+form button:hover {
+  background: #ffc700;
+  transform: translateY(-2px);
+}
+
+/* ---------- Results Sections ---------- */
+.track_time_calc_results,
+.ml_sim_results {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: #fffbea;
+  border-left: 5px solid #FFD700;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
 
 /* ===================================================
  LOGIN PAGE
@@ -341,12 +422,12 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
 
 .apps ul {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 28px;
   list-style: none;
   padding: 0;
   margin: 0;
-  max-width: 600px;
+  max-width: 1000px;
 }
 
 .apps li {
@@ -361,7 +442,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
   width: 200px;
   height: 200px;
   border-radius: 26px; /* iOS-style rounded square */
-  background: linear-gradient(145deg, #fed702, #ffea75);
+  background: linear-gradient(145deg, #ffea75, #ffea75);
   box-shadow:
       0 10px 20px rgba(0, 0, 0, 0.15),
       inset 0 1px 0 rgba(255, 255, 255, 0.6);
@@ -414,7 +495,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
   width: 70px;           /* icon size */
   height: 70px;
   border-radius: 18px;   /* rounded square */
-  background: #fed702;   /* icon background */
+  background: wh;   /* icon background */
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
