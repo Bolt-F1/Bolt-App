@@ -5,6 +5,8 @@
 
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
+
+
   <style>
    body {
     font-family: Arial, sans-serif;
@@ -43,6 +45,14 @@
   </style>
 </head>
 <body>
+
+    <div class="home">
+        <ul>
+            <li><a href="{{ url_for('chat') }}"><img src="{{ url_for('static', filename='images/Home_icon.png') }}" width="100" height="100" alt="Home"></a></li>
+        </ul>
+    </div>
+
+
     <h1>F1 Reaction Test</h1>
     <p style="font-size:20px">Wait until the lights turn green, react quickly and hit it quickly as possible.</p>
  

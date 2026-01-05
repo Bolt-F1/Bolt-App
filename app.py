@@ -460,7 +460,7 @@ def login():
 
 
 
-@app.route("/chat", methods=["GET", "POST"])
+@app.route("/home", methods=["GET", "POST"])
 def chat():
     username = session.get("username")
     if not username or username not in USERS:
@@ -580,7 +580,7 @@ def chatbot():
     return render_template("chatbot.html", chatbot_convo=chatbot_convo)
 
 
-    
+
 
 
 @app.route("/sim", methods=["GET", "POST"])
