@@ -460,7 +460,7 @@ def login():
 
 
 
-@app.route("/home", methods=["GET", "POST"])
+@app.route("/chat", methods=["GET", "POST"])
 def chat():
     username = session.get("username")
     if not username or username not in USERS:

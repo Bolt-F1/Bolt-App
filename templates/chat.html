@@ -8,9 +8,12 @@
 
 <body>
 
+    <h1>Welcome, {{ username }}</h1>
+
+
     <div class="apps">
         <ul>
-            <li><a href="{{ url_for('home') }}"><img src="{{ url_for('static', filename='images/Home_icon.png') }}" width="100" height="100" alt="Home"></a></li>
+            <li><a href="{{ url_for('chat') }}"><img src="{{ url_for('static', filename='images/Home_icon.png') }}" width="100" height="100" alt="Home"></a></li>
             <li><a href="{{ url_for('chatbot') }}"><img src="{{ url_for('static', filename='images/Bolt_AI_Icon.png') }}" alt="Chatbot"></a></li>
             <li><a href="{{ url_for('sim') }}"><img src="{{ url_for('static', filename='images/Sim_icon.png') }}" alt="Sim"></a></li>
             <li><a href="{{ url_for('react') }}"><img src="{{ url_for('static', filename='images/Reaction_Time_Icon.png') }}" alt="VR City"></a></li>
@@ -21,7 +24,6 @@
 
 
     <div class="chat-container">
-        <h1>Welcome, {{ username }}</h1>
 
         <div class="messages" id="messages">
             {% for msg in messages %}
