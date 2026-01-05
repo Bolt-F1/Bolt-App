@@ -413,7 +413,7 @@ form button:hover {
 /* ===================================================
  Apps
 =================================================== */
-
+/* ---------- App Grid Container ---------- */
 .apps {
   display: flex;
   justify-content: center;
@@ -442,7 +442,7 @@ form button:hover {
   width: 200px;
   height: 200px;
   border-radius: 26px; /* iOS-style rounded square */
-  background: linear-gradient(145deg, #ffea75, #ffea75);
+  background: linear-gradient(145deg, #ffea75, #ffd700);
   box-shadow:
       0 10px 20px rgba(0, 0, 0, 0.15),
       inset 0 1px 0 rgba(255, 255, 255, 0.6);
@@ -465,6 +465,53 @@ form button:hover {
   height: 64%;
   object-fit: contain;
   pointer-events: none;
+}
+
+/* ---------- Floating Home Button ---------- */
+.home {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+
+.home ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.home li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.home a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ---------- Mobile: Stack icons in one column ---------- */
+@media (max-width: 600px) {
+  .apps ul {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .apps a {
+    width: 150px;
+    height: 150px;
+  }
 }
 
 
