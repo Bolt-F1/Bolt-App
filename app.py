@@ -823,10 +823,10 @@ template_path = os.path.join(BASE_DIR, "templates", "mass_email_template.html")
 with open(template_path, "r", encoding="utf-8") as f:
     EMAIL_TEMPLATE = f.read()
 
+
+SENT_FILE = "/opt/render/data/sent_emails.txt"
 os.makedirs("/opt/render/data", exist_ok=True)
 
-# File to track previously contacted emails
-SENT_FILE = "sent_emails.txt"
 
 def load_sent_emails():
     if not os.path.exists(SENT_FILE):
