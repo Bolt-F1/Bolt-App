@@ -818,7 +818,7 @@ GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
 
 
 # Email template
-with open("template.html", "r") as f:
+with open("mass_email_tempate.html", "r") as f:
     EMAIL_TEMPLATE = f.read()
 
 # File to track previously contacted emails
