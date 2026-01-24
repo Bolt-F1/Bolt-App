@@ -472,22 +472,44 @@ def chat():
     username = session.get("username")
     if not username or username not in USERS:
         return render_template("select_user.html", users=USERS)
-    if request.method == "POST":
-        message = request.form.get("message")
-        if message:
-            conn = get_pg_conn()
-            c = conn.cursor()
-            c.execute("INSERT INTO messages (sender, body) VALUES (%s, %s)", (username, message))
-            conn.commit()
-            conn.close()
-        
+
     conn = get_pg_conn()
     c = conn.cursor()
+
+    if request.method == "POST":
+        # Handle new message from form or AJAX
+        if request.is_json:
+            data = request.get_json()
+            message = data.get("message")
+        else:
+            message = request.form.get("message")
+
+        if message:
+            c.execute(
+                "INSERT INTO messages (sender, body) VALUES (%s, %s)",
+                (username, message)
+            )
+            conn.commit()
+
+    # Fetch all messages
     c.execute("SELECT sender, body, time FROM messages ORDER BY id ASC")
     messages = c.fetchall()
     conn.close()
-    return render_template("chat.html", messages=messages, username=username, user_colors=USER_COLORS)
 
+    # If AJAX request for JSON
+    if request.args.get("json"):
+        json_messages = []
+        for sender, body, time in messages:
+            json_messages.append({
+                "sender": sender,
+                "body": body,
+                "time": time.strftime("%H:%M"),  # format time
+                "color": USER_COLORS.get(sender, "#000000")
+            })
+        return jsonify({"messages": json_messages})
+
+    # Normal page render
+    return render_template("chat.html", messages=messages, username=username, user_colors=USER_COLORS)
 
 
 @app.route("/todo", methods=["GET", "POST"])
@@ -871,32 +893,39 @@ def send_emails(subject, contacts, attachment):
 
 @app.route("/mass-email", methods=["GET", "POST"])
 def mass_email():
-    if request.method == "POST":
-        subject = request.form["subject"]
-        raw_contacts = request.form["contacts"]
-        attachment = request.files.get("attachment")
+    try:
+        if request.method == "POST":
+            subject = request.form["subject"]
+            raw_contacts = request.form["contacts"]
+            attachment = request.files.get("attachment")
 
-        previous_emails = load_sent_emails()
-        contacts = []
+            previous_emails = load_sent_emails()
+            contacts = []
 
-        for line in raw_contacts.splitlines():
-            if "," in line:
-                name, email = line.split(",", 1)
-                name = name.strip()
-                email = email.strip()
-                if email not in previous_emails:
-                    contacts.append((name, email))
-                    previous_emails.add(email)
+            for line in raw_contacts.splitlines():
+                if "," in line:
+                    name, email = line.split(",", 1)
+                    name = name.strip()
+                    email = email.strip()
+                    if email not in previous_emails:
+                        contacts.append((name, email))
+                        previous_emails.add(email)
 
-        if not contacts:
-            return "<h3>No new emails to send (all duplicates skipped)</h3>"
+            if not contacts:
+                return "<h3>No new emails to send (all duplicates skipped)</h3>"
 
-        send_emails(subject, contacts, attachment)
-        save_sent_emails([email for _, email in contacts])
+            send_emails(subject, contacts, attachment)
+            save_sent_emails([email for _, email in contacts])
 
-        return f"<h3>Emails sent successfully ({len(contacts)} recipients)</h3>"
+            return f"<h3>Emails sent successfully ({len(contacts)} recipients)</h3>"
 
-    return render_template("mass_email.html")
+        return render_template("mass_email.html")
+
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return f"<h3>Internal Server Error: {e}</h3>", 500
 
 
 
