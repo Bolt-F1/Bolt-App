@@ -9,5 +9,6 @@ requests
 dropbox
 huggingface_hub
 joblib
+sendgrid
 python-dotenv
 gunicorn
