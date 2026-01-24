@@ -868,7 +868,7 @@ def send_emails(subject, contacts, attachment):
     server.quit()
 
 @app.route("/mass-email", methods=["GET", "POST"])
-def email():
+def mass_email():
     if request.method == "POST":
         subject = request.form["subject"]
         raw_contacts = request.form["contacts"]
