@@ -18,6 +18,13 @@ from PDF_summary import Rules_and_Regs_sum
 import math
 from huggingface_hub import InferenceClient
 import dropbox
+import smtplib
+import os
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -801,6 +808,96 @@ def AR_sim():
 
 
     return render_template("AR_sim_settings.html", ar_sim_selections=ar_sim_selections)
+
+
+
+
+
+GMAIL_EMAIL = os.getenv("GMAIL_EMAIL")
+GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
+
+
+# Email template
+with open("template.html", "r") as f:
+    EMAIL_TEMPLATE = f.read()
+
+# File to track previously contacted emails
+SENT_FILE = "sent_emails.txt"
+
+def load_sent_emails():
+    if not os.path.exists(SENT_FILE):
+        return set()
+    with open(SENT_FILE, "r") as f:
+        return set(line.strip() for line in f.readlines())
+
+def save_sent_emails(emails):
+    with open(SENT_FILE, "a") as f:
+        for email in emails:
+            f.write(email + "\n")
+
+def send_emails(subject, contacts, attachment):
+    server = smtplib.SMTP("smtp.gmail.com", 587)
+    server.starttls()
+    server.login(GMAIL_EMAIL, GMAIL_APP_PASSWORD)
+
+    attachment_data = None
+    attachment_name = None
+    if attachment and attachment.filename:
+        attachment_data = attachment.read()
+        attachment_name = attachment.filename
+
+    for name, email in contacts:
+        html_body = EMAIL_TEMPLATE.replace("{{name}}", name)
+
+        msg = MIMEMultipart()
+        msg["From"] = GMAIL_EMAIL
+        msg["To"] = email
+        msg["Subject"] = subject
+
+        msg.attach(MIMEText(html_body, "html"))
+
+        if attachment_data:
+            part = MIMEApplication(attachment_data, Name=attachment_name)
+            part["Content-Disposition"] = f'attachment; filename="{attachment_name}"'
+            msg.attach(part)
+
+        server.sendmail(GMAIL_EMAIL, email, msg.as_string())
+
+    server.quit()
+
+@app.route("/mass-email", methods=["GET", "POST"])
+def email():
+    if request.method == "POST":
+        subject = request.form["subject"]
+        raw_contacts = request.form["contacts"]
+        attachment = request.files.get("attachment")
+
+        previous_emails = load_sent_emails()
+        contacts = []
+
+        for line in raw_contacts.splitlines():
+            if "," in line:
+                name, email = line.split(",", 1)
+                name = name.strip()
+                email = email.strip()
+                if email not in previous_emails:
+                    contacts.append((name, email))
+                    previous_emails.add(email)
+
+        if not contacts:
+            return "<h3>No new emails to send (all duplicates skipped)</h3>"
+
+        send_emails(subject, contacts, attachment)
+        save_sent_emails([email for _, email in contacts])
+
+        return f"<h3>Emails sent successfully ({len(contacts)} recipients)</h3>"
+
+    return render_template("mass_email.html")
+
+
+
+
+
     
 
 @app.route("/reactiontime", methods=["GET", "POST"])

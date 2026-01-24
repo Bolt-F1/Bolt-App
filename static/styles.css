@@ -378,6 +378,94 @@ form button:hover {
 
 
 /* ===================================================
+   FORM CONTAINER
+=================================================== */
+.email-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 2rem;
+  max-width: 500px;
+  margin: 4rem auto;
+  background: #111;
+  border-radius: 15px;
+  border: 2px solid #FFD700;
+  box-shadow: 0 0 20px rgba(255,215,0,0.25);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.email-form:hover {
+  box-shadow: 0 10px 30px rgba(255,215,0,0.35);
+  transform: scale(1.01);
+}
+
+/* ===================================================
+   FORM ELEMENTS
+=================================================== */
+.email-form label {
+  font-weight: bold;
+  color: #FFD700;
+  margin-bottom: 0.3rem;
+}
+
+.email-form input[type="text"],
+.email-form textarea,
+.email-form input[type="file"] {
+  padding: 0.6rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  width: 100%;
+  background: #222;
+  color: #fff;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.email-form input[type="text"]:focus,
+.email-form textarea:focus,
+.email-form input[type="file"]:focus {
+  outline: none;
+  border-color: #FFD700;
+  box-shadow: 0 0 10px rgba(255,215,0,0.4);
+}
+
+/* ===================================================
+   BUTTONS
+=================================================== */
+.email-form button {
+  padding: 0.75rem 1rem;
+  background: #FFD700;
+  color: #0a0a0a;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.email-form button:hover {
+  background: #FFC700;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(255,215,0,0.4);
+}
+
+/* ===================================================
+   RESULTS / MESSAGES
+=================================================== */
+.results {
+  max-width: 500px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background: #fffbea;
+  border-left: 5px solid #FFD700;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  color: #111;
+}
+
+
+
+/* ===================================================
  LOGIN PAGE
 =================================================== */
 .login-body {
@@ -837,45 +925,52 @@ body::before {
 
 
 /* ===================================================
-   DOUBLE-LINE INLINE BACKGROUND
-   (Trade Gothic Inline inspired)
+   THICK SNAKE-LINE ANIMATED BACKGROUND
 =================================================== */
 
-body::before {
+body::before,
+body::after {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: -2;
+  z-index: -3; /* behind everything */
   pointer-events: none;
+}
 
+/* Base thick stripes layer */
+body::before {
   background:
-    /* horizontal double lines */
-    repeating-linear-gradient(
-      0deg,
-      rgba(255,215,0,0.06) 0px,
-      rgba(255,215,0,0.06) 1px,
-      transparent 1px,
-      transparent 6px,
-      rgba(255,215,0,0.06) 6px,
-      rgba(255,215,0,0.06) 7px,
-      transparent 7px,
-      transparent 14px
-    ),
-    /* vertical double lines */
-    repeating-linear-gradient(
-      90deg,
-      rgba(255,215,0,0.05) 0px,
-      rgba(255,215,0,0.05) 1px,
-      transparent 1px,
-      transparent 8px,
-      rgba(255,215,0,0.05) 8px,
-      rgba(255,215,0,0.05) 9px,
-      transparent 9px,
-      transparent 18px
-    );
+    linear-gradient(90deg, rgba(255,215,0,0.05) 30%, transparent 30%),
+    linear-gradient(0deg, rgba(255,215,0,0.05) 30%, transparent 30%);
+  background-size: 200px 200px; /* thick stripes */
+  animation: snakeStripes1 20s linear infinite;
+}
 
-  background-size: 120% 120%;
-  animation: inlineDrift 40s linear infinite;
+/* Moving secondary layer for “snake turns” */
+body::after {
+  background:
+    linear-gradient(90deg, rgba(255,215,0,0.03) 30%, transparent 30%),
+    linear-gradient(0deg, rgba(255,215,0,0.03) 30%, transparent 30%);
+  background-size: 180px 180px;
+  animation: snakeStripes2 25s linear infinite reverse;
+  opacity: 0.8;
+}
+
+/* Animations for the snake motion */
+@keyframes snakeStripes1 {
+  0% { background-position: 0 0, 0 0; }
+  25% { background-position: 100px 0, 0 100px; }
+  50% { background-position: 100px 100px, 100px 100px; }
+  75% { background-position: 0 100px, 100px 0; }
+  100% { background-position: 0 0, 0 0; }
+}
+
+@keyframes snakeStripes2 {
+  0% { background-position: 0 0, 0 0; }
+  25% { background-position: 90px 0, 0 90px; }
+  50% { background-position: 90px 90px, 90px 90px; }
+  75% { background-position: 0 90px, 90px 0; }
+  100% { background-position: 0 0, 0 0; }
 }
 
 
