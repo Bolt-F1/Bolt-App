@@ -9,6 +9,6 @@ requests
 dropbox
 huggingface_hub
 joblib
-sendgrid
+mailjet_rest
 python-dotenv
 gunicorn

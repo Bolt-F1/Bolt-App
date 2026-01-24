@@ -18,9 +18,7 @@ from PDF_summary import Rules_and_Regs_sum
 import math
 from huggingface_hub import InferenceClient
 import dropbox
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
-import base64
+from mailjet_rest import Client
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -831,8 +829,9 @@ def AR_sim():
 
 
 
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
-SENDGRID_SENDER = os.getenv("SENDGRID_SENDER")
+MAILJET_API_KEY = os.getenv("MAILJET_API_KEY")
+MAILJET_API_SECRET = os.getenv("MAILJET_API_SECRET")
+MAILJET_SENDER = os.getenv("MAILJET_SENDER")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 template_path = os.path.join(BASE_DIR, "templates", "mass_email_template.html")
@@ -854,7 +853,7 @@ def save_sent_emails(emails):
             f.write(email + "\n")
 
 def send_emails(subject, contacts, attachment):
-    sg = SendGridAPIClient(SENDGRID_API_KEY)
+    mailjet = Client(auth=(MAILJET_API_KEY, MAILJET_API_SECRET), version='v3.1')
 
     attachment_data = None
     attachment_name = None
@@ -865,29 +864,26 @@ def send_emails(subject, contacts, attachment):
     for name, email in contacts:
         html_body = EMAIL_TEMPLATE.replace("{{name}}", name)
 
-        mail = Mail(
-            from_email=SENDGRID_SENDER,
-            to_emails=email,
-            subject=subject,
-            html_content=html_body
-        )
+        data = {
+            'Messages': [
+                {
+                    "From": {"Email": MAILJET_SENDER, "Name": "Your App"},
+                    "To": [{"Email": email, "Name": name}],
+                    "Subject": subject,
+                    "HTMLPart": html_body,
+                    "Attachments": [
+                        {
+                            "ContentType": "application/pdf",
+                            "Filename": attachment_name,
+                            "Base64Content": attachment_data
+                        }
+                    ] if attachment_data else []
+                }
+            ]
+        }
 
-        if attachment_data:
-            att = Attachment(
-                FileContent(attachment_data),
-                FileName(attachment_name),
-                FileType("application/pdf"),
-                Disposition("attachment")
-            )
-            mail.attachment = att
-
-        try:
-            response = sg.send(mail)
-            print(f"SendGrid response for {email}: {response.status_code} - {response.body}")
-            if response.status_code >= 400:
-                print("Email not sent!")
-        except Exception as e:
-            print(f"Error sending to {email}: {e}")
+        result = mailjet.send.create(data=data)
+        print(f"Sent to {email}: {result.status_code}")
 
 @app.route("/mass-email", methods=["GET", "POST"])
 def mass_email():
