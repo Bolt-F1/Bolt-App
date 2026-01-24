@@ -873,16 +873,19 @@ def send_emails(subject, contacts, attachment):
         )
 
         if attachment_data:
-            att = Attachment()
-            att.file_content = FileContent(attachment_data)
-            att.file_type = FileType("application/pdf")  # adjust if not PDF
-            att.file_name = FileName(attachment_name)
-            att.disposition = Disposition("attachment")
+            att = Attachment(
+                FileContent(attachment_data),
+                FileName(attachment_name),
+                FileType("application/pdf"),
+                Disposition("attachment")
+            )
             mail.attachment = att
 
         try:
             response = sg.send(mail)
-            print(f"Sent to {email}: {response.status_code}")
+            print(f"SendGrid response for {email}: {response.status_code} - {response.body}")
+            if response.status_code >= 400:
+                print("Email not sent!")
         except Exception as e:
             print(f"Error sending to {email}: {e}")
 
