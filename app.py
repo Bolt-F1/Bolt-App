@@ -817,8 +817,10 @@ GMAIL_EMAIL = os.getenv("GMAIL_EMAIL")
 GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
 
 
-# Email template
-with open("mass_email_template.html", "r") as f:
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # folder containing app.py
+template_path = os.path.join(BASE_DIR, "templates", "mass_email_template.html")
+
+with open(template_path, "r", encoding="utf-8") as f:
     EMAIL_TEMPLATE = f.read()
 
 # File to track previously contacted emails
