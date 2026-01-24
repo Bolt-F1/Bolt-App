@@ -18,13 +18,9 @@ from PDF_summary import Rules_and_Regs_sum
 import math
 from huggingface_hub import InferenceClient
 import dropbox
-import smtplib
-import os
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
-from dotenv import load_dotenv
-load_dotenv()
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
+import base64
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -835,20 +831,16 @@ def AR_sim():
 
 
 
-GMAIL_EMAIL = os.getenv("GMAIL_EMAIL")
-GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
+SENDGRID_SENDER = os.getenv("SENDGRID_SENDER")
 
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # folder containing app.py
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 template_path = os.path.join(BASE_DIR, "templates", "mass_email_template.html")
 
 with open(template_path, "r", encoding="utf-8") as f:
     EMAIL_TEMPLATE = f.read()
 
-
-SENT_FILE = "/opt/render/data/sent_emails.txt"
-os.makedirs("/opt/render/data", exist_ok=True)
-
+SENT_FILE = "sent_emails.txt"
 
 def load_sent_emails():
     if not os.path.exists(SENT_FILE):
@@ -862,34 +854,37 @@ def save_sent_emails(emails):
             f.write(email + "\n")
 
 def send_emails(subject, contacts, attachment):
-    server = smtplib.SMTP("smtp.gmail.com", 587)
-    server.starttls()
-    server.login(GMAIL_EMAIL, GMAIL_APP_PASSWORD)
+    sg = SendGridAPIClient(SENDGRID_API_KEY)
 
     attachment_data = None
     attachment_name = None
     if attachment and attachment.filename:
-        attachment_data = attachment.read()
+        attachment_data = base64.b64encode(attachment.read()).decode()
         attachment_name = attachment.filename
 
     for name, email in contacts:
         html_body = EMAIL_TEMPLATE.replace("{{name}}", name)
 
-        msg = MIMEMultipart()
-        msg["From"] = GMAIL_EMAIL
-        msg["To"] = email
-        msg["Subject"] = subject
-
-        msg.attach(MIMEText(html_body, "html"))
+        mail = Mail(
+            from_email=SENDGRID_SENDER,
+            to_emails=email,
+            subject=subject,
+            html_content=html_body
+        )
 
         if attachment_data:
-            part = MIMEApplication(attachment_data, Name=attachment_name)
-            part["Content-Disposition"] = f'attachment; filename="{attachment_name}"'
-            msg.attach(part)
+            att = Attachment()
+            att.file_content = FileContent(attachment_data)
+            att.file_type = FileType("application/pdf")  # adjust if not PDF
+            att.file_name = FileName(attachment_name)
+            att.disposition = Disposition("attachment")
+            mail.attachment = att
 
-        server.sendmail(GMAIL_EMAIL, email, msg.as_string())
-
-    server.quit()
+        try:
+            response = sg.send(mail)
+            print(f"Sent to {email}: {response.status_code}")
+        except Exception as e:
+            print(f"Error sending to {email}: {e}")
 
 @app.route("/mass-email", methods=["GET", "POST"])
 def mass_email():
