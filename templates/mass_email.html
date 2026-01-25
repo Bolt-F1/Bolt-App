@@ -1,8 +1,96 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Mass Email Sender</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <style>
+    /* ===================================================
+       MASS EMAIL PAGE — INLINE STYLES
+    =================================================== */
+
+    body.mass-email-page {
+      background-color: #0a0a0a;
+      color: #FFD700;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 6vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .mass-email-title {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      letter-spacing: 1px;
+    }
+
+    .mass-email-form {
+      width: 100%;
+      max-width: 540px;
+      background: #111;
+      border: 2px solid #FFD700;
+      border-radius: 18px;
+      padding: 2rem 2.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.6);
+    }
+
+    .mass-email-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .mass-email-label {
+      font-weight: 600;
+      letter-spacing: 0.4px;
+    }
+
+    .mass-email-input,
+    .mass-email-textarea,
+    .mass-email-file {
+      background: #1a1a1a;
+      color: #FFD700;
+      border: 2px solid #FFD700;
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
+      font-size: 1rem;
+    }
+
+    .mass-email-textarea {
+      resize: vertical;
+      min-height: 140px;
+    }
+
+    .mass-email-input:focus,
+    .mass-email-textarea:focus {
+      outline: none;
+      border-color: #FFC700;
+      box-shadow: 0 0 10px rgba(255,199,0,0.5);
+    }
+
+    .mass-email-submit {
+      margin-top: 0.8rem;
+      padding: 0.9rem;
+      font-size: 1.05rem;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #FFD700, #FFC700);
+      color: #0a0a0a;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .mass-email-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(255,215,0,0.45);
+    }
+  </style>
 </head>
 
 <body class="mass-email-page">
