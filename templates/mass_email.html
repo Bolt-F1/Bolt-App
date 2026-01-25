@@ -2,26 +2,27 @@
 <html>
 <head>
   <title>Mass Email Sender</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-<body style="font-family: Arial; padding: 40px;">
+<body>
 
   <h2>Mass Email Sender</h2>
 
-  <form method="POST" enctype="multipart/form-data">
-    <label>Subject:</label><br>
-    <input type="text" name="subject" required style="width: 300px;"><br><br>
+  <form method="POST" enctype="multipart/form-data" class="login">
+    
+    <label>Subject:</label>
+    <input type="text" name="subject" required>
 
-    <label>Contacts (Name,email per line):</label><br>
-    <textarea name="contacts" rows="8" cols="50" required></textarea><br><br>
+    <label>Contacts (Name,email per line):</label>
+    <textarea name="contacts" rows="8" required></textarea>
 
-    <label>Attach Prospectus:</label><br>
-    <input type="file" name="attachment" accept=".pdf"><br><br>
+    <label>Attach Prospectus:</label>
+    <input type="file" name="attachment" accept=".pdf">
 
     <button type="submit">Send Emails</button>
   </form>
 
 </body>
 </html>
+
