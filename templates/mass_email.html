@@ -5,24 +5,32 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-<body>
+<body class="mass-email-page">
 
-  <h2>Mass Email Sender</h2>
+  <h2 class="mass-email-title">Mass Email Sender</h2>
 
-  <form method="POST" enctype="multipart/form-data" class="login">
-    
-    <label>Subject:</label>
-    <input type="text" name="subject" required>
+  <form method="POST" enctype="multipart/form-data" class="mass-email-form">
 
-    <label>Contacts (Name,email per line):</label>
-    <textarea name="contacts" rows="8" required></textarea>
+    <div class="mass-email-field">
+      <label class="mass-email-label">Subject:</label>
+      <input type="text" name="subject" required class="mass-email-input">
+    </div>
 
-    <label>Attach Prospectus:</label>
-    <input type="file" name="attachment" accept=".pdf">
+    <div class="mass-email-field">
+      <label class="mass-email-label">Contacts (Name,email per line):</label>
+      <textarea name="contacts" rows="8" required class="mass-email-textarea"></textarea>
+    </div>
 
-    <button type="submit">Send Emails</button>
+    <div class="mass-email-field">
+      <label class="mass-email-label">Attach Prospectus:</label>
+      <input type="file" name="attachment" accept=".pdf" class="mass-email-file">
+    </div>
+
+    <button type="submit" class="mass-email-submit">
+      Send Emails
+    </button>
+
   </form>
 
 </body>
 </html>
-
