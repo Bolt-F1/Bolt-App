@@ -11,4 +11,6 @@ huggingface_hub
 joblib
 mailjet_rest
 python-dotenv
+google-generativeai
+Pillow
 gunicorn
