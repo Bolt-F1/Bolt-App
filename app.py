@@ -19,6 +19,7 @@ import math
 from huggingface_hub import InferenceClient
 import dropbox
 from mailjet_rest import Client
+import google.generativeai as genai
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -194,65 +195,27 @@ clear_if_new_day()
 
 # ------------------------ NLP / CHATBOT ------------------------
 
+genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+model = genai.GenerativeModel("gemma-3-27b-it")
 
-client = InferenceClient(token=os.environ["HUGGINGFACE_API_TOKEN"])
+print("Initializing Gemma Knowledge Base")
+pdf_files = [
+    genai.upload_file(path="Competition_Regs.pdf", mime_type="application/pdf"),
+    genai.upload_file(path="Technical_Regs.pdf", mime_type="application/pdf")
+]
+print("--- Knowledge Base Ready ---")
 
-
-def split_summary_into_sections(summary, max_words=500):
-    words = summary.split()
-    sections = []
-    for i in range(0, len(words), max_words):
-        section = " ".join(words[i:i + max_words])
-        sections.append(section)
-    return sections
-
-
-def select_relevant_sections(question, sections, top_n=2):
-    question_lower = question.lower()
-    scores = []
-    for sec in sections:
-        score = sum(word in sec.lower() for word in question_lower.split())
-        scores.append(score)
-    
-    top_sections = [sec for score, sec in sorted(zip(scores, sections), reverse=True)[:top_n]]
-    return "\n\n".join(top_sections)
-
-
-def ask_question_with_summary(question):
-    
-    summary_sections = split_summary_into_sections(Rules_and_Regs_sum, max_words=500)
-
-    
-    relevant_text = select_relevant_sections(question, summary_sections)
-
-    
-    prompt = f"""Summary:
-{relevant_text}
-
-Question:
-{question}
-
-Answer concisely in bullet points with numbers and explanations.
-Answer clearly in short paragraphs, not in code or markdown.
-Use plain text with simple bullet points only if it improves readability.
-Keep the answer conversational.
-"""
-
+def ask_chatbot(question):
+    """
+    Uses the pre-uploaded PDFs and the user's question.
+    """
     try:
+        prompt_parts = pdf_files + [f"\n\nUser Question: {question}"]
         
-        result = client.chat_completion(
-            model="meta-llama/Llama-3.2-1B-Instruct",  
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant that bases answers ONLY on the provided summary."},
-                {"role": "user", "content": prompt},
-            ],
-            max_tokens=500,
-        )
-
-        return result.choices[0].message["content"]
-
+        response = model.generate_content(prompt_parts)
+        return response.text
     except Exception as e:
-        return f"Error: API request failed ({str(e)})"
+        return f"Gemma Error: {str(e)}"
 
 # ------------------------ TRACK TIME SIM ------------------------
 
@@ -584,16 +547,13 @@ def chatbot():
         
         if query:
             
-            answer = ask_question_with_summary(query)
-
-            
+            answer = ask_chatbot(query)
             c.execute(
                 "INSERT INTO chatbot (query, answer) VALUES (%s, %s)",
                 (query, answer)
             )
             conn.commit()
 
-            
             return jsonify({"answer": answer})
 
 
