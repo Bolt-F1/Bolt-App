@@ -218,141 +218,91 @@ def ask_chatbot(question):
         return f"Gemma Error: {str(e)}"
 
 # ------------------------ TRACK TIME SIM ------------------------
-
 import math
 
-def simulate_track_time(dragaero, lift_coefficient, frontal_area, car_mass, show_diagnostics=False):
-    # ----- track & car params -----
-    track_length = 20.0        # meters
-    cartridge_mass = 0.008     # kg CO2
-    slope_angle_deg = 0.0
-    axle_friction_force = 0.005  # N, small axle friction
-    nozzle_diameter = 0.002
-    dt = 0.001
-    air_density = 1.225
-    g = 9.81
+def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
+                        cartridge_mass=0.008,  # kg CO2
+                        cartridge_volume=0.01, # m^3
+                        P_initial=5.8e6,       # Pa
+                        gamma=1.3,
+                        T_initial=293.15,      # K
+                        dt=0.001,
+                        track_length=20.0,
+                        show_diagnostics=False):
+    """
+    Simulate a CO2 car over 20 m using actual energy in the gas canister.
+    
+    Inputs:
+        drag_20ms : drag force in N at 20 m/s
+        lift_20ms : lift force in N at 20 m/s
+        car_mass_g : car mass in grams
+        cartridge_mass : mass of CO2 in kg
+        cartridge_volume : gas volume in m^3
+        P_initial : initial pressure in Pa
+        gamma : adiabatic index of CO2
+        T_initial : temperature in K
+    """
 
-    # ----- gas constants -----
-    R_co2 = 188.9          # specific gas constant, J/(kg·K)
-    gamma = 1.3
-    T_initial = 293.15     # K
-    P_initial = 5.8e6      # Pa
-    Cd_nozzle = 0.9
-    system_efficiency = 0.18
-    delivered_energy = 0.0
 
-   
+    mass = car_mass_g / 1000.0  # kg
 
-    nozzle_area = math.pi * (nozzle_diameter / 2.0)**2
-    V_cartridge = 0.01
-    C_rr = 0.105
 
-    # ----- initial state -----
     position = 0.0
     velocity = 0.0
     time = 0.0
     remaining_co2 = cartridge_mass
-    total_mass = car_mass + remaining_co2
-    liquid_mass = 0.9 * cartridge_mass
-    theta = math.radians(slope_angle_deg)
-    TARGET_ENERGY = 333.0  # J
- 
-    energy_scale = None
-    raw_energy = 0
 
-    speeds = []
+
+    R_co2 = 188.9  # J/(kg·K)
+    E_total = (P_initial * cartridge_volume) / (gamma - 1)  # J
+    delivered_energy = 0.0
+
     positions = []
+    speeds = []
 
     thrust_trace = []
     drag_trace = []
-    rolling_trace = []
-    slope_trace = []
-    mdot_trace = []
-    pressure_trace = []
+    lift_trace = []
 
-    # choked flow factor
-    choked_factor = math.sqrt(gamma / (R_co2 * T_initial)) * (2 / (gamma + 1))**((gamma + 1) / (2 * (gamma - 1)))
-    exit_velocity = math.sqrt((2 * gamma / (gamma + 1)) * R_co2 * T_initial)
-
-    while position < track_length and (velocity > 1e-6 or remaining_co2 > 1e-6):
+    while position < track_length and remaining_co2 > 1e-6:
         positions.append(position)
         speeds.append(velocity)
 
-        # --- pressure & mass flow ---
-        if liquid_mass > 0:
-            current_pressure = P_initial * (remaining_co2 / cartridge_mass)
-            current_pressure = max(current_pressure, 101325.0)
-            # mass flow from liquid vaporization
-            mdot = Cd_nozzle * nozzle_area * current_pressure * choked_factor
-            liquid_mass -= mdot * dt
-            if liquid_mass < 0:
-                liquid_mass = 0.0
-        elif remaining_co2 > 0:
-            # ideal gas mass flow
-            current_pressure = remaining_co2 * R_co2 * T_initial / V_cartridge
-            if current_pressure < 101325:
-                current_pressure = 101325
-            mdot = Cd_nozzle * nozzle_area * current_pressure * choked_factor
-        else:
-            current_pressure = 101325.0
-            mdot = 0.0
+     
+        drag = drag_20ms * (velocity / 20.0)**2
+        lift = lift_20ms * (velocity / 20.0)**2
+        normal_force = mass * 9.81 - lift
+        rolling_force = 0.015 * normal_force
+        axle_friction = 0.5
+        resist_force = drag + rolling_force + axle_friction
 
-        # --- thrust ---
-        raw_thrust = mdot * exit_velocity
-        raw_energy += raw_thrust * velocity * dt
-
-        # determine scale factor once
-        if energy_scale is None and raw_energy > 0:
-            energy_scale = TARGET_ENERGY / raw_energy
-
-        thrust_force = energy_scale * raw_thrust if energy_scale else raw_thrust
-        delivered_energy += thrust_force * velocity * dt
+      
+        energy_fraction = 0.1 
+        thrust = (E_total * energy_fraction / dt) / (velocity + 1e-6)  # F = P / v
+        delivered_energy += thrust * velocity * dt
+        remaining_co2 -= cartridge_mass * energy_fraction * dt 
 
 
-
-        # --- update remaining mass ---
-        remaining_co2 -= mdot * dt
-        if remaining_co2 < 0:
-            remaining_co2 = 0.0
-        total_mass = car_mass + remaining_co2
-
-        # --- resistances ---
-        drag_force = 0.5 * air_density * velocity**2 * dragaero * frontal_area
-        lift_force = 0.5 * air_density * velocity**2 * lift_coefficient * frontal_area
-        normal_force = total_mass * g * math.cos(theta) - lift_force
-        rolling_force = C_rr * normal_force
-        slope_force = total_mass * g * math.sin(theta)
-        resist_force = drag_force + rolling_force + slope_force + axle_friction_force
-
-        # --- dynamics ---
-        net_force = thrust_force - resist_force
-        acceleration = net_force / total_mass
-        position += velocity * dt
+        net_force = thrust - resist_force
+        acceleration = net_force / mass
         velocity += acceleration * dt
-        # numerical safety
-        if velocity < 1e-12:
-            velocity = 0.0
-
+        if velocity < 0: velocity = 0.0
+        position += velocity * dt
         time += dt
 
-        # --- diagnostics ---
-        thrust_trace.append(thrust_force)
-        drag_trace.append(drag_force)
-        rolling_trace.append(rolling_force)
-        slope_trace.append(slope_force)
-        mdot_trace.append(mdot)
-        pressure_trace.append(current_pressure)
+       
+        thrust_trace.append(thrust)
+        drag_trace.append(drag)
+        lift_trace.append(lift)
 
+  
         if time > 60.0:
             break
 
     diagnostics = {
         "thrust": thrust_trace,
         "drag": drag_trace,
-        "rolling": rolling_trace,
-        "slope": slope_trace,
-        "mdot": mdot_trace,
-        "pressure": pressure_trace
+        "lift": lift_trace
     }
 
     if show_diagnostics:
@@ -568,30 +518,33 @@ def chatbot():
 
 @app.route("/sim", methods=["GET", "POST"])
 def sim():
+    import io, base64
+    import matplotlib.pyplot as plt
 
     img_speeds = None
     img_forces = None
-    
-    time = None
-    
-    drag = None
-    lift = None
-    frontal_area = None
+    time_result = None
     message = None
-    cross_sections = None
 
     if request.method == "POST":
         form_id = request.form.get("form_id")
 
         if form_id == "track_time_calc":
             try:
-                drag_co = float(request.form.get("drag_co"))
-                lift_co = float(request.form.get("lift_co"))
-                mass = float(request.form.get("mass"))
-                cross_section = float(request.form.get("cross_section"))
+                # --- get user inputs ---
+                drag_force = float(request.form.get("drag_force"))     # N at 20 m/s
+                lift_force = float(request.form.get("lift_force"))     # N at 20 m/s
+                mass_g = float(request.form.get("mass"))              # grams
 
-                distances, speeds, time, diag = simulate_track_time(drag_co, lift_co, cross_section, mass, show_diagnostics=True)
+                # --- run simulation ---
+                distances, speeds, time_result, diag = simulate_track_time(
+                    drag_20ms=drag_force,
+                    lift_20ms=lift_force,
+                    car_mass_g=mass_g,
+                    show_diagnostics=True
+                )
 
+                # --- speed vs distance plot ---
                 buf = io.BytesIO()
                 plt.figure(figsize=(8,5))
                 plt.plot(distances, speeds, label="Speed (m/s)", color="gold")
@@ -604,10 +557,11 @@ def sim():
                 plt.close()
                 img_speeds = base64.b64encode(buf.getvalue()).decode("utf-8")
 
+                # --- forces vs distance plot ---
                 buf2 = io.BytesIO()
                 plt.figure(figsize=(8,5))
                 plt.plot(distances, diag["drag"], label="Drag Force (N)", color="red")
-                plt.plot(distances, diag["rolling"], label="Rolling Resistance (N)", color="blue")
+                plt.plot(distances, diag["lift"], label="Lift Force (N)", color="blue")
                 plt.xlabel("Distance (m)")
                 plt.ylabel("Force (N)")
                 plt.legend()
@@ -620,6 +574,13 @@ def sim():
             except Exception as e:
                 message = f"Simulation error: {str(e)}"
 
+    # --- return or render template ---
+    return {
+        "img_speeds": img_speeds,
+        "img_forces": img_forces,
+        "time": time_result,
+        "message": message
+    }
         else:
             action = request.form.get("action")
             files = request.files.getlist("obj_files")

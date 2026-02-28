@@ -21,10 +21,9 @@
 
     <form class="track_time_calc_form" method="POST" action="/sim">
       <input type="hidden" name="form_id" value="track_time_calc">
-      <input type="number" step="any" name="drag_co" placeholder="drag coefficent (e.g. 0.0007)">
-      <input type="number" step="any" name="lift_co" placeholder="lift coefficent (e.g. 0.0007)">
+      <input type="number" step="any" name="drag_force" placeholder="drag coefficent (e.g. 0.3)">
+      <input type="number" step="any" name="lift_force" placeholder="lift coefficent (e.g. -0.02)">
       <input type="number" step="any" name="mass" placeholder="mass (kg) (e.g. 0.065)">
-      <input type="number" step="any" name="cross_section" placeholder="Frontal cross section (m) (e.g. 0.3)">
       <button type="submit">Submit</button>
     </form>
 
