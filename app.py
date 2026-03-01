@@ -197,49 +197,65 @@ clear_if_new_day()
 
 # ------------------------ NLP / CHATBOT ------------------------
 
+import os
+import fitz  # PyMuPDF
+import google.generativeai as genai
 
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 model = genai.GenerativeModel("gemma-3-27b-it")
 
-def extract_text_from_pdfs(pdf_list):
-    """Extracts all text from a list of PDF file paths."""
-    combined_text = ""
+def get_chunks_from_pdfs(pdf_list):
+    """Splits PDFs into 'chunks' (roughly 1 page each)"""
+    chunks = []
     for path in pdf_list:
-        try:
-           
-            with fitz.open(path) as doc:
-              
-                for page in doc:
-                    combined_text += page.get_text() + "\n"
-        except Exception as e:
-            print(f"Could not read {path}: {e}")
-    return combined_text
+        with fitz.open(path) as doc:
+            for i, page in enumerate(doc):
+                text = page.get_text().strip()
+                if text:
+                    # Store text along with where it came from
+                    chunks.append({"text": text, "source": f"{path} - Page {i+1}"})
+    return chunks
 
-print("Extracting text from regulations...")
+# 1. Load the knowledge base into chunks
 pdf_paths = ["Competition_Regs.pdf", "Technical_Regs.pdf"]
-REGS_CONTEXT = extract_text_from_pdfs(pdf_paths)
-print("--- Knowledge Base Loaded (Text Only) ---")
+ALL_CHUNKS = get_chunks_from_pdfs(pdf_paths)
+
+def find_relevant_chunks(query, chunks, top_n=3):
+    """Simple search to find chunks containing query keywords"""
+    query_words = query.lower().split()
+    scored_chunks = []
+    
+    for chunk in chunks:
+        score = sum(1 for word in query_words if word in chunk['text'].lower())
+        scored_chunks.append((score, chunk))
+    
+    # Sort by score and take the best ones
+    scored_chunks.sort(key=lambda x: x[0], reverse=True)
+    return [item[1] for item in scored_chunks[:top_n]]
 
 def ask_chatbot(question):
-    """Uses the extracted text string to answer the question."""
-    prompt = f"""
-    You are a professional assistant. Use the following regulations to answer the user's question.
-    If the answer is not in the text, say you don't know.
+    # 2. Only get the relevant 3 pages (roughly 1,500 - 3,000 tokens)
+    relevant_data = find_relevant_chunks(question, ALL_CHUNKS)
+    
+    # Combine the text from those pages
+    context_text = "\n\n".join([f"Source: {c['source']}\n{c['text']}" for c in relevant_data])
 
-    REGULATIONS:
-    {REGS_CONTEXT}
+    prompt = f"""
+    Using ONLY the following excerpts from the regulations, answer the question. Your name is Lumin.
+    
+    EXCERPTS:
+    {context_text}
 
     USER QUESTION:
     {question}
-    
-    ANSWER:
     """
+    
     try:
+        # 3. This will now be ~2,000 tokens, well under the 15,000 limit!
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
         return f"Error: {str(e)}"
-
 
 # ------------------------ TRACK TIME SIM ------------------------
 import math
@@ -549,6 +565,10 @@ def sim():
     img_forces = None
     time_result = None
     message = None
+    drag = None
+    lift = None
+    frontal_area = None
+    cross_sections = None
 
     if request.method == "POST":
         form_id = request.form.get("form_id")
@@ -650,7 +670,7 @@ def sim():
     
     return render_template(
         "sim.html",
-        time=time,
+        time=time_result,
         graph_speed=img_speeds,
         graph_forces=img_forces,
         drag=round(drag,3) if drag is not None else None,
@@ -659,7 +679,6 @@ def sim():
         message=message,
         cross_sections=cross_sections
     )
-
 
 
 ACCESS_TOKEN = os.environ.get("DROPBOX_SIM_TOKEN")  
