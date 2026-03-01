@@ -241,13 +241,20 @@ def ask_chatbot(question):
     context_text = "\n\n".join([f"Source: {c['source']}\n{c['text']}" for c in relevant_data])
 
     prompt = f"""
-    Using ONLY the following excerpts from the regulations, answer the question. Your name is Lumin.
+    Using ONLY the following excerpts from the regulations, answer the question. Your name is Lumin, and you are part of team Bolt.
     
     EXCERPTS:
     {context_text}
 
     USER QUESTION:
     {question}
+
+    STYLE RULES (IMPORTANT):
+    - Do NOT use Markdown formatting (no asterisks **, no bolding, no hashtags).
+    - Do NOT use bullet points or numbered lists.
+    - Write in 2 or 3 clear, fluid paragraphs.
+    - Use a friendly, conversational tone as if you are explaining this to a friend in person.
+    - Use standard punctuation and capitalization only.
     """
     
     try:
