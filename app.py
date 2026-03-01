@@ -233,36 +233,30 @@ def find_relevant_chunks(query, chunks, top_n=3):
     scored_chunks.sort(key=lambda x: x[0], reverse=True)
     return [item[1] for item in scored_chunks[:top_n]]
 
-def ask_chatbot(question):
-    # 2. Only get the relevant 3 pages (roughly 1,500 - 3,000 tokens)
-    relevant_data = find_relevant_chunks(question, ALL_CHUNKS)
+
+def ask_chatbot(question, chat_history=[]):
     
-    # Combine the text from those pages
+    relevant_data = find_relevant_chunks(question, ALL_CHUNKS)
     context_text = "\n\n".join([f"Source: {c['source']}\n{c['text']}" for c in relevant_data])
 
+   
+    chat = model.start_chat(history=chat_history)
+
     prompt = f"""
-    Using ONLY the following excerpts from the regulations, answer the question. Your name is Lumin, and you are part of team Bolt.
-    
-    EXCERPTS:
+    CONTEXT FROM REGS:
     {context_text}
 
     USER QUESTION:
     {question}
 
-    STYLE RULES (IMPORTANT):
-    - Do NOT use Markdown formatting (no asterisks **, no bolding, no hashtags).
-    - Do NOT use bullet points or numbered lists.
-    - Write in 2 or 3 clear, fluid paragraphs.
-    - Use a friendly, conversational tone as if you are explaining this to a friend in person.
-    - Use standard punctuation and capitalization only.
+    (Remember to use a natural, conversational tone without markdown or bullet points. Your Name is lumin, and you are part of team bolt, here to help the userstand the competition and the team)
     """
-    
+
     try:
-        # 3. This will now be ~2,000 tokens, well under the 15,000 limit!
-        response = model.generate_content(prompt)
-        return response.text
+        response = chat.send_message(prompt)
+        return response.text, chat.history
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"Error: {str(e)}", chat_history
 
 # ------------------------ TRACK TIME SIM ------------------------
 import math
@@ -270,7 +264,7 @@ import math
 import math
 
 def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
-                        total_energy=330,
+                        total_energy=102.5,
                         track_length=20,
                         dt=0.001,
                         show_diagnostics=False):
@@ -541,8 +535,18 @@ def chatbot():
         query = data.get("chatbot_query")
         
         if query:
+      
+            conn = get_pg_conn()
+            c = conn.cursor()
+            c.execute("SELECT query, answer FROM chatbot ORDER BY id DESC LIMIT 5")
+            rows = c.fetchall()
             
-            answer = ask_chatbot(query)
+            formatted_history = []
+            for q, a in reversed(rows):
+                formatted_history.append({"role": "user", "parts": [q]})
+                formatted_history.append({"role": "model", "parts": [a]})
+
+            answer = ask_chatbot(query, chat_history=formatted_history)
             c.execute(
                 "INSERT INTO chatbot (query, answer) VALUES (%s, %s)",
                 (query, answer)
@@ -556,8 +560,6 @@ def chatbot():
     chatbot_convo = [{"query": q, "answer": a} for _, q, a in c.fetchall()]
     conn.close()
     return render_template("chatbot.html", chatbot_convo=chatbot_convo)
-
-
 
 
 
