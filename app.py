@@ -261,19 +261,17 @@ def ask_chatbot(question, chat_history=[]):
 # ------------------------ TRACK TIME SIM ------------------------
 import math
 
-
 def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
-                        total_energy=15,
-                        track_length=20,
+                        total_energy=330,  # J
+                        track_length=20,    # m
                         dt=0.001,
+                        burn_time=0.6,      # seconds to deliver energy
                         show_diagnostics=False):
 
-    mass = car_mass_g / 1000.0
-
+    mass = car_mass_g / 1000.0  # convert g → kg
     position = 0.0
     velocity = 0.0
     time = 0.0
-
     energy_used = 0.0
 
     positions = []
@@ -289,45 +287,45 @@ def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
         positions.append(position)
         speeds.append(velocity)
 
-        # --- Aerodynamics (scaled from 20 m/s) ---
+        # Aerodynamic forces
         drag = drag_20ms * (velocity / 20.0)**2
         lift = lift_20ms * (velocity / 20.0)**2
 
-        # --- Rolling resistance ---
+        # Rolling resistance
         normal_force = mass * 9.81 - lift
         rolling_force = 0.015 * normal_force
         axle_friction = 0.4
 
         resist_force = drag + rolling_force + axle_friction
 
-        # --- Thrust from energy ---
+        # Energy-based thrust
         if energy_used < total_energy:
-            thrust = total_energy / track_length
+            remaining_energy = total_energy - energy_used
+            power = remaining_energy / burn_time
+            thrust = power / max(velocity, 0.1)  # F = P/v
         else:
             thrust = 0
 
-        # --- Energy accounting ---
+        # Energy accounting
         energy_used += thrust * velocity * dt
 
-        # --- Dynamics ---
+        # Dynamics
         net_force = thrust - resist_force
         acceleration = net_force / mass
-
         velocity += acceleration * dt
         if velocity < 0:
             velocity = 0
-
         position += velocity * dt
         time += dt
 
-        # --- Diagnostics ---
+        # Diagnostics
         thrust_trace.append(thrust)
         drag_trace.append(drag)
         rolling_trace.append(rolling_force)
         lift_trace.append(lift)
 
         # Safety break
-        if time > 60.0:
+        if time > 60:
             break
 
     diagnostics = {
@@ -341,8 +339,6 @@ def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
         return positions, speeds, time, diagnostics
     else:
         return positions, speeds, time
-
-
 
 # ------------------------ POSTGRES ML DATA ------------------------
 
