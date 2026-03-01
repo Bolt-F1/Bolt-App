@@ -20,6 +20,8 @@ from huggingface_hub import InferenceClient
 import dropbox
 from mailjet_rest import Client
 import google.generativeai as genai
+import fitz
+
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -195,27 +197,49 @@ clear_if_new_day()
 
 # ------------------------ NLP / CHATBOT ------------------------
 
+
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 model = genai.GenerativeModel("gemma-3-27b-it")
 
-print("Initializing Gemma Knowledge Base")
-pdf_files = [
-    genai.upload_file(path="Competition_Regs.pdf", mime_type="application/pdf"),
-    genai.upload_file(path="Technical_Regs.pdf", mime_type="application/pdf")
-]
-print("--- Knowledge Base Ready ---")
+def extract_text_from_pdfs(pdf_list):
+    """Extracts all text from a list of PDF file paths."""
+    combined_text = ""
+    for path in pdf_list:
+        try:
+           
+            with fitz.open(path) as doc:
+              
+                for page in doc:
+                    combined_text += page.get_text() + "\n"
+        except Exception as e:
+            print(f"Could not read {path}: {e}")
+    return combined_text
+
+print("Extracting text from regulations...")
+pdf_paths = ["Competition_Regs.pdf", "Technical_Regs.pdf"]
+REGS_CONTEXT = extract_text_from_pdfs(pdf_paths)
+print("--- Knowledge Base Loaded (Text Only) ---")
 
 def ask_chatbot(question):
-    """
-    Uses the pre-uploaded PDFs and the user's question.
+    """Uses the extracted text string to answer the question."""
+    prompt = f"""
+    You are a professional assistant. Use the following regulations to answer the user's question.
+    If the answer is not in the text, say you don't know.
+
+    REGULATIONS:
+    {REGS_CONTEXT}
+
+    USER QUESTION:
+    {question}
+    
+    ANSWER:
     """
     try:
-        prompt_parts = pdf_files + [f"\n\nUser Question: {question}"]
-        
-        response = model.generate_content(prompt_parts)
+        response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        return f"Gemma Error: {str(e)}"
+        return f"Error: {str(e)}"
+
 
 # ------------------------ TRACK TIME SIM ------------------------
 import math
@@ -574,13 +598,6 @@ def sim():
             except Exception as e:
                 message = f"Simulation error: {str(e)}"
 
-    # --- return or render template ---
-    return {
-        "img_speeds": img_speeds,
-        "img_forces": img_forces,
-        "time": time_result,
-        "message": message
-    }
         else:
             action = request.form.get("action")
             files = request.files.getlist("obj_files")

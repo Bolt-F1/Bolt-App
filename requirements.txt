@@ -13,4 +13,5 @@ mailjet_rest
 python-dotenv
 google-generativeai
 Pillow
+pymupdf
 gunicorn
