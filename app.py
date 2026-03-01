@@ -217,7 +217,7 @@ def get_chunks_from_pdfs(pdf_list):
     return chunks
 
 # 1. Load the knowledge base into chunks
-pdf_paths = ["Competition_Regs.pdf", "Technical_Regs.pdf"]
+pdf_paths = ["Competition_Regs.pdf", "Technical_Regs.pdf", "Regionals_engineering.pdf", "Regionals_enterprise.pdf"]
 ALL_CHUNKS = get_chunks_from_pdfs(pdf_paths)
 
 def find_relevant_chunks(query, chunks, top_n=3):
@@ -260,88 +260,88 @@ def ask_chatbot(question):
 # ------------------------ TRACK TIME SIM ------------------------
 import math
 
+import math
+
 def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
-                        cartridge_mass=0.008,  # kg CO2
-                        cartridge_volume=0.01, # m^3
-                        P_initial=5.8e6,       # Pa
-                        gamma=1.3,
-                        T_initial=293.15,      # K
+                        total_energy=330,
+                        track_length=20,
                         dt=0.001,
-                        track_length=20.0,
                         show_diagnostics=False):
-    """
-    Simulate a CO2 car over 20 m using actual energy in the gas canister.
-    
-    Inputs:
-        drag_20ms : drag force in N at 20 m/s
-        lift_20ms : lift force in N at 20 m/s
-        car_mass_g : car mass in grams
-        cartridge_mass : mass of CO2 in kg
-        cartridge_volume : gas volume in m^3
-        P_initial : initial pressure in Pa
-        gamma : adiabatic index of CO2
-        T_initial : temperature in K
-    """
 
-
-    mass = car_mass_g / 1000.0  # kg
-
+    mass = car_mass_g / 1000.0
 
     position = 0.0
     velocity = 0.0
     time = 0.0
-    remaining_co2 = cartridge_mass
 
-
-    R_co2 = 188.9  # J/(kg·K)
-    E_total = (P_initial * cartridge_volume) / (gamma - 1)  # J
-    delivered_energy = 0.0
+    energy_used = 0.0
 
     positions = []
     speeds = []
 
     thrust_trace = []
     drag_trace = []
+    rolling_trace = []
     lift_trace = []
 
-    while position < track_length and remaining_co2 > 1e-6:
+    thrust_active = True
+
+    while position < track_length:
+
         positions.append(position)
         speeds.append(velocity)
 
-     
+        # --- Aerodynamics (scaled from 20 m/s) ---
         drag = drag_20ms * (velocity / 20.0)**2
         lift = lift_20ms * (velocity / 20.0)**2
+
+        # --- Rolling resistance ---
         normal_force = mass * 9.81 - lift
         rolling_force = 0.015 * normal_force
-        axle_friction = 0.5
+        axle_friction = 0.4
+
         resist_force = drag + rolling_force + axle_friction
 
-      
-        energy_fraction = 0.1 
-        thrust = (E_total * energy_fraction / dt) / (velocity + 1e-6)  # F = P / v
-        delivered_energy += thrust * velocity * dt
-        remaining_co2 -= cartridge_mass * energy_fraction * dt 
+        # --- Thrust from remaining energy ---
+        if thrust_active and energy_used < total_energy:
+            # Convert energy flow to thrust (F = E/d)
+            thrust = total_energy / track_length
 
+            # Stop thrust if acceleration would be negative
+            if thrust < resist_force:
+                thrust_active = False
+                thrust = 0
+        else:
+            thrust = 0
 
+        # --- Energy accounting ---
+        energy_used += thrust * velocity * dt
+
+        # --- Dynamics ---
         net_force = thrust - resist_force
         acceleration = net_force / mass
+
         velocity += acceleration * dt
-        if velocity < 0: velocity = 0.0
+        if velocity < 0:
+            velocity = 0
+
         position += velocity * dt
         time += dt
 
-       
+        # --- Diagnostics ---
         thrust_trace.append(thrust)
         drag_trace.append(drag)
+        rolling_trace.append(rolling_force)
         lift_trace.append(lift)
 
-  
+        # Safety break in case something goes wrong
         if time > 60.0:
             break
 
     diagnostics = {
         "thrust": thrust_trace,
         "drag": drag_trace,
+        "rolling": rolling_trace,
         "lift": lift_trace
     }
 
@@ -349,8 +349,6 @@ def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
         return positions, speeds, time, diagnostics
     else:
         return positions, speeds, time
-
-
 
 
 
