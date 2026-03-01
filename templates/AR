@@ -1,0 +1,34 @@
+<!-- File input for uploading your 3D model -->
+<input type="file" id="modelFile" accept=".glb,.gltf" style="position: absolute; top: 10px; left: 10px; z-index: 10;">
+
+<!-- The AR model viewer -->
+<model-viewer id="viewer"
+              ar
+              ar-modes="webxr scene-viewer quick-look"
+              camera-controls
+              style="width:100%; height:80vh;">
+</model-viewer>
+
+<!-- Include model-viewer library -->
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+<!-- JS to load user-selected model -->
+<script>
+const input = document.getElementById('modelFile');
+const viewer = document.getElementById('viewer');
+
+input.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Only allow glb/gltf
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext !== 'glb' && ext !== 'gltf') {
+    alert('Please upload a .glb or .gltf model!');
+    return;
+  }
+
+  const url = URL.createObjectURL(file);
+  viewer.src = url;
+});
+</script>

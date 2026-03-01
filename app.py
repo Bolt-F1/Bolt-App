@@ -895,6 +895,10 @@ def mass_email():
 def react():
     return render_template("React_Test.html")
 
+@app.route("/arviewer", methods=["GET", "POST"])
+def public_ar():
+    return render_template("AR.html")
+
 @app.route("/health", methods=["GET"])
 def health():
     return "OK", 200
