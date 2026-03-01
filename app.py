@@ -261,6 +261,7 @@ def ask_chatbot(question, chat_history=[]):
 # ------------------------ TRACK TIME SIM ------------------------
 import math
 
+
 def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
                         total_energy=15,
                         track_length=20,
@@ -283,8 +284,6 @@ def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
     rolling_trace = []
     lift_trace = []
 
-    thrust_active = True
-
     while position < track_length:
 
         positions.append(position)
@@ -301,15 +300,9 @@ def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
 
         resist_force = drag + rolling_force + axle_friction
 
-        # --- Thrust from remaining energy ---
-        if thrust_active and energy_used < total_energy:
-            # Convert energy flow to thrust (F = E/d)
+        # --- Thrust from energy ---
+        if energy_used < total_energy:
             thrust = total_energy / track_length
-
-            # Stop thrust if acceleration would be negative
-            if thrust < resist_force:
-                thrust_active = False
-                thrust = 0
         else:
             thrust = 0
 
@@ -333,7 +326,7 @@ def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
         rolling_trace.append(rolling_force)
         lift_trace.append(lift)
 
-        # Safety break in case something goes wrong
+        # Safety break
         if time > 60.0:
             break
 
