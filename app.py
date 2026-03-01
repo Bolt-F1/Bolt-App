@@ -261,10 +261,8 @@ def ask_chatbot(question, chat_history=[]):
 # ------------------------ TRACK TIME SIM ------------------------
 import math
 
-import math
-
 def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
-                        total_energy=50,
+                        total_energy=15,
                         track_length=20,
                         dt=0.001,
                         show_diagnostics=False):

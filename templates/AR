@@ -1,3 +1,6 @@
+<!DOCTYPE html>
+<html>
+<body>
 <!-- File input for uploading your 3D model -->
 <input type="file" id="modelFile" accept=".glb,.gltf" style="position: absolute; top: 10px; left: 10px; z-index: 10;">
 
@@ -32,3 +35,5 @@ input.addEventListener('change', (e) => {
   viewer.src = url;
 });
 </script>
+</body>
+</html>
