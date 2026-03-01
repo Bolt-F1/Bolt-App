@@ -264,7 +264,7 @@ import math
 import math
 
 def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
-                        total_energy=102.5,
+                        total_energy=50,
                         track_length=20,
                         dt=0.001,
                         show_diagnostics=False):
