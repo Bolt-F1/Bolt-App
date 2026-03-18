@@ -234,12 +234,12 @@ def find_relevant_chunks(query, chunks, top_n=3):
     return [item[1] for item in scored_chunks[:top_n]]
 
 
+last_answer = None  # keep this outside your function
+
 def ask_chatbot(question, chat_history=[]):
-    
     relevant_data = find_relevant_chunks(question, ALL_CHUNKS)
     context_text = "\n\n".join([f"Source: {c['source']}\n{c['text']}" for c in relevant_data])
 
-   
     chat = model.start_chat(history=chat_history)
 
     prompt = f"""
@@ -257,6 +257,25 @@ def ask_chatbot(question, chat_history=[]):
         return response.text, chat.history
     except Exception as e:
         return f"Error: {str(e)}", chat_history
+
+# --- MAIN LOOP ---
+while True:
+    question = input("Your question: ")
+
+    # Minimal change: pass only the previous answer as history
+    if last_answer:
+        history_for_next = [{"role": "assistant", "content": last_answer}]
+    else:
+        history_for_next = []
+
+    # Call your original function exactly as is
+    answer, _ = ask_chatbot(question, chat_history=history_for_next)
+
+    # Update last_answer for the next question
+    last_answer = answer
+
+    print(answer)
+
 
 # ------------------------ TRACK TIME SIM ------------------------
 import math
