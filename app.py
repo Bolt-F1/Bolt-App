@@ -234,22 +234,32 @@ def find_relevant_chunks(query, chunks, top_n=3):
     return [item[1] for item in scored_chunks[:top_n]]
 
 
-def ask_chatbot(question, previous_answer=None):
-    context_text = ""
-    if previous_answer:
-        context_text = f"Previous answer: {previous_answer}\n\n"
-
-    prompt = f"""
-    {context_text}
-    USER QUESTION:
-    {question}
-
-    (Remember to use a natural, conversational tone without markdown or bullet points.
-    Your Name is lumin, part of team bolt.)
+def ask_chatbot(question):
     """
+    Sends a single prompt to the model using relevant PDF chunks as context.
+    Returns the model's answer as a string.
+    """
+    # Get the most relevant chunks
+    relevant_chunks = find_relevant_chunks(question, ALL_CHUNKS)
+    context_text = "\n\n".join(
+        [f"Source: {c['source']}\n{c['text']}" for c in relevant_chunks]
+    )
+
+    # Build the prompt
+    prompt = f"""
+CONTEXT FROM REGULATIONS:
+{context_text}
+
+USER QUESTION:
+{question}
+
+(Remember to respond naturally, without markdown or bullet points. 
+Your Name is Lumin, part of Team Bolt.)
+"""
 
     try:
-        response = model.generate_text(prompt=prompt)  # single request
+        # Single request — no persistent session
+        response = model.generate_text(prompt=prompt)
         return response.text
     except Exception as e:
         return f"Error: {str(e)}"
@@ -518,15 +528,10 @@ def chatbot():
     if request.method == "POST":
         data = request.get_json()
         query = data.get("chatbot_query")
+
         if query:
-
-            # Get the previous answer
-            c.execute("SELECT answer FROM chatbot ORDER BY id DESC LIMIT 1")
-            row = c.fetchone()
-            previous_answer = row[0] if row else None
-
-            # Generate response using single prompt
-            answer = ask_chatbot(query, previous_answer=previous_answer)
+            # Get answer from model
+            answer = ask_chatbot(query)
 
             # Save to DB
             c.execute(
@@ -538,7 +543,7 @@ def chatbot():
 
             return jsonify({"answer": answer})
 
-    # For GET requests, show all past messages
+    # GET request → render conversation history
     c.execute("SELECT id, query, answer FROM chatbot ORDER BY id")
     chatbot_convo = [{"query": q, "answer": a} for _, q, a in c.fetchall()]
     conn.close()
