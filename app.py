@@ -234,28 +234,25 @@ def find_relevant_chunks(query, chunks, top_n=3):
     return [item[1] for item in scored_chunks[:top_n]]
 
 
-def ask_chatbot(question, chat_history=[]):
-    relevant_data = find_relevant_chunks(question, ALL_CHUNKS)
-    context_text = "\n\n".join([f"Source: {c['source']}\n{c['text']}" for c in relevant_data])
-
-    chat = model.start_chat(history=chat_history)
+def ask_chatbot(question, previous_answer=None):
+    context_text = ""
+    if previous_answer:
+        context_text = f"Previous answer: {previous_answer}\n\n"
 
     prompt = f"""
-    CONTEXT FROM REGS:
     {context_text}
-
     USER QUESTION:
     {question}
 
-    (Remember to use a natural, conversational tone without markdown or bullet points. Your Name is lumin, and you are part of team bolt, here to help the userstand the competition and the team)
+    (Remember to use a natural, conversational tone without markdown or bullet points.
+    Your Name is lumin, part of team bolt.)
     """
 
     try:
-        response = chat.send_message(prompt)
-        return response.text, chat.history
+        response = model.generate_text(prompt=prompt)  # single request
+        return response.text
     except Exception as e:
-        return f"Error: {str(e)}", chat_history
-
+        return f"Error: {str(e)}"
 
 
 
@@ -512,38 +509,36 @@ def todo():
         show_completed=show_completed
     )
 
+
 @app.route("/chatbot", methods=["GET", "POST"])
 def chatbot():
     conn = get_pg_conn()
     c = conn.cursor()
 
     if request.method == "POST":
-        
         data = request.get_json()
         query = data.get("chatbot_query")
-        
         if query:
-      
-            conn = get_pg_conn()
-            c = conn.cursor()
+
+            # Get the previous answer
             c.execute("SELECT answer FROM chatbot ORDER BY id DESC LIMIT 1")
             row = c.fetchone()
+            previous_answer = row[0] if row else None
 
-            if row:
-                formatted_history = [{"role": "assistant", "content": row[0]}]
-            else:
-                formatted_history = []
+            # Generate response using single prompt
+            answer = ask_chatbot(query, previous_answer=previous_answer)
 
-            answer, _ = ask_chatbot(query, chat_history=formatted_history)
+            # Save to DB
             c.execute(
                 "INSERT INTO chatbot (query, answer) VALUES (%s, %s)",
                 (query, answer)
             )
             conn.commit()
+            conn.close()
 
             return jsonify({"answer": answer})
 
-
+    # For GET requests, show all past messages
     c.execute("SELECT id, query, answer FROM chatbot ORDER BY id")
     chatbot_convo = [{"query": q, "answer": a} for _, q, a in c.fetchall()]
     conn.close()
