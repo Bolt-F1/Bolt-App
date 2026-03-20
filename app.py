@@ -259,7 +259,7 @@ Your Name is Lumin, part of Team Bolt.)
 
     try:
         # Single request — no persistent session
-        response = model.generate_text(prompt=prompt)
+        response = model.generate_content(prompt)
         return response.text
     except Exception as e:
         return f"Error: {str(e)}"
