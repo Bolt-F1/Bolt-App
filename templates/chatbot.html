@@ -18,8 +18,8 @@
     <div class="chatbot_body">
         <div class="chatbot_output" id="chatbot_output">
             {% for i in chatbot_convo %}
-            <p class="chatbot_query"><b>Q:</b> {{ i.query }}</p>
-            <p class="chatbot_answer"><b>A:</b> {{ i.answer }}</p>
+            <p class="chatbot_query"><b>Q:</b> {{ i['query'] }}</p>
+            <p class="chatbot_answer"><b>A:</b> {{ i['answer'] }}</p>
             {% endfor %}
         </div>
 
