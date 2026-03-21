@@ -1,148 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Handheld + Ground AR Scene</title>
+<title>Multi Model AR</title>
 
-<!-- Three.js core -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
-<!-- GLTF loader -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/examples/js/loaders/GLTFLoader.js"></script>
-<!-- ARButton -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/webxr/ARButton.js"></script>
-<!-- OrbitControls (for desktop preview) -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.161.0/examples/js/controls/OrbitControls.js"></script>
 
 <style>
-  body { margin: 0; overflow: hidden; }
-  #uploadContainer {
-    position: absolute; top: 10px; left: 10px; z-index: 10;
-    background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px;
-  }
-  #modelSelect { margin-top: 5px; width: 150px; }
+body { margin: 0; overflow: hidden; }
+#upload {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+}
 </style>
 </head>
+
 <body>
 
-<div id="uploadContainer">
-  <input type="file" id="modelFiles" accept=".glb,.gltf" multiple>
-  <br>
-  <select id="modelSelect">
-    <option value="">Select a model</option>
-  </select>
-</div>
+<input type="file" id="upload" multiple accept=".glb,.gltf">
 
 <script>
-let scene, camera, renderer;
-let controller;
-let models = {}; // store GLTF scenes by filename
-let placedModels = []; // keep track of models in scene
+let scene, camera, renderer, controller;
+let models = [];
+let modelIndex = 0;
+let reticle;
 
 init();
-animate();
 
 function init() {
-    // Scene & camera
     scene = new THREE.Scene();
+
     camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 20);
 
-    // Renderer
     renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.xr.enabled = true;
     document.body.appendChild(renderer.domElement);
 
-    // Light
+    document.body.appendChild(ARButton.createButton(renderer, {
+        requiredFeatures: ['hit-test']
+    }));
+
     const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-    light.position.set(0.5, 1, 0.25);
     scene.add(light);
 
-    // AR Button
-    document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
-
-    // Controller for placement
-    controller = renderer.xr.getController(0);
-    scene.add(controller);
-
-    const reticleGeometry = new THREE.RingGeometry(0.08, 0.1, 32).rotateX(-Math.PI/2);
-    const reticleMaterial = new THREE.MeshBasicMaterial({ color: 0x0fff00 });
-    const reticle = new THREE.Mesh(reticleGeometry, reticleMaterial);
+    // RETICLE (ground placement indicator)
+    const geometry = new THREE.RingGeometry(0.08, 0.1, 32).rotateX(-Math.PI/2);
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    reticle = new THREE.Mesh(geometry, material);
     reticle.matrixAutoUpdate = false;
     reticle.visible = false;
     scene.add(reticle);
 
-    // For hit testing
-    let hitTestSource = null;
-    let localSpace = null;
+    controller = renderer.xr.getController(0);
+    scene.add(controller);
 
-    renderer.xr.addEventListener('sessionstart', async () => {
-        const session = renderer.xr.getSession();
-        const viewerSpace = await session.requestReferenceSpace('viewer');
-        hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
-        localSpace = await session.requestReferenceSpace('local');
-    });
-
+    // Tap to place model
     controller.addEventListener('select', () => {
-        const name = document.getElementById('modelSelect').value;
-        if (name && models[name] && reticle.visible) {
-            const clone = models[name].clone();
-            clone.position.setFromMatrixPosition(reticle.matrix);
-            scene.add(clone);
-            placedModels.push(clone);
-        }
+        if (models.length === 0) return;
+        if (!reticle.visible) return;
+
+        const model = models[modelIndex].clone();
+
+        model.position.setFromMatrixPosition(reticle.matrix);
+        scene.add(model);
+
+        // Cycle models
+        modelIndex = (modelIndex + 1) % models.length;
     });
 
     // Load models
-    const fileInput = document.getElementById('modelFiles');
-    const select = document.getElementById('modelSelect');
     const loader = new THREE.GLTFLoader();
-
-    fileInput.addEventListener('change', (e) => {
-        const files = e.target.files;
-        for (const file of files) {
-            const ext = file.name.split('.').pop().toLowerCase();
-            if (ext !== 'glb' && ext !== 'gltf') continue;
-
+    document.getElementById("upload").addEventListener("change", (e) => {
+        for (const file of e.target.files) {
             const url = URL.createObjectURL(file);
+
             loader.load(url, (gltf) => {
-                models[file.name] = gltf.scene;
-                const option = document.createElement('option');
-                option.value = file.name;
-                option.textContent = file.name;
-                select.appendChild(option);
+                models.push(gltf.scene);
+                console.log("Loaded:", file.name);
             });
         }
     });
 
-    // Resize
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth/window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+    // HIT TEST SETUP
+    let hitTestSource = null;
+    let localSpace = null;
+
+    renderer.xr.addEventListener("sessionstart", async () => {
+        const session = renderer.xr.getSession();
+        const viewerSpace = await session.requestReferenceSpace("viewer");
+        hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+        localSpace = await session.requestReferenceSpace("local");
     });
 
-    // Animation loop: reticle update
     renderer.setAnimationLoop((timestamp, frame) => {
-        if (frame && renderer.xr.isPresenting) {
-            const referenceSpace = renderer.xr.getReferenceSpace();
-            const session = renderer.xr.getSession();
+        if (frame) {
             const hitTestResults = frame.getHitTestResults(hitTestSource);
             if (hitTestResults.length > 0) {
                 const hit = hitTestResults[0];
                 const pose = hit.getPose(localSpace);
+
                 reticle.visible = true;
                 reticle.matrix.fromArray(pose.transform.matrix);
             } else {
                 reticle.visible = false;
             }
         }
-        renderer.render(scene, camera);
-    });
-}
 
-function animate() {
-    renderer.setAnimationLoop(() => {
         renderer.render(scene, camera);
     });
 }
