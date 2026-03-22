@@ -2,12 +2,9 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Interactive AR Shapes Demo</title>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <title>Multi-Model AR Scene</title>
   <style>
     body { margin:0; font-family: Arial; overflow: hidden; }
-    model-viewer { width:100%; height: 100vh; }
- 
     #infoCard {
       position: fixed;
       bottom: 20px;
@@ -22,14 +19,12 @@
       text-align: center;
       z-index: 10;
     }
- 
     #ui {
       position: fixed;
       top: 20px;
       left: 20px;
       z-index: 10;
     }
- 
     button {
       padding: 10px;
       margin: 5px;
@@ -38,99 +33,111 @@
       border: 1px solid gold;
       cursor: pointer;
     }
- 
-    /* AR button styling */
-    model-viewer::part(ar-button) {
-      position: fixed !important;
-      bottom: 20px !important;
-      right: 20px !important;
-      width: 70px !important;
-      height: 70px !important;
-      border-radius: 50% !important;
-      z-index: 9999 !important;
-    }
   </style>
 </head>
 <body>
- 
+
 <div id="ui">
-  <button onclick="explodeView()">Explode View</button>
-  <button onclick="resetView()">Reset</button>
+  <button onclick="placeModel('Astronaut')">Astronaut</button>
+  <button onclick="placeModel('Robot')">Robot</button>
+  <button onclick="placeModel('Duck')">Duck</button>
 </div>
- 
+
 <div id="infoCard">Info will appear here</div>
- 
-<!-- Default GLB model -->
-<model-viewer id="viewer"
-              src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
-              ar
-              ar-modes="webxr scene-viewer quick-look"
-              ar-button="enabled"
-              camera-controls
-              touch-action="pan-y"
-              exposure="1">
-</model-viewer>
- 
+
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.module.js';
+import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/webxr/ARButton.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/loaders/GLTFLoader.js';
 
-const viewer = document.getElementById('viewer');
-const infoCard = document.getElementById('infoCard');
+let camera, scene, renderer;
+let controller;
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const models = []; // all placed GLBs
 let highlighted = null;
+const infoCard = document.getElementById('infoCard');
 
-// Wait for the model to load
-viewer.addEventListener('load', () => {
-  const model = viewer.model; // THREE.Group of the GLB
+const MODEL_URLS = {
+  Astronaut: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
+  Robot: 'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb',
+  Duck: 'https://modelviewer.dev/shared-assets/models/Duck.glb'
+};
 
-  // Map shapes by their node names (example nodes inside GLB)
-  const shapes = {
-    Helmet: model.getObjectByName('Helmet') || model, // fallback to whole model
-    Backpack: model.getObjectByName('Backpack') || model
-  };
+init();
+animate();
 
-  // Explode positions
-  window.explodeView = () => {
-    if(shapes.Helmet) shapes.Helmet.position.x -= 0.2;
-    if(shapes.Backpack) shapes.Backpack.position.x += 0.2;
-  };
+function init() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 20);
 
-  window.resetView = () => {
-    if(shapes.Helmet) shapes.Helmet.position.x = 0;
-    if(shapes.Backpack) shapes.Backpack.position.x = 0;
-    infoCard.style.display = 'none';
-    if(highlighted) {
-      highlighted.material.emissive.setHex(0x000000);
-      highlighted = null;
-    }
-  };
+  renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.xr.enabled = true;
+  document.body.appendChild(renderer.domElement);
+  document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
 
-  // Raycasting for clicks
-  viewer.canvas.addEventListener('click', (event) => {
-    const rect = viewer.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+  const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+  scene.add(light);
 
-    const camera = viewer.camera;
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera({x, y}, camera);
+  // Floor placeholder
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(10, 10),
+    new THREE.ShadowMaterial({ opacity:0.2 })
+  );
+  floor.rotation.x = -Math.PI/2;
+  floor.position.y = 0;
+  scene.add(floor);
 
-    const intersects = raycaster.intersectObjects(Object.values(shapes), true);
+  controller = renderer.xr.getController(0);
+  scene.add(controller);
 
-    if (intersects.length > 0) {
-      const obj = intersects[0].object;
-      // Highlight
-      if (highlighted) highlighted.material.emissive.setHex(0x000000);
-      obj.material.emissive.setHex(0xffff00);
-      highlighted = obj;
+  // Click/tap to select models
+  window.addEventListener('click', onClick, false);
+}
 
-      // Show info card
-      const shapeName = Object.keys(shapes).find(k => shapes[k] === obj) || obj.name || "Selected Part";
-      infoCard.innerHTML = `This is the ${shapeName}`;
-      infoCard.style.display = 'block';
-    }
+// Place a model in front of the camera
+function placeModel(name) {
+  const url = MODEL_URLS[name];
+  const loader = new GLTFLoader();
+  loader.load(url, (gltf) => {
+    const model = gltf.scene;
+    model.position.set(0, 0, -0.5); // in front of camera
+    model.scale.set(0.3,0.3,0.3);
+    model.userData.name = name;
+    scene.add(model);
+    models.push(model);
   });
-});
+}
+
+// Select models
+function onClick(event) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.x = ((event.clientX - rect.left)/rect.width)*2 - 1;
+  mouse.y = -((event.clientY - rect.top)/rect.height)*2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(models, true);
+
+  if(intersects.length > 0){
+    const obj = intersects[0].object;
+    if(highlighted) highlighted.traverse(c => { if(c.material) c.material.emissive.setHex(0x000000); });
+    obj.traverse(c => { if(c.material) c.material.emissive.setHex(0xffff00); });
+    highlighted = obj;
+
+    infoCard.innerText = `This is a ${obj.userData.name || 'model'}`;
+    infoCard.style.display = 'block';
+  }
+}
+
+function animate() {
+  renderer.setAnimationLoop(render);
+}
+
+function render() {
+  renderer.render(scene, camera);
+}
 </script>
- 
+
 </body>
 </html>
