@@ -273,74 +273,66 @@ Your Name is Lumin, part of Team Bolt.)
 import math
 
 def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
-                        total_energy=330,  # J
+                        total_energy=15,    # J (From your latest parameters)
                         track_length=20,    # m
                         dt=0.001,
-                        burn_time=0.6,      # seconds to deliver energy
+                        k_thrust=0.7,       # Your new Calibration Constant
                         show_diagnostics=False):
 
-    mass = car_mass_g / 1000.0  # convert g → kg
+    mass = car_mass_g / 1000.0  # g → kg
     position = 0.0
-    velocity = 0.0
+    velocity = 0.1              # Start small to avoid divide-by-zero
     time = 0.0
-    energy_used = 0.0
+    E_remaining = total_energy
+    P_limit = 20.0              # Watts
+    C_r = 0.105                 # Your latest Rolling Resistance coefficient
 
-    positions = []
-    speeds = []
+    # Storage for diagnostics
+    positions, speeds = [], []
+    thrust_trace, drag_trace, rolling_trace, lift_trace, lift_thrust_trace = [], [], [], [], []
 
-    thrust_trace = []
-    drag_trace = []
-    rolling_trace = []
-    lift_trace = []
-
-    while position < track_length:
-
-        positions.append(position)
-        speeds.append(velocity)
-
-        # Aerodynamic forces
+    while position < track_length and time < 5.0:
+        # 1. Aerodynamic forces (scaled by v^2)
         drag = drag_20ms * (velocity / 20.0)**2
         lift = lift_20ms * (velocity / 20.0)**2
 
-        # Rolling resistance
-        normal_force = mass * 9.81 - lift
-        rolling_force = 0.015 * normal_force
-        axle_friction = 0.4
+        # 2. Lift-to-Energy Conversion (The "Sailing" Thrust)
+        # Directly adds forward force based on lift production
+        F_lift_thrust = k_thrust * lift
 
-        resist_force = drag + rolling_force + axle_friction
+        # 3. Rolling Resistance (Now factoring in Lift)
+        normal_force = max(0, (mass * 9.81) - lift)
+        rolling_force = C_r * normal_force
 
-        # Energy-based thrust
-        if energy_used < total_energy:
-            remaining_energy = total_energy - energy_used
-            power = remaining_energy / burn_time
-            thrust = power / max(velocity, 0.1)  # F = P/v
+        # 4. Primary Energy (Battery/Motor)
+        if E_remaining > 0:
+            # F = P / v
+            thrust_applied = P_limit / max(velocity, 0.5) 
+            E_remaining -= P_limit * dt
         else:
-            thrust = 0
+            thrust_applied = 0
 
-        # Energy accounting
-        energy_used += thrust * velocity * dt
-
-        # Dynamics
-        net_force = thrust - resist_force
+        # 5. Dynamics (Net Force includes the new Lift Thrust)
+        net_force = thrust_applied + F_lift_thrust - drag - rolling_force
         acceleration = net_force / mass
+        
         velocity += acceleration * dt
-        if velocity < 0:
-            velocity = 0
+        if velocity < 0: velocity = 0
         position += velocity * dt
         time += dt
 
-        # Diagnostics
-        thrust_trace.append(thrust)
+        # Store traces
+        positions.append(position)
+        speeds.append(velocity)
+        thrust_trace.append(thrust_applied)
+        lift_thrust_trace.append(F_lift_thrust)
         drag_trace.append(drag)
         rolling_trace.append(rolling_force)
         lift_trace.append(lift)
 
-        # Safety break
-        if time > 60:
-            break
-
     diagnostics = {
         "thrust": thrust_trace,
+        "lift_thrust": lift_thrust_trace,
         "drag": drag_trace,
         "rolling": rolling_trace,
         "lift": lift_trace
@@ -351,6 +343,9 @@ def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
     else:
         return positions, speeds, time
 
+# Example Usage:
+# p, s, final_time = simulate_track_time(0.604, 0.068, 74)
+# print(f"Race Time: {final_time:.3f} s")
 # ------------------------ POSTGRES ML DATA ------------------------
 
 
