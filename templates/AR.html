@@ -4,128 +4,107 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Interactive AR Astronaut</title>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   
-  <style>
-    body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a1a; }
-    model-viewer { width: 100%; height: 100vh; --poster-color: transparent; }
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
-    #ui {
+  <style>
+    body { margin: 0; background-color: #121212; font-family: sans-serif; }
+    model-viewer { width: 100%; height: 100vh; }
+
+    /* The clickable dot in 3D space */
+    .Hotspot {
+      background: #ffd700;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    /* The Info Box that stays hidden until clicked */
+    .HotspotAnnotation {
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 8px;
+      border: 1px solid #ffd700;
+      padding: 8px 12px;
+      position: absolute;
+      left: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: max-content;
+      max-width: 150px;
+      font-size: 14px;
+      pointer-events: none; /* Let clicks pass through to the button */
+      
+      /* Hiding logic */
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    /* When the hotspot is clicked, show the child annotation */
+    .Hotspot.active .HotspotAnnotation {
+      opacity: 1;
+    }
+
+    /* This button only shows up in the browser to help the user */
+    #help-text {
       position: fixed;
       top: 20px;
-      left: 20px;
-      z-index: 100;
-      display: flex;
-      gap: 10px;
-    }
-
-    button {
-      padding: 12px 20px;
-      background: rgba(0, 0, 0, 0.8);
-      color: #ffd700;
-      border: 1px solid #ffd700;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.2s;
-    }
-
-    button:hover {
-      background: #ffd700;
-      color: black;
-    }
-
-    #infoCard {
-      position: fixed;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.9);
-      color: white;
-      padding: 20px;
-      border-radius: 15px;
-      border: 2px solid #ffd700;
-      display: none; /* Hidden by default */
+      width: 100%;
       text-align: center;
-      min-width: 200px;
-      z-index: 100;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    }
-
-    .highlight-text {
       color: #ffd700;
-      display: block;
-      font-size: 1.2em;
-      margin-top: 5px;
+      z-index: 10;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
 
-<div id="ui">
-  <button onclick="resetView()">Reset Selection</button>
-</div>
-
-<div id="infoCard">
-  Selecting part...
-  <span id="partName" class="highlight-text"></span>
-</div>
+<div id="help-text">Tap the gold dots for info</div>
 
 <model-viewer id="viewer"
               src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
               ar
               ar-modes="webxr scene-viewer quick-look"
               camera-controls
-              touch-action="pan-y"
-              shadow-intensity="1"
-              exposure="1">
+              shadow-intensity="1">
+
+  <button class="Hotspot" slot="hotspot-1" 
+          data-position="0.2m 1.7m 0.1m" 
+          data-normal="0m 0m 1m" 
+          onclick="toggleInfo(this)">
+    <div class="HotspotAnnotation">Reflective Polycarbonate Helmet</div>
+  </button>
+
+  <button class="Hotspot" slot="hotspot-2" 
+          data-position="-0.1m 1.4m -0.2m" 
+          data-normal="-1m 0m 0m" 
+          onclick="toggleInfo(this)">
+    <div class="HotspotAnnotation">Primary Life Support System (PLSS)</div>
+  </button>
+
 </model-viewer>
 
 <script>
-  const viewer = document.querySelector('#viewer');
-  const infoCard = document.querySelector('#infoCard');
-  const partNameDisplay = document.querySelector('#partName');
-  
-  let lastMaterial = null;
+  // This tiny bit of JavaScript makes the boxes appear/disappear
+  function toggleInfo(dot) {
+    // 1. Close any other open info boxes first
+    document.querySelectorAll('.Hotspot').forEach(h => {
+      if (h !== dot) h.classList.remove('active');
+    });
 
-  // Listen for clicks/taps on the model
-  viewer.addEventListener('click', (event) => {
-    // Check if the click hit the model and which material it hit
-    const material = viewer.materialFromPoint(event.clientX, event.clientY);
+    // 2. Toggle the one we clicked
+    dot.classList.toggle('active');
+  }
 
-    if (material) {
-      displayInfo(material);
-    } else {
-      hideInfo();
+  // Close boxes if user clicks the empty "sky"
+  document.querySelector('#viewer').addEventListener('click', (event) => {
+    if (event.target.tagName !== 'BUTTON') {
+      document.querySelectorAll('.Hotspot').forEach(h => h.classList.remove('active'));
     }
   });
-
-  function displayInfo(material) {
-    // Reset previous material color if it exists
-    if (lastMaterial) {
-      lastMaterial.pbrMetallicRoughness.setBaseColorFactor([1, 1, 1, 1]);
-    }
-
-    // Set the display text (using the material name from the GLB)
-    partNameDisplay.textContent = material.name || "Unknown Component";
-    infoCard.style.display = 'block';
-
-    // Visual feedback: Highlight the part by tinting it gold
-    material.pbrMetallicRoughness.setBaseColorFactor([1, 0.84, 0, 1]);
-    lastMaterial = material;
-  }
-
-  function hideInfo() {
-    infoCard.style.display = 'none';
-    if (lastMaterial) {
-      lastMaterial.pbrMetallicRoughness.setBaseColorFactor([1, 1, 1, 1]);
-      lastMaterial = null;
-    }
-  }
-
-  window.resetView = () => {
-    hideInfo();
-  };
 </script>
 
 </body>
