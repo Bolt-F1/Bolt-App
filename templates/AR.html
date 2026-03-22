@@ -8,55 +8,73 @@
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
   <style>
-    body { margin: 0; background-color: #121212; font-family: sans-serif; }
-    model-viewer { width: 100%; height: 100vh; }
+    body { margin: 0; background-color: #121212; font-family: 'Segoe UI', sans-serif; }
+    model-viewer { width: 100%; height: 100vh; --poster-color: transparent; }
+
+    /* CUSTOM AR BUTTON: This ensures you can actually see the button */
+    #ar-button {
+      background-color: #ffd700;
+      border-radius: 8px;
+      border: none;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 100;
+      padding: 12px 20px;
+      font-weight: bold;
+      color: black;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
 
     /* The clickable dot in 3D space */
     .Hotspot {
       background: #ffd700;
       border-radius: 50%;
       border: 2px solid #fff;
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       cursor: pointer;
       box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      transition: transform 0.2s;
     }
 
-    /* The Info Box that stays hidden until clicked */
+    .Hotspot:active { transform: scale(1.2); }
+
+    /* The Info Box (Annotation) */
     .HotspotAnnotation {
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.85);
       color: #fff;
       border-radius: 8px;
       border: 1px solid #ffd700;
-      padding: 8px 12px;
+      padding: 10px 15px;
       position: absolute;
-      left: 30px;
+      left: 35px;
       top: 50%;
       transform: translateY(-50%);
       width: max-content;
-      max-width: 150px;
+      max-width: 180px;
       font-size: 14px;
-      pointer-events: none; /* Let clicks pass through to the button */
-      
-      /* Hiding logic */
+      line-height: 1.4;
+      pointer-events: none;
       opacity: 0;
       transition: opacity 0.3s ease;
     }
 
-    /* When the hotspot is clicked, show the child annotation */
+    /* Show annotation when hotspot is active */
     .Hotspot.active .HotspotAnnotation {
       opacity: 1;
     }
 
-    /* This button only shows up in the browser to help the user */
     #help-text {
       position: fixed;
-      top: 20px;
+      bottom: 20px;
       width: 100%;
       text-align: center;
       color: #ffd700;
       z-index: 10;
       pointer-events: none;
+      text-shadow: 1px 1px 2px black;
     }
   </style>
 </head>
@@ -68,40 +86,51 @@
               src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
               ar
               ar-modes="webxr scene-viewer quick-look"
-              ar-button="enabled"
               camera-controls
-              shadow-intensity="1">
+              shadow-intensity="1"
+              exposure="1">
+
+  <button slot="ar-button" id="ar-button">
+    👋 VIEW IN AR
+  </button>
 
   <button class="Hotspot" slot="hotspot-1" 
           data-position="0.2m 1.7m 0.1m" 
           data-normal="0m 0m 1m" 
           onclick="toggleInfo(this)">
-    <div class="HotspotAnnotation">Reflective Polycarbonate Helmet</div>
+    <div class="HotspotAnnotation">
+      <strong>Helmet</strong><br>
+      Gold-tinted visor for UV protection.
+    </div>
   </button>
 
   <button class="Hotspot" slot="hotspot-2" 
           data-position="-0.1m 1.4m -0.2m" 
           data-normal="-1m 0m 0m" 
           onclick="toggleInfo(this)">
-    <div class="HotspotAnnotation">Primary Life Support System (PLSS)</div>
+    <div class="HotspotAnnotation">
+      <strong>Life Support</strong><br>
+      Provides 8 hours of oxygen and cooling.
+    </div>
   </button>
 
 </model-viewer>
 
 <script>
-  // This tiny bit of JavaScript makes the boxes appear/disappear
+  // Logic to show/hide the info boxes
   function toggleInfo(dot) {
-    // 1. Close any other open info boxes first
+    // Close others
     document.querySelectorAll('.Hotspot').forEach(h => {
       if (h !== dot) h.classList.remove('active');
     });
 
-    // 2. Toggle the one we clicked
+    // Toggle current
     dot.classList.toggle('active');
   }
 
-  // Close boxes if user clicks the empty "sky"
-  document.querySelector('#viewer').addEventListener('click', (event) => {
+  // Close info boxes if the user clicks anywhere else on the model
+  const viewer = document.querySelector('#viewer');
+  viewer.addEventListener('click', (event) => {
     if (event.target.tagName !== 'BUTTON') {
       document.querySelectorAll('.Hotspot').forEach(h => h.classList.remove('active'));
     }
