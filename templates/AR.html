@@ -1,118 +1,118 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Multi Model AR</title>
+  <meta charset="UTF-8">
+  <title>AR Shapes Demo</title>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.161.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/webxr/ARButton.js"></script>
+  <!-- A-Frame + MindAR + Draggable -->
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
 
-<style>
-body { margin: 0; overflow: hidden; }
-#upload {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 10;
-}
-</style>
+  <style>
+    body { margin: 0; overflow: hidden; font-family: Arial; }
+
+    #infoCard {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0,0,0,0.8);
+      color: gold;
+      padding: 15px;
+      border-radius: 10px;
+      display: none;
+      max-width: 250px;
+    }
+
+    #ui {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+    }
+
+    button {
+      padding: 10px;
+      margin: 5px;
+      background: black;
+      color: gold;
+      border: 1px solid gold;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
 
-<input type="file" id="upload" multiple accept=".glb,.gltf">
+<div id="ui">
+  <button onclick="explodeView()">Explode View</button>
+  <button onclick="resetView()">Reset</button>
+</div>
+
+<div id="infoCard"></div>
+
+<a-scene
+  mindar-image="imageTargetSrc: {{ url_for('static', filename='markers/targets.mind') }};"
+  embedded
+  color-space="sRGB"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: true"
+>
+
+  <!-- Marker Target -->
+  <a-entity mindar-image-target="targetIndex: 0">
+
+    <!-- TRACK / plane -->
+    <a-plane rotation="-90 0 0" width="3" height="3" color="#222"></a-plane>
+
+    <!-- Demo Shapes -->
+    <a-box position="-1 0.2 0" color="red" depth="0.4" height="0.4" width="0.4" draggable click-handler data-info="This is a red cube"></a-box>
+    <a-sphere position="0 0.2 0" color="blue" radius="0.2" draggable click-handler data-info="This is a blue sphere"></a-sphere>
+    <a-cylinder position="1 0.2 0" color="green" radius="0.2" height="0.5" draggable click-handler data-info="This is a green cylinder"></a-cylinder>
+
+  </a-entity>
+
+  <a-camera position="0 0 0">
+    <a-cursor raycaster="objects: .clickable"></a-cursor>
+  </a-camera>
+</a-scene>
 
 <script>
-let scene, camera, renderer, controller;
-let models = [];
-let modelIndex = 0;
-let reticle;
-
-init();
-
-function init() {
-    scene = new THREE.Scene();
-
-    camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 20);
-
-    renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.xr.enabled = true;
-    document.body.appendChild(renderer.domElement);
-
-    document.body.appendChild(ARButton.createButton(renderer, {
-        requiredFeatures: ['hit-test']
-    }));
-
-    const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-    scene.add(light);
-
-    // RETICLE (ground placement indicator)
-    const geometry = new THREE.RingGeometry(0.08, 0.1, 32).rotateX(-Math.PI/2);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    reticle = new THREE.Mesh(geometry, material);
-    reticle.matrixAutoUpdate = false;
-    reticle.visible = false;
-    scene.add(reticle);
-
-    controller = renderer.xr.getController(0);
-    scene.add(controller);
-
-    // Tap to place model
-    controller.addEventListener('select', () => {
-        if (models.length === 0) return;
-        if (!reticle.visible) return;
-
-        const model = models[modelIndex].clone();
-
-        model.position.setFromMatrixPosition(reticle.matrix);
-        scene.add(model);
-
-        // Cycle models
-        modelIndex = (modelIndex + 1) % models.length;
+// CLICK HANDLER
+AFRAME.registerComponent('click-handler', {
+  init: function () {
+    this.el.addEventListener('click', () => {
+      const info = this.el.getAttribute('data-info') || 'Shape';
+      const card = document.getElementById('infoCard');
+      card.innerHTML = info;
+      card.style.display = 'block';
     });
+  }
+});
 
-    // Load models
-    const loader = new THREE.GLTFLoader();
-    document.getElementById("upload").addEventListener("change", (e) => {
-        for (const file of e.target.files) {
-            const url = URL.createObjectURL(file);
-
-            loader.load(url, (gltf) => {
-                models.push(gltf.scene);
-                console.log("Loaded:", file.name);
-            });
-        }
+// EXPLODE VIEW
+function explodeView() {
+  const positions = ['-1 0.5 -0.5', '0 0.5 -0.5', '1 0.5 -0.5'];
+  document.querySelectorAll('a-box, a-sphere, a-cylinder').forEach((el, i) => {
+    el.setAttribute('animation', {
+      property: 'position',
+      to: positions[i],
+      dur: 800
     });
+  });
+}
 
-    // HIT TEST SETUP
-    let hitTestSource = null;
-    let localSpace = null;
-
-    renderer.xr.addEventListener("sessionstart", async () => {
-        const session = renderer.xr.getSession();
-        const viewerSpace = await session.requestReferenceSpace("viewer");
-        hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
-        localSpace = await session.requestReferenceSpace("local");
+// RESET VIEW
+function resetView() {
+  const positions = ['-1 0.2 0', '0 0.2 0', '1 0.2 0'];
+  document.querySelectorAll('a-box, a-sphere, a-cylinder').forEach((el, i) => {
+    el.setAttribute('animation', {
+      property: 'position',
+      to: positions[i],
+      dur: 800
     });
-
-    renderer.setAnimationLoop((timestamp, frame) => {
-        if (frame) {
-            const hitTestResults = frame.getHitTestResults(hitTestSource);
-            if (hitTestResults.length > 0) {
-                const hit = hitTestResults[0];
-                const pose = hit.getPose(localSpace);
-
-                reticle.visible = true;
-                reticle.matrix.fromArray(pose.transform.matrix);
-            } else {
-                reticle.visible = false;
-            }
-        }
-
-        renderer.render(scene, camera);
-    });
+  });
+  document.getElementById('infoCard').style.display = 'none';
 }
 </script>
 
