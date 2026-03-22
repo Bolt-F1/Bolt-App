@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>AR Shapes Demo</title>
+  <title>AR Shapes Demo with Debug</title>
 
   <!-- A-Frame + MindAR + Draggable -->
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
@@ -59,8 +59,6 @@
   device-orientation-permission-ui="enabled: true"
 >
 
-  <a-box position="0 0.1 0" color="yellow" opacity="0.5"></a-box>
-
   <!-- Marker Target -->
   <a-entity mindar-image-target="targetIndex: 0">
 
@@ -71,6 +69,9 @@
     <a-box position="-1 0.2 0" color="red" depth="0.4" height="0.4" width="0.4" draggable click-handler data-info="This is a red cube"></a-box>
     <a-sphere position="0 0.2 0" color="blue" radius="0.2" draggable click-handler data-info="This is a blue sphere"></a-sphere>
     <a-cylinder position="1 0.2 0" color="green" radius="0.2" height="0.5" draggable click-handler data-info="This is a green cylinder"></a-cylinder>
+
+    <!-- Debug Cube -->
+    <a-box id="debugBox" position="0 0.5 0" color="yellow" opacity="0.5" visible="false"></a-box>
 
   </a-entity>
 
@@ -116,6 +117,23 @@ function resetView() {
   });
   document.getElementById('infoCard').style.display = 'none';
 }
+
+// DEBUGGING: Show cube when marker detected
+const target = document.querySelector('[mindar-image-target]');
+const debugBox = document.getElementById('debugBox');
+
+target.addEventListener('targetFound', () => {
+  console.log('Marker detected!');
+  debugBox.setAttribute('visible', true);
+  document.getElementById('infoCard').innerHTML = 'Marker detected!';
+  document.getElementById('infoCard').style.display = 'block';
+});
+
+target.addEventListener('targetLost', () => {
+  console.log('Marker lost!');
+  debugBox.setAttribute('visible', false);
+  document.getElementById('infoCard').style.display = 'none';
+});
 </script>
 
 </body>

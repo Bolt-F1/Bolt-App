@@ -324,16 +324,21 @@ img[alt="lumin"] {
   margin: 1rem auto;
   width: 180px;
   height: 180px;
-  border-radius: 50%;
-  border: 4px solid #FFD700;
+  border-radius: 50%;          /* keeps it circular */
+  border: 4px solid #FFD700;   /* golden border */
   box-shadow: 0 8px 20px rgba(255,215,0,0.25);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: #FFD700;   /* yellow background */
+  padding: 8px;                /* space between image and border */
+  object-fit: cover;           /* ensures the image fills the circle nicely */
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 
 img[alt="lumin"]:hover {
   transform: scale(1.05);
   box-shadow: 0 12px 30px rgba(255,215,0,0.45);
+  background-color: #FFC700;   /* optional hover highlight */
 }
+
 
 h1 {
   text-align: center;
