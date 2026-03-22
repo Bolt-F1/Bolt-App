@@ -19,8 +19,10 @@
     <div class="chatbot_body">
         <div class="chatbot_output" id="chatbot_output">
             {% for i in chatbot_convo %}
+            {% if i['query'] != 'query' %}
             <p class="chatbot_query"><b>Q:</b> {{ i['query'] }}</p>
             <p class="chatbot_answer"><b>A:</b> {{ i['answer'] }}</p>
+            {% endif %}
             {% endfor %}
         </div>
 
