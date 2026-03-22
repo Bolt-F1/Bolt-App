@@ -2,9 +2,10 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Markerless AR Demo</title>
+  <title>Marker-Based AR Demo</title>
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
   <style>
     body { margin: 0; overflow: hidden; font-family: Arial; }
     #infoCard {
@@ -44,114 +45,67 @@
 
 <div id="infoCard">Info will appear here</div>
 
-<a-scene embedded xrweb="optionalFeatures: hit-test;">
-  <!-- Reticle for floor detection -->
-  <a-entity id="reticle" 
-            geometry="primitive: ring; radiusInner: 0.05; radiusOuter: 0.06" 
-            material="color: gold; shader: flat" 
-            visible="false" 
-            position="0 0 -1">
+<a-scene mindar-image="imageTargetSrc: {{ url_for('static', filename='markers/targets.mind') }}; autoStart: true;" embedded color-space="sRGB" vr-mode-ui="enabled: false">
+  
+  <!-- Marker target -->
+  <a-entity mindar-image-target="targetIndex: 0">
+
+    <!-- Demo shapes -->
+    <a-box id="partCube" position="-0.5 0.2 0" color="red" draggable click-handler data-info="This is a red cube"></a-box>
+    <a-sphere id="partSphere" position="0 0.2 0" color="blue" radius="0.2" draggable click-handler data-info="This is a blue sphere"></a-sphere>
+    <a-cylinder id="partCylinder" position="0.5 0.25 0" color="green" radius="0.15" height="0.5" draggable click-handler data-info="This is a green cylinder"></a-cylinder>
+
+    <!-- Debug cube -->
+    <a-box id="debugBox" position="0 0.3 0" color="yellow" opacity="0.5" visible="false"></a-box>
+
   </a-entity>
 
-  <!-- Objects to place -->
-  <a-box id="partCube" position="0 0 0" color="red" visible="false" class="clickable" draggable></a-box>
-  <a-sphere id="partSphere" position="0 0 0" color="blue" visible="false" class="clickable" draggable></a-sphere>
-  <a-cylinder id="partCylinder" position="0 0 0" color="green" visible="false" class="clickable" draggable></a-cylinder>
-
-  <a-camera id="camera"></a-camera>
+  <a-camera position="0 0 0"></a-camera>
 </a-scene>
 
 <script>
-const scene = document.querySelector('a-scene');
-const reticle = document.getElementById('reticle');
-const cube = document.getElementById('partCube');
-const sphere = document.getElementById('partSphere');
-const cylinder = document.getElementById('partCylinder');
-const infoCard = document.getElementById('infoCard');
-
-let hitTestSource = null;
-let hitTestSourceRequested = false;
-
-// AR hit-testing setup
-scene.renderer.xr.addEventListener('sessionstart', async () => {
-  const session = scene.renderer.xr.getSession();
-  if (!hitTestSourceRequested) {
-    const viewerSpace = await session.requestReferenceSpace('viewer');
-    hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
-    hitTestSourceRequested = true;
-    session.addEventListener('end', () => { hitTestSourceRequested = false; hitTestSource = null; });
-  }
-});
-
-// Animation loop for reticle placement
-scene.addEventListener('renderstart', () => {
-  scene.renderer.setAnimationLoop((time, frame) => {
-    if (frame && hitTestSource) {
-      const referenceSpace = scene.renderer.xr.getReferenceSpace();
-      const hitTestResults = frame.getHitTestResults(hitTestSource);
-      if (hitTestResults.length > 0) {
-        const hit = hitTestResults[0];
-        const pose = hit.getPose(referenceSpace);
-        reticle.object3D.position.set(pose.transform.position.x, pose.transform.position.y, pose.transform.position.z);
-        reticle.visible = true;
-      } else {
-        reticle.visible = false;
-      }
-    }
-  });
-});
-
-// Place objects on tap
-scene.canvas.onclick = () => {
-  if (reticle.visible) {
-    cube.visible = true;
-    cube.object3D.position.copy(reticle.object3D.position);
-    sphere.visible = true;
-    sphere.object3D.position.set(reticle.object3D.position.x + 0.5, reticle.object3D.position.y, reticle.object3D.position.z);
-    cylinder.visible = true;
-    cylinder.object3D.position.set(reticle.object3D.position.x - 0.5, reticle.object3D.position.y, reticle.object3D.position.z);
-  }
-};
-
-// Interaction / highlighting
-[cube, sphere, cylinder].forEach(part => {
-  part.addEventListener('click', () => {
-    // Highlight by changing color
-    part.setAttribute('color', 'yellow');
-    // Show floating info card above the part
-    infoCard.innerHTML = `This is ${part.id}`;
-    infoCard.style.display = 'block';
-    infoCard.style.left = `${window.innerWidth / 2 - 125}px`; // roughly center
-  });
-});
-
-// Explode / reset view
-function explodeView() {
-  const positions = [
-    { x: cube.object3D.position.x - 0.5, y: cube.object3D.position.y, z: cube.object3D.position.z },
-    { x: sphere.object3D.position.x + 0.5, y: sphere.object3D.position.y, z: sphere.object3D.position.z },
-    { x: cylinder.object3D.position.x, y: cylinder.object3D.position.y, z: cylinder.object3D.position.z - 0.5 }
-  ];
-  [cube, sphere, cylinder].forEach((el, i) => {
-    el.setAttribute('animation', {
-      property: 'position',
-      to: `${positions[i].x} ${positions[i].y} ${positions[i].z}`,
-      dur: 800
+// CLICK HANDLER
+AFRAME.registerComponent('click-handler', {
+  init: function () {
+    this.el.addEventListener('click', () => {
+      const info = this.el.getAttribute('data-info') || 'Shape';
+      const card = document.getElementById('infoCard');
+      card.innerHTML = info;
+      card.style.display = 'block';
     });
-  });
+  }
+});
+
+// EXPLODE / RESET
+function explodeView() {
+  document.getElementById('partCube').setAttribute('animation', { property: 'position', to: '-1 0.5 0', dur: 800 });
+  document.getElementById('partSphere').setAttribute('animation', { property: 'position', to: '0 0.5 0.5', dur: 800 });
+  document.getElementById('partCylinder').setAttribute('animation', { property: 'position', to: '1 0.5 0', dur: 800 });
 }
 
 function resetView() {
-  [cube, sphere, cylinder].forEach(el => {
-    el.setAttribute('animation', {
-      property: 'position',
-      to: `${reticle.object3D.position.x} ${reticle.object3D.position.y} ${reticle.object3D.position.z}`,
-      dur: 800
-    });
-    el.setAttribute('color', el.getAttribute('id') === 'partCube' ? 'red' : el.getAttribute('id') === 'partSphere' ? 'blue' : 'green');
-  });
-  infoCard.style.display = 'none';
+  document.getElementById('partCube').setAttribute('animation', { property: 'position', to: '-0.5 0.2 0', dur: 800 });
+  document.getElementById('partSphere').setAttribute('animation', { property: 'position', to: '0 0.2 0', dur: 800 });
+  document.getElementById('partCylinder').setAttribute('animation', { property: 'position', to: '0.5 0.25 0', dur: 800 });
+  document.getElementById('infoCard').style.display = 'none';
 }
+
+// DEBUGGING: show cube when marker detected
+const target = document.querySelector('[mindar-image-target]');
+const debugBox = document.getElementById('debugBox');
+
+target.addEventListener('targetFound', () => {
+  console.log('Marker detected!');
+  debugBox.setAttribute('visible', true);
+  document.getElementById('infoCard').innerHTML = 'Marker detected!';
+  document.getElementById('infoCard').style.display = 'block';
+});
+
+target.addEventListener('targetLost', () => {
+  console.log('Marker lost!');
+  debugBox.setAttribute('visible', false);
+  document.getElementById('infoCard').style.display = 'none';
+});
 </script>
 
 </body>
