@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bolt Interactive AR - Full Aero</title>
+  <title>Bolt AR - Interactive Aero</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
   <style>
-    body { margin: 0; background-color: #000; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { margin: 0; background-color: #000; font-family: 'Segoe UI', sans-serif; }
     model-viewer { width: 100%; height: 100vh; }
 
-    /* Custom AR Button */
     #ar-button {
       background-color: #ffd700;
       border-radius: 8px;
@@ -21,18 +20,15 @@
       padding: 12px 24px;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
-    /* Hotspot Styling */
     .Hotspot {
       background: #ffd700;
       border-radius: 50%;
       border: 2px solid #fff;
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       cursor: pointer;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
     }
 
     .HotspotAnnotation {
@@ -42,7 +38,7 @@
       border: 1px solid #ffd700;
       padding: 10px;
       position: absolute;
-      left: 30px;
+      left: 25px;
       top: 50%;
       transform: translateY(-50%);
       width: max-content;
@@ -51,68 +47,82 @@
       opacity: 0;
       transition: opacity 0.3s ease;
       pointer-events: none;
-      z-index: 10;
     }
 
     .Hotspot.active .HotspotAnnotation { opacity: 1; }
+
+    /* Helper text for the Coordinate Finder */
+    #coord-helper {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      color: #ffd700;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
 
+<div id="coord-helper">Dev Tip: Click the car & check Browser Console (F12) for exact coordinates</div>
+
 <model-viewer id="viewer"
-              src="{{ url_for('static', filename='models/Bolt_AR.glb') }}"
+              src="{{ url_for('static', filename='Bolt_AR.glb') }}"
               ar ar-modes="webxr scene-viewer quick-look"
-              camera-controls shadow-intensity="1"
+              camera-controls 
+              shadow-intensity="1"
+              orientation="-90deg 0 0" 
               exposure="1">
 
-  <button slot="ar-button" id="ar-button">VIEW IN AR</button>
+  <button slot="ar-button" id="ar-button">🚀 VIEW IN AR</button>
 
-  <button class="Hotspot" slot="hotspot-front-wing" 
-          data-position="0m 0.05m 1.8m" data-normal="0m 1m 0m" onclick="toggle(this)">
-    <div class="HotspotAnnotation"><strong>Front Wing</strong><br>Multi-element assembly for front-end downforce.</div>
+  <button class="Hotspot" slot="hotspot-front" data-position="0m 0m 1.5m" data-normal="0m 1m 0m" onclick="toggle(this)">
+    <div class="HotspotAnnotation"><strong>Front Wing</strong></div>
   </button>
 
-  <button class="Hotspot" slot="hotspot-rear-wing" 
-          data-position="0m 0.8m -2.2m" data-normal="0m 1m 0m" onclick="toggle(this)">
-    <div class="HotspotAnnotation"><strong>Rear Wing</strong><br>High-lift element with integrated endplates.</div>
+  <button class="Hotspot" slot="hotspot-rear" data-position="0m 0.5m -2m" data-normal="0m 1m 0m" onclick="toggle(this)">
+    <div class="HotspotAnnotation"><strong>Rear Wing</strong></div>
   </button>
 
-  <button class="Hotspot" slot="hotspot-nose" 
-          data-position="0m 0.2m 1.2m" data-normal="0m 1m 0m" onclick="toggle(this)">
-    <div class="HotspotAnnotation"><strong>Nosecone</strong><br>Impact structure and aerodynamic guide.</div>
+  <button class="Hotspot" slot="hotspot-side" data-position="0.5m 0m 0m" data-normal="1m 0m 0m" onclick="toggle(this)">
+    <div class="HotspotAnnotation"><strong>Sidepods</strong></div>
   </button>
 
-  <button class="Hotspot" slot="hotspot-sidepod" 
-          data-position="0.6m 0.1m 0m" data-normal="1m 0m 0m" onclick="toggle(this)">
-    <div class="HotspotAnnotation"><strong>Sidepods</strong><br>Airflow management for aero.</div>
-  </button>
-
-  <button class="Hotspot" slot="hotspot-rearpod" 
-          data-position="0.5m 0.15m -1.5m" data-normal="1m 0m 0m" onclick="toggle(this)">
-    <div class="HotspotAnnotation"><strong>Rearpods</strong><br>Rear bodywork for wake control.</div>
-  </button>
-
-  <button class="Hotspot" slot="hotspot-chassis" 
-          data-position="0m 0.2m 0m" data-normal="0m 1m 0m" onclick="toggle(this)">
-    <div class="HotspotAnnotation"><strong>Chassis</strong><br>The central "Bolt" structural frame.</div>
+  <button class="Hotspot" slot="hotspot-rearpod" data-position="0.5m 0m -1.2m" data-normal="1m 0m 0m" onclick="toggle(this)">
+    <div class="HotspotAnnotation"><strong>Rearpods</strong></div>
   </button>
 
 </model-viewer>
 
 <script>
+  // 1. Logic for clicking hotspots
   function toggle(dot) {
-    // Close other hotspots first
     document.querySelectorAll('.Hotspot').forEach(h => {
       if (h !== dot) h.classList.remove('active');
     });
-    // Toggle the clicked one
     dot.classList.toggle('active');
   }
 
-  // Close when clicking model background
-  document.querySelector('#viewer').addEventListener('click', (event) => {
-    if (event.target.tagName !== 'BUTTON') {
-      document.querySelectorAll('.Hotspot').forEach(h => h.classList.remove('active'));
+  // 2. COORDINATE FINDER TOOL
+  // This helps you fix the "wrong coordinates" issue instantly.
+  const viewer = document.querySelector('#viewer');
+  viewer.addEventListener('click', (event) => {
+    const rect = viewer.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    // This function asks the 3D model exactly where you clicked
+    const position = viewer.positionAndNormalFromPoint(x, y);
+    
+    if (position) {
+      const {position: pos, normal: norm} = position;
+      console.log("--- COORD FOUND ---");
+      console.log(`data-position="${pos.x.toFixed(3)}m ${pos.y.toFixed(3)}m ${pos.z.toFixed(3)}m"`);
+      console.log(`data-normal="${norm.x.toFixed(2)}m ${norm.y.toFixed(2)}m ${norm.z.toFixed(2)}m"`);
+      console.log("-------------------");
     }
   });
 </script>
