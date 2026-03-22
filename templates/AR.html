@@ -1,93 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bolt AR - Full Interactive Assembly</title>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bolt AR - Component Auto-Mapping</title>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <style>
+        body { margin: 0; background-color: #000; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        model-viewer { width: 100%; height: 100vh; }
 
-  <style>
-    body { margin: 0; background-color: #000; font-family: 'Segoe UI', sans-serif; }
-    model-viewer { width: 100%; height: 100vh; }
+        #ar-button {
+            background-color: #ffd700; border: none; border-radius: 8px;
+            position: absolute; top: 20px; right: 20px; z-index: 100;
+            padding: 14px 24px; font-weight: bold; cursor: pointer;
+        }
 
-    #ar-button {
-      background-color: #ffd700; border: none; border-radius: 8px;
-      position: absolute; top: 20px; right: 20px; z-index: 100;
-      padding: 12px 24px; font-weight: bold; cursor: pointer;
-    }
+        .Hotspot {
+            background: #ffd700; border-radius: 50%; border: 2px solid #fff;
+            width: 20px; height: 20px; cursor: pointer; 
+            display: none; /* Hidden until the component is found and mapped */
+        }
 
-    .Hotspot {
-      background: #ffd700; border-radius: 50%; border: 2px solid #fff;
-      width: 20px; height: 20px; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
+        .HotspotAnnotation {
+            background: rgba(0, 0, 0, 0.9); color: #fff; border-radius: 6px;
+            border: 1px solid #ffd700; padding: 10px; position: absolute;
+            left: 25px; top: 50%; transform: translateY(-50%);
+            width: max-content; max-width: 200px; font-size: 13px;
+            opacity: 0; transition: opacity 0.3s; pointer-events: none;
+        }
 
-    .HotspotAnnotation {
-      background: rgba(0, 0, 0, 0.9); color: #fff; border-radius: 6px;
-      border: 1px solid #ffd700; padding: 10px; position: absolute;
-      left: 25px; top: 50%; transform: translateY(-50%);
-      width: max-content; max-width: 200px; font-size: 13px;
-      opacity: 0; transition: opacity 0.3s; pointer-events: none;
-    }
-
-    .Hotspot.active .HotspotAnnotation { opacity: 1; }
-  </style>
+        .Hotspot.active .HotspotAnnotation { opacity: 1; }
+    </style>
 </head>
 <body>
 
 <model-viewer id="viewer"
-              src="{{ url_for('static', filename='models/Bolt_AR.glb') }}"
+              src="{{ url_for('static', filename='Bolt_AR.glb') }}"
               ar ar-modes="webxr scene-viewer quick-look"
-              ar-placement="floor"
               camera-controls 
-              shadow-intensity="1"
               rotation="-90deg 0 0" 
-              exposure="1">
+              shadow-intensity="1">
 
-  <button slot="ar-button" id="ar-button">🚀 VIEW IN AR</button>
+    <button slot="ar-button" id="ar-button">🚀 VIEW IN AR</button>
 
-  <button class="Hotspot" slot="hotspot-front" id="hp-front" data-position="0 0 0" onclick="toggle(this)">
-    <div class="HotspotAnnotation"><strong>Front Wing</strong><br>Aero downforce assembly.</div>
-  </button>
+    <button class="Hotspot" id="front-wing" slot="hotspot-1" onclick="toggle(this)">
+        <div class="HotspotAnnotation"><strong>Front Wing</strong><br>Optimized for front-end downforce.</div>
+    </button>
 
-  <button class="Hotspot" slot="hotspot-rear" id="hp-rear" data-position="0 0 0" onclick="toggle(this)">
-    <div class="HotspotAnnotation"><strong>Rear Wing</strong><br>High-pressure rear element.</div>
-  </button>
+    <button class="Hotspot" id="rear-wing" slot="hotspot-2" onclick="toggle(this)">
+        <div class="HotspotAnnotation"><strong>Rear Wing</strong><br>High-pressure drag reduction element.</div>
+    </button>
 
-  <button class="Hotspot" slot="hotspot-side" id="hp-side" data-position="0 0 0" onclick="toggle(this)">
-    <div class="HotspotAnnotation"><strong>Sidepods</strong><br>Cooling and side-aero.</div>
-  </button>
+    <button class="Hotspot" id="sidepod" slot="hotspot-3" onclick="toggle(this)">
+        <div class="HotspotAnnotation"><strong>Sidepods</strong><br>Internal cooling & airflow guide.</div>
+    </button>
 
-  <button class="Hotspot" slot="hotspot-rearpod" id="hp-rearpod" data-position="0 0 0" onclick="toggle(this)">
-    <div class="HotspotAnnotation"><strong>Rearpods</strong><br>Rear wake management.</div>
-  </button>
+    <button class="Hotspot" id="rearpod" slot="hotspot-4" onclick="toggle(this)">
+        <div class="HotspotAnnotation"><strong>Rearpods</strong><br>Wake control & rear stability.</div>
+    </button>
 
-  <button class="Hotspot" slot="hotspot-chassis" id="hp-chassis" data-position="0 0 0" onclick="toggle(this)">
-    <div class="HotspotAnnotation"><strong>Chassis</strong><br>Main structural frame.</div>
-  </button>
+    <button class="Hotspot" id="nosecone" slot="hotspot-5" onclick="toggle(this)">
+        <div class="HotspotAnnotation"><strong>Nosecone</strong><br>Primary aero-entry point.</div>
+    </button>
 
 </model-viewer>
 
 <script>
-  function toggle(dot) {
-    document.querySelectorAll('.Hotspot').forEach(h => {
-      if (h !== dot) h.classList.remove('active');
-    });
-    dot.classList.toggle('active');
-  }
+    const viewer = document.querySelector('#viewer');
 
-  // COORDINATE FINDER - Use this to fix the "Wrong Place" issue
-  const viewer = document.querySelector('#viewer');
-  viewer.addEventListener('click', (event) => {
-    const rect = viewer.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    const position = viewer.positionAndNormalFromPoint(x, y);
-    
-    if (position) {
-      const {position: pos, normal: norm} = position;
-      console.log(`%c CLICKED: data-position="${pos.x.toFixed(3)}m ${pos.y.toFixed(3)}m ${pos.z.toFixed(3)}m"`, "color: #ffd700;");
+    // MAPPING: HTML ID -> GLB Node Name
+    // Ensure these names match what you saw in your CAD/GLB export
+    const componentMap = {
+        'front-wing': 'frontwing',
+        'rear-wing': 'rearwing',
+        'sidepod': 'sidepod',
+        'rearpod': 'rearpod',
+        'nosecone': 'nosecone'
+    };
+
+    viewer.addEventListener('load', () => {
+        const scene = viewer.toObject3D(); // Access the 3D scene directly
+        
+        Object.keys(componentMap).forEach(id => {
+            const nodeName = componentMap[id];
+            const hotspot = document.getElementById(id);
+            
+            // Search the model for the specific part name
+            const part = scene.getObjectByName(nodeName);
+
+            if (part) {
+                // Get the position of the part in the 3D space
+                const position = part.getWorldPosition(new THREE.Vector3());
+                
+                // Convert coordinates to the format model-viewer expects
+                hotspot.dataset.position = `${position.x} ${position.y} ${position.z}`;
+                hotspot.style.display = 'block'; // Show the dot now that it's placed
+                console.log(`Mapped ${id} to ${nodeName} at:`, position);
+            } else {
+                console.warn(`Could not find component named: ${nodeName}`);
+            }
+        });
+    });
+
+    function toggle(dot) {
+        document.querySelectorAll('.Hotspot').forEach(h => {
+            if (h !== dot) h.classList.remove('active');
+        });
+        dot.classList.toggle('active');
     }
-  });
 </script>
 
 </body>
