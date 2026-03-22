@@ -273,7 +273,7 @@ Your Name is Lumin, part of Team Bolt.)
 import math
 
 def simulate_track_time(drag_20ms, lift_20ms, car_mass_g,
-                        total_energy=15,    # J (From your latest parameters)
+                        total_energy=18,    # J (From your latest parameters)
                         track_length=20,    # m
                         dt=0.001,
                         k_thrust=0.7,       # Your new Calibration Constant
